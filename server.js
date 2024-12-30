@@ -17,7 +17,7 @@ mongoose.connection.on("connected", () => {
 
 // Configure Express app
 // app.set(...)
-
+app.set('view engine', 'ejs');
 // Mount Middleware
 // app.use(...)
 

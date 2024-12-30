@@ -1,0 +1,20 @@
+<%- include('../partials/header.ejs') %>
+
+<h2>My Record Collection</h2>
+
+<a href="/records/new">Add New Record</a>
+
+<% if (records && records.length) { %>
+    <ul>
+        <% records.forEach(function(record) { %>
+            <li>
+                <%= record.title %> by <%= record.artist %>
+                <a href="/records/<%= record._id %>">Details</a>
+            </li>
+        <% }); %>
+    </ul>
+<% } else { %>
+    <p>No records yet!</p>
+<% } %>
+
+<%- include('../partials/footer.ejs') %>

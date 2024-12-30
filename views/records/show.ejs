@@ -1,0 +1,22 @@
+<%- include('../partials/header.ejs') %>
+
+<h2><%= record.title %></h2>
+
+<p>Artist: <%= record.artist %></p>
+<p>Year: <%= record.year %></p>
+<p>Format: <%= record.format %></p>
+<p>Plays: <%= record.plays %></p>
+
+<form action="/records/<%= record._id %>/play" method="POST">
+    <button type="submit">Log Play</button>
+</form>
+
+<a href="/records/<%= record._id %>/edit">Edit</a>
+
+<form action="/records/<%= record._id %>?_method=DELETE" method="POST">
+    <button type="submit">Delete</button>
+</form>
+
+<a href="/records">Back to Collection</a>
+
+<%- include('../partials/footer.ejs') %>

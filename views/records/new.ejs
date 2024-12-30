@@ -1,0 +1,27 @@
+<%- include('../partials/header.ejs') %>
+
+<form action="/records" method="POST">
+    <label for="title">Title:</label>
+    <input type="text" name="title" id="title" required />
+
+    <label for="artist">Artist:</label>
+    <input type="text" name="artist" id="artist" required />
+
+    <label for="year">Year:</label>
+    <input type="number" name="year" id="year" />
+
+    <label for="format">Format:</label>
+    <select name="format" id="format">
+        <option value="LP">LP</option>
+        <option value="45">45</option>
+        <option value="78">78</option>
+        <option value="Other">Other</option>
+    </select>
+
+    <label for="notes">Notes:</label>
+    <textarea name="notes" id="notes"></textarea>
+
+    <button type="submit">Add Record</button>
+</form>
+
+<%- include('../partials/footer.ejs') %>

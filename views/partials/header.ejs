@@ -12,8 +12,14 @@
                 <span class="logo-text">VinylTracker</span>
             </a>
             <div class="nav-links">
-                <a href="/auth/signup" class="nav-link">Sign Up</a>
-                <a href="/auth/login" class="nav-link">Login</a>
+                <% if (user) { %>
+                    <a href="/records" class="nav-link">My Records</a>
+                    <a href="/auth/sign-out" class="nav-link">Sign Out</a>
+                    <span class="nav-link"><%= user.username %></span>
+                <% } else { %>
+                    <a href="/auth/sign-up" class="nav-link">Sign Up</a>
+                    <a href="/auth/sign-in" class="nav-link">Sign In</a>
+                <% } %>
             </div>
         </div>
     </nav>
