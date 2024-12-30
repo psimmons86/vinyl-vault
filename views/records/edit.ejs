@@ -1,0 +1,31 @@
+<%- include('../partials/header.ejs') %>
+
+<form action="/records/<%= record._id %>?_method=PUT" method="POST">
+    <label for="title">Title:</label>
+    <input type="text" name="title" id="title" value="<%= record.title %>" required />
+
+    <label for="artist">Artist:</label>
+    <input type="text" name="artist" id="artist" value="<%= record.artist %>" required />
+
+    <label for="year">Year:</label>
+    <input type="number" name="year" id="year" value="<%= record.year %>" />
+
+    <label for="format">Format:</label>
+    <select name="format" id="format">
+        <% formats.forEach(format => { %>
+            <option value="<%= format %>" <%= record.format === format ? 'selected' : '' %>><%= format %></option>
+        <% }); %>
+    </select>
+
+    <label for="imageUrl">Album Art URL:</label>
+    <input type="url" name="imageUrl" id="imageUrl" value="<%= record.imageUrl %>" />
+
+    <label for="notes">Notes:</label>
+    <textarea name="notes" id="notes"><%= record.notes %></textarea>
+
+    <button type="submit">Update Record</button>
+</form>
+
+<a href="/records/<%= record._id %>">BACK</a>
+
+<%- include('../partials/footer.ejs') %>

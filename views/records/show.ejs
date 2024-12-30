@@ -1,22 +1,43 @@
 <%- include('../partials/header.ejs') %>
 
-<h2><%= record.title %></h2>
+<div>
+    <img 
+        src="<%= record.imageUrl || '/images/default-album.png' %>" 
+        alt="Album art for <%= record.title %>"
+    />
+</div>
 
+<p>Title: <%= record.title %></p>
 <p>Artist: <%= record.artist %></p>
-<p>Year: <%= record.year %></p>
+
+<% if (record.year) { %>
+    <p>Year: <%= record.year %></p>
+<% } %>
+
 <p>Format: <%= record.format %></p>
 <p>Plays: <%= record.plays %></p>
 
+<% if (record.lastPlayed) { %>
+    <p>Last Played: <%= record.lastPlayed.toLocaleDateString() %></p>
+<% } %>
+
+<% if (record.notes) { %>
+    <p>Notes: <%- '<br />' + record.notes.replaceAll('\n', '<br />') %></p>
+<% } %>
+
 <form action="/records/<%= record._id %>/play" method="POST">
-    <button type="submit">Log Play</button>
+    <button type="submit">🎵</button>
 </form>
 
-<a href="/records/<%= record._id %>/edit">Edit</a>
+<a href="/records/<%= record._id %>/edit">EDIT</a>
 
-<form action="/records/<%= record._id %>?_method=DELETE" method="POST">
-    <button type="submit">Delete</button>
+<form 
+    action="/records/<%= record._id %>?_method=DELETE"
+    method="POST"
+>
+    <button type="submit">🗑️</button>
 </form>
 
-<a href="/records">Back to Collection</a>
+<a href="/records">BACK</a>
 
 <%- include('../partials/footer.ejs') %>

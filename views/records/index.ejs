@@ -2,6 +2,22 @@
 
 <h2>My Record Collection</h2>
 
+<div>
+    <p>Total Records: <%= records.length %></p>
+    
+    <% if (records.length > 0) { %>
+        <% const mostPlayed = records.sort((a, b) => b.plays - a.plays)[0] %>
+        <% if (mostPlayed.plays > 0) { %>
+            <p>Most Played: <%= mostPlayed.title %> by <%= mostPlayed.artist %> (<%= mostPlayed.plays %> plays)</p>
+        <% } %>
+
+        <% const recentlyPlayed = records.filter(r => r.lastPlayed).sort((a, b) => b.lastPlayed - a.lastPlayed)[0] %>
+        <% if (recentlyPlayed) { %>
+            <p>Last Played: <%= recentlyPlayed.title %> (<%= recentlyPlayed.lastPlayed.toLocaleDateString() %>)</p>
+        <% } %>
+    <% } %>
+</div>
+
 <a href="/records/new">Add New Record</a>
 
 <% if (records && records.length) { %>

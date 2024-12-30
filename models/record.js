@@ -28,14 +28,13 @@ const recordSchema = new Schema({
     lastPlayed: {
         type: Date
     },
+    imageUrl: {
+        type: String,
+        default: '/images/default-album.png'
+    },
     notes: String
 }, {
     timestamps: true
 });
-
-// Remove the express requirements - they don't belong in a model file
-// const express = require('express');
-// const router = express.Router();
-// const Record = require('../models/record');
 
 module.exports = mongoose.model('Record', recordSchema);

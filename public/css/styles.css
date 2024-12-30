@@ -1,49 +1,73 @@
-.navbar {
-  background-color: #2c3e50;
-  padding: 1rem 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+.record-img {
+  max-width: 300px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  margin: 1rem 0;
 }
 
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+
+form {
+  max-width: 500px;
+  margin: 2rem auto;
 }
 
-.logo {
-  text-decoration: none;
+label {
+  display: block;
+  margin-top: 1rem;
+  color: #333;
 }
 
-.logo-text {
-  color: white;
-  font-size: 1.5rem;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-}
-
-.nav-links {
-  display: flex;
-  gap: 2rem;
-}
-
-.nav-link {
-  color: #ecf0f1;
-  text-decoration: none;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
+input, select, textarea {
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  border: 1px solid #ddd;
   border-radius: 4px;
-  transition: background-color 0.3s ease;
 }
 
-.nav-link:hover {
-  background-color: #03970c;
+textarea {
+  min-height: 100px;
 }
 
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
-  line-height: 1.6;
+
+button {
+  background-color: #2c3e50;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 1rem 0;
+}
+
+button:hover {
+  background-color: #34495e;
+}
+
+
+.delete-btn {
+  background-color: #e74c3c;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b;
+}
+
+
+.play-count {
+  font-size: 1.2rem;
+  color: #2c3e50;
+  margin: 1rem 0;
+}
+
+.back-link {
+  display: inline-block;
+  margin: 1rem 0;
+  color: #2c3e50;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
 }

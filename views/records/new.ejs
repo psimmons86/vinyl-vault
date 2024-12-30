@@ -18,10 +18,15 @@
         <option value="Other">Other</option>
     </select>
 
+    <label for="imageUrl">Album Art URL:</label>
+    <input type="url" name="imageUrl" id="imageUrl" />
+
     <label for="notes">Notes:</label>
     <textarea name="notes" id="notes"></textarea>
 
     <button type="submit">Add Record</button>
 </form>
+
+<a href="/records">BACK</a>
 
 <%- include('../partials/footer.ejs') %>

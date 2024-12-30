@@ -46,7 +46,7 @@ app.use(require('./middleware/add-user-to-locals-and-req'));
 // Routes
 // GET / (home page functionality)
 app.get('/', (req, res) => {
-    res.render('index.ejs', { title: 'VinylTracker' });
+    res.render('index.ejs', { title: 'VinylVault' });
 });
 
 // '/auth' is the "starts with" path that the request must match
