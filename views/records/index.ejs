@@ -1,31 +1,32 @@
 <%- include('../partials/header.ejs') %>
 
-<h2>My Record Collection</h2>
-
-<div>
-    <p>Total Records: <%= records.length %></p>
+<div class="collection-stats">
+    <p>Total Records: <%= totalRecords %></p>
     
-    <% if (records.length > 0) { %>
-        <% const mostPlayed = records.sort((a, b) => b.plays - a.plays)[0] %>
-        <% if (mostPlayed.plays > 0) { %>
-            <p>Most Played: <%= mostPlayed.title %> by <%= mostPlayed.artist %> (<%= mostPlayed.plays %> plays)</p>
-        <% } %>
+    <% if (mostPlayed && mostPlayed.plays > 0) { %>
+        <p>Most Played: <%= mostPlayed.title %> by <%= mostPlayed.artist %> (<%= mostPlayed.plays %> plays)</p>
+    <% } %>
 
-        <% const recentlyPlayed = records.filter(r => r.lastPlayed).sort((a, b) => b.lastPlayed - a.lastPlayed)[0] %>
-        <% if (recentlyPlayed) { %>
-            <p>Last Played: <%= recentlyPlayed.title %> (<%= recentlyPlayed.lastPlayed.toLocaleDateString() %>)</p>
-        <% } %>
+    <% if (recentlyPlayed) { %>
+        <p>Last Played: <%= recentlyPlayed.title %> (<%= recentlyPlayed.lastPlayed.toLocaleDateString() %>)</p>
     <% } %>
 </div>
 
-<a href="/records/new">Add New Record</a>
+<div class="sort-controls">
+    Sort by:
+    <a href="/records?sort=az" class="<%= currentSort === 'az' ? 'active' : '' %>">A-Z</a> |
+    <a href="/records?sort=date" class="<%= currentSort === 'date' ? 'active' : '' %>">Date Added</a> |
+    <a href="/records">Default</a>
+</div>
+
+<a href="/records/new" class="nav-link">Add New Record</a>
 
 <% if (records && records.length) { %>
-    <ul>
+    <ul class="records-list">
         <% records.forEach(function(record) { %>
             <li>
-                <%= record.title %> by <%= record.artist %>
-                <a href="/records/<%= record._id %>">Details</a>
+                <span><%= record.title %> by <%= record.artist %></span>
+                <a href="/records/<%= record._id %>" class="details-link">Details</a>
             </li>
         <% }); %>
     </ul>
