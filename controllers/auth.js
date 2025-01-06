@@ -33,8 +33,8 @@ router.post('/sign-in', (req, res) => {
     User.findOne({ username: req.body.username })
         .then(user => {
             if (user && bcrypt.compareSync(req.body.password, user.password)) {
-                req.session.user = user;
-                res.redirect('/records');
+              req.session.user = user;
+              res.redirect('/records/profile');
             } else {
                 res.redirect('/auth/sign-in');
             }

@@ -1,35 +1,33 @@
 <%- include('../partials/header.ejs') %>
 
 <div class="collection-stats">
-    <p>Total Records: <%= totalRecords %></p>
-    
-    <% if (mostPlayed && mostPlayed.plays > 0) { %>
-        <p>Most Played: <%= mostPlayed.title %> by <%= mostPlayed.artist %> (<%= mostPlayed.plays %> plays)</p>
-    <% } %>
-
-    <% if (recentlyPlayed) { %>
-        <p>Last Played: <%= recentlyPlayed.title %> (<%= recentlyPlayed.lastPlayed.toLocaleDateString() %>)</p>
-    <% } %>
+    <p>Total Records: <%= records.length %></p>
 </div>
 
 <div class="sort-controls">
     Sort by:
-    <a href="/records?sort=az" class="<%= currentSort === 'az' ? 'active' : '' %>">A-Z</a> |
-    <a href="/records?sort=date" class="<%= currentSort === 'date' ? 'active' : '' %>">Date Added</a> |
-    <a href="/records">Default</a>
+    <a href="/records?sort=artist" class="<%= currentSort === 'artist' ? 'active' : '' %>">Artist</a> |
+    <a href="/records" class="<%= !currentSort ? 'active' : '' %>">Date Added</a>
 </div>
 
 <a href="/records/new" class="nav-link">Add New Record</a>
 
 <% if (records && records.length) { %>
-    <ul class="records-list">
+    <div class="records-grid">
         <% records.forEach(function(record) { %>
-            <li>
-                <span><%= record.title %> by <%= record.artist %></span>
-                <a href="/records/<%= record._id %>" class="details-link">Details</a>
-            </li>
+            <div class="record-card">
+                <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
+                     alt="Album art for <%= record.title %>"
+                     class="record-img">
+                <div class="record-title"><%= record.title %></div>
+                <div class="record-artist"><%= record.artist %></div>
+                <div class="record-format"><%= record.format %></div>
+                <div class="record-details">
+                    <a href="/records/<%= record._id %>">View Details</a>
+                </div>
+            </div>
         <% }); %>
-    </ul>
+    </div>
 <% } else { %>
     <p>No records yet!</p>
 <% } %>

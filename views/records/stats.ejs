@@ -1,0 +1,29 @@
+<%- include('../partials/header.ejs') %>
+
+<div class="stats-container">
+    <div class="collection-stats">
+        <p>Total Records: <%= totalRecords %></p>
+    </div>
+
+    <div class="stats-info">
+        <% if (mostPlayed && mostPlayed.plays > 0) { %>
+            <div class="stat-card">
+                <h3>Most Played</h3>
+                <p><%= mostPlayed.title %> by <%= mostPlayed.artist %></p>
+                <p>Plays: <%= mostPlayed.plays %></p>
+            </div>
+        <% } %>
+
+        <% if (recentlyPlayed) { %>
+            <div class="stat-card">
+                <h3>Last Played</h3>
+                <p><%= recentlyPlayed.title %> by <%= recentlyPlayed.artist %></p>
+                <p>Played on: <%= recentlyPlayed.lastPlayed.toLocaleDateString() %></p>
+            </div>
+        <% } %>
+    </div>
+
+    <a href="/records" class="nav-link">Back to Collection</a>
+</div>
+
+<%- include('../partials/footer.ejs') %>

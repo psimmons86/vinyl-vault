@@ -1,40 +1,57 @@
 const express = require('express');
 const router = express.Router();
 const Record = require('../models/record');
-// Middleware to protect selected routes
-const ensureSignedIn = require('../middleware/ensure-signed-in');
 
-// All routes start with '/records'
-// GET /records (index functionality)
-router.get('/', (req, res) => {
-    Record.find({ owner: req.user._id })
-        .then(records => {
-            // Sort based on query parameter
-            if (req.query.sort === 'az') {
-                records.sort((a, b) => a.title.localeCompare(b.title));
-            } else if (req.query.sort === 'date') {
-                records.sort((a, b) => b.createdAt - a.createdAt);
-            }
+// GET /records/profile (profile functionality)
+router.get('/profile', async (req, res) => {
+    try {
+        // Get last 10 added records
+        const recentlyAdded = await Record.find({ owner: req.user._id })
+            .sort({ createdAt: -1 })
+            .limit(10);
             
-            // Calculate collection stats
-            const totalRecords = records.length;
-            const mostPlayed = records.length > 0 
-                ? records.sort((a, b) => b.plays - a.plays)[0] 
-                : null;
-            const recentlyPlayed = records.length > 0
-                ? records.filter(r => r.lastPlayed)
-                    .sort((a, b) => b.lastPlayed - a.lastPlayed)[0]
-                : null;
-            
-            res.render('records/index.ejs', {
-                records,
-                title: 'My Records',
-                totalRecords,
-                mostPlayed,
-                recentlyPlayed,
-                currentSort: req.query.sort
-            });
+        // Get last 10 played records
+        const recentlyPlayed = await Record.find({ 
+            owner: req.user._id,
+            lastPlayed: { $exists: true, $ne: null }
+        })
+            .sort({ lastPlayed: -1 })
+            .limit(10);
+        
+        res.render('records/profile', {
+            title: 'My Profile',
+            recentlyAdded,
+            recentlyPlayed
         });
+    } catch (e) {
+        console.log(e);
+        res.redirect('/records');
+    }
+});
+
+// GET /records/stats (stats functionality)
+router.get('/stats', async (req, res) => {
+    try {
+        const records = await Record.find({ owner: req.user._id });
+        const totalRecords = records.length;
+        const mostPlayed = records.length > 0 
+            ? records.sort((a, b) => b.plays - a.plays)[0] 
+            : null;
+        const recentlyPlayed = records.length > 0
+            ? records.filter(r => r.lastPlayed)
+                .sort((a, b) => b.lastPlayed - a.lastPlayed)[0] 
+            : null;
+
+        res.render('records/stats.ejs', {
+            title: 'Collection Stats',
+            totalRecords,
+            mostPlayed,
+            recentlyPlayed
+        });
+    } catch (e) {
+        console.log(e);
+        res.redirect('/records');
+    }
 });
 
 // GET /records/new (new functionality)
@@ -121,6 +138,33 @@ router.put('/:id', async (req, res) => {
     } catch (e) {
         console.log(e);
         res.redirect('/records');
+    }
+});
+
+// GET /records (index functionality)
+router.get('/', async (req, res) => {
+    try {
+        const records = await Record.find({ owner: req.user._id });
+        
+        // Create a copy of records array before sorting
+        let sortedRecords = [...records];
+        
+        // Sort by date added by default
+        if (req.query.sort === 'artist') {
+            sortedRecords.sort((a, b) => a.artist.toLowerCase().localeCompare(b.artist.toLowerCase()));
+        } else {
+            // Default sort: date added (newest first)
+            sortedRecords.sort((a, b) => b.createdAt - a.createdAt);
+        }
+        
+        res.render('records/index.ejs', {
+            records: sortedRecords,
+            title: 'My Records',
+            currentSort: req.query.sort
+        });
+    } catch (e) {
+        console.log(e);
+        res.redirect('/');
     }
 });
 

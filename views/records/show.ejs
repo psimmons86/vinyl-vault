@@ -1,43 +1,38 @@
 <%- include('../partials/header.ejs') %>
 
-<div>
-    <img 
-        src="<%= record.imageUrl || '/images/default-album.png' %>" 
-        alt="Album art for <%= record.title %>"
-    />
+<div class="record-detail-card">
+    <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
+         alt="Album art for <%= record.title %>"
+         class="record-img">
+    
+    <div class="record-info">
+        <h2 class="record-title"><%= record.title %></h2>
+        <p class="record-artist"><%= record.artist %></p>
+        <p class="record-format"><%= record.format %></p>
+        <p class="record-plays">Plays: <%= record.plays %></p>
+        
+        <% if (record.lastPlayed) { %>
+            <p class="record-last-played">Last Played: <%= record.lastPlayed.toLocaleDateString() %></p>
+        <% } %>
+        
+        <% if (record.notes) { %>
+            <p class="record-notes">Notes: <%= record.notes %></p>
+        <% } %>
+        
+        <div class="button-group">
+            <form action="/records/<%= record._id %>/play" method="POST">
+                <button type="submit" class="btn">🎵 Play</button>
+            </form>
+
+            <a href="/records/<%= record._id %>/edit" class="btn">Edit</a>
+
+            <form action="/records/<%= record._id %>?_method=DELETE" method="POST">
+                <button type="submit" class="btn btn-delete">Delete</button>
+            </form>
+        </div>
+    </div>
 </div>
 
-<p>Title: <%= record.title %></p>
-<p>Artist: <%= record.artist %></p>
-
-<% if (record.year) { %>
-    <p>Year: <%= record.year %></p>
-<% } %>
-
-<p>Format: <%= record.format %></p>
-<p>Plays: <%= record.plays %></p>
-
-<% if (record.lastPlayed) { %>
-    <p>Last Played: <%= record.lastPlayed.toLocaleDateString() %></p>
-<% } %>
-
-<% if (record.notes) { %>
-    <p>Notes: <%- '<br />' + record.notes.replaceAll('\n', '<br />') %></p>
-<% } %>
-
-<form action="/records/<%= record._id %>/play" method="POST">
-    <button type="submit">🎵</button>
-</form>
-
-<a href="/records/<%= record._id %>/edit">EDIT</a>
-
-<form 
-    action="/records/<%= record._id %>?_method=DELETE"
-    method="POST"
->
-    <button type="submit">🗑️</button>
-</form>
-
-<a href="/records">BACK</a>
+<a href="/records" class="back-link">Back to Collection</a>
 
 <%- include('../partials/footer.ejs') %>

@@ -1,21 +1,27 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VinylVault</title>
+    <title><%= title %> | Vinyl Vault</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="/" class="logo">
-                <span class="logo-text">VinylVault</span>
+            <a href="<%= user ? '/records/profile' : '/' %>" class="logo">
+                <span class="logo-text">Vinyl Vault</span>
             </a>
             <div class="nav-links">
                 <% if (user) { %>
-                    <a href="/records" class="nav-link">My Records</a>
-                    <a href="/auth/sign-out" class="nav-link">Sign Out</a>
-                    <span class="nav-link"><%= user.username %></span>
+                    <a href="/records/profile" class="nav-link">Profile</a>
+                    <a href="/records" class="nav-link">Collection</a>
+                    <a href="/records/new" class="nav-link">Add Record</a>
+                    <a href="/records/stats" class="nav-link">Stats</a>
+                    <div class="nav-user-group">
+                        <span class="nav-link user-name"><%= user.username %></span>
+                        <a href="/auth/sign-out" class="nav-link">Sign Out</a>
+                    </div>
                 <% } else { %>
                     <a href="/auth/sign-up" class="nav-link">Sign Up</a>
                     <a href="/auth/sign-in" class="nav-link">Sign In</a>
