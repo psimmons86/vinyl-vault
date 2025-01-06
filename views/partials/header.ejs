@@ -13,12 +13,14 @@
                 <span class="logo-text">Vinyl Vault</span>
             </a>
             <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
                 <% if (user) { %>
                     <a href="/records/profile" class="nav-link">Profile</a>
                     <a href="/records" class="nav-link">Collection</a>
                     <a href="/records/new" class="nav-link">Add Record</a>
                     <a href="/records/stats" class="nav-link">Stats</a>
                     <div class="nav-user-group">
+                        <a href="/records/settings" class="nav-link">Settings</a>
                         <span class="nav-link user-name"><%= user.username %></span>
                         <a href="/auth/sign-out" class="nav-link">Sign Out</a>
                     </div>

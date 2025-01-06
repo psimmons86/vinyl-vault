@@ -326,3 +326,186 @@ main {
   gap: 1rem;
   justify-content: center;
 }
+
+/* Home Page Styles */
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.featured-collectors h2 {
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-size: 2rem;
+}
+
+.collectors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 1rem;
+}
+
+.collector-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.collector-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.collector-header {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.collector-header h3 {
+  color: #2c3e50;
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.member-since {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.collector-bio {
+  font-size: 0.925rem;
+  color: #444;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.collection-preview {
+  background: #f8f9fa;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.recent-play {
+  font-size: 0.875rem;
+}
+
+.last-played {
+  color: #666;
+  display: block;
+}
+
+.recent-additions {
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+}
+
+.recent-additions h4 {
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+}
+
+.recent-additions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recent-additions li {
+  font-size: 0.875rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.recent-additions li:last-child {
+  border-bottom: none;
+}
+
+.added-date {
+  display: block;
+  color: #666;
+  font-size: 0.75rem;
+}
+
+.view-collection {
+  display: block;
+  text-align: center;
+  padding: 0.75rem;
+  background: #2c3e50;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.view-collection:hover {
+  background: #34495e;
+}
+
+/* Settings Page Styles */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.help-text {
+  color: #666;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  margin-left: 1.5rem;
+}
+
+.form-group input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Nav User Group Styles */
+.nav-user-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: 2rem;
+  padding-left: 2rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.user-name {
+  font-weight: 500;
+  color: #fff;
+  opacity: 0.9;
+  cursor: default;
+}

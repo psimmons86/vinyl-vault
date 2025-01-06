@@ -11,14 +11,16 @@ router.get('/sign-up', (req, res) => {
 });
 
 // POST /auth/sign-up - Handle form submission
-router.post('/sign-up', (req, res) => {
-    req.body.password = bcrypt.hashSync(req.body.password, 10);
-    
-    User.create(req.body)
-        .then(user => {
-            req.session.user = user;
-            res.redirect('/records');
-    });
+router.post('/sign-up', async (req, res) => {
+    try {
+        req.body.password = bcrypt.hashSync(req.body.password, 10);
+        const user = await User.create(req.body);
+        req.session.user = user;
+        res.redirect('/records/profile');
+    } catch (err) {
+        console.error('Sign up error:', err);
+        res.redirect('/auth/sign-up');
+    }
 });
 
 // GET /auth/sign-in - Show sign in form
@@ -29,16 +31,19 @@ router.get('/sign-in', (req, res) => {
 });
 
 // POST /auth/sign-in - Handle sign in form submission
-router.post('/sign-in', (req, res) => {
-    User.findOne({ username: req.body.username })
-        .then(user => {
-            if (user && bcrypt.compareSync(req.body.password, user.password)) {
-              req.session.user = user;
-              res.redirect('/records/profile');
-            } else {
-                res.redirect('/auth/sign-in');
-            }
-    });
+router.post('/sign-in', async (req, res) => {
+    try {
+        const user = await User.findOne({ username: req.body.username });
+        if (user && bcrypt.compareSync(req.body.password, user.password)) {
+            req.session.user = user;
+            res.redirect('/records/profile');
+        } else {
+            res.redirect('/auth/sign-in');
+        }
+    } catch (err) {
+        console.error('Sign in error:', err);
+        res.redirect('/auth/sign-in');
+    }
 });
 
 // GET /auth/sign-out - Sign out user

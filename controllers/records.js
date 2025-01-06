@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Record = require('../models/record');
+const User = require('../models/user');
 
 // GET /records/profile (profile functionality)
 router.get('/profile', async (req, res) => {
@@ -26,6 +27,26 @@ router.get('/profile', async (req, res) => {
     } catch (e) {
         console.log(e);
         res.redirect('/records');
+    }
+});
+
+// GET /records/settings
+router.get('/settings', (req, res) => {
+    res.render('records/settings', { 
+        title: 'Profile Settings'
+    });
+});
+
+// POST /records/settings
+router.post('/settings', async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        user.isPublic = !!req.body.isPublic; // Convert checkbox value to boolean
+        await user.save();
+        res.redirect('/records/profile');
+    } catch (e) {
+        console.log(e);
+        res.redirect('/records/settings');
     }
 });
 

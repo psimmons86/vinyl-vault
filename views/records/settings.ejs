@@ -1,0 +1,19 @@
+<%- include('../partials/header.ejs') %>
+
+<div class="form-container">
+    <h2>Profile Settings</h2>
+
+    <form action="/records/settings" method="POST" class="record-form">
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" name="isPublic" <%= user.isPublic ? 'checked' : '' %>>
+                Make my collection public
+            </label>
+            <p class="help-text">When enabled, other users can view your collection and profile</p>
+        </div>
+
+        <button type="submit" class="btn">Save Settings</button>
+    </form>
+</div>
+
+<%- include('../partials/footer.ejs') %>

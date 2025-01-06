@@ -5,32 +5,27 @@ const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 const session = require('express-session');
 
-const app = express();
+// Connect to MongoDB first
+mongoose.connect(process.env.MONGODB_URI);
 
-// Set the port from environment variable or default to 3000
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', () => console.log('Connected to MongoDB'));
+
+// Import models after connection is established
+const User = require('./models/user');
+const Record = require('./models/record');
+
+const app = express();
 const port = process.env.PORT || "3000";
 
-mongoose.connect(process.env.MONGODB_URI);
-mongoose.connection.on("connected", () => {
-    console.log(`Connected to MongoDB ${mongoose.connection.name}.`);
-});
-
 // Configure Express app
-// app.set(...)
 app.set('view engine', 'ejs');
+
 // Mount Middleware
-// app.use(...)
-
-// Morgan for logging HTTP requests
 app.use(morgan('dev'));
-
-// Static middleware for returning static assets to the browser
 app.use(express.static('public'));
-
-// Middleware to parse URL-encoded data from forms
 app.use(express.urlencoded({ extended: false }));
-
-// Middleware for using HTTP verbs such as PUT or DELETE
 app.use(methodOverride("_method"));
 
 // Session middleware
@@ -43,25 +38,104 @@ app.use(session({
 // Add the user (if logged in) to req.user & res.locals
 app.use(require('./middleware/add-user-to-locals-and-req'));
 
-// Routes
-// GET / (home page functionality)
-app.get('/', (req, res) => {
-    res.render('index.ejs', { title: 'VinylVault' });
-});
-
-// '/auth' is the "starts with" path that the request must match
-// The "starts with" path is pre-pended to the paths
-// defined in the router module
+// Mount auth routes
 app.use('/auth', require('./controllers/auth'));
 
-// Any requests that get this far must have a signed in
-// user thanks to ensureSignedIn middleware
+// Mount record routes with ensure-signed-in middleware
+app.use('/records', require('./middleware/ensure-signed-in'), require('./controllers/records'));
+
+// GET / (public home page functionality)
+app.get('/', async (req, res) => {
+    try {
+        const users = await User.find({ isPublic: true })
+            .sort({ createdAt: -1 })
+            .limit(12);
+
+        const usersWithRecords = await Promise.all(users.map(async user => {
+            try {
+                const recentlyAdded = await Record.find({ owner: user._id })
+                    .sort({ createdAt: -1 })
+                    .limit(3)
+                    .select('title artist createdAt');
+
+                const recentlyPlayed = await Record.findOne({ 
+                    owner: user._id,
+                    lastPlayed: { $exists: true, $ne: null }
+                })
+                    .sort({ lastPlayed: -1 })
+                    .select('title artist lastPlayed');
+
+                return {
+                    ...user.toObject(),
+                    recentlyAdded: recentlyAdded || [],
+                    recentlyPlayed: recentlyPlayed || null,
+                    joinDate: user.createdAt ? user.createdAt.toLocaleDateString() : 'Unknown'
+                };
+            } catch (e) {
+                console.error('Error processing user records:', e);
+                return {
+                    ...user.toObject(),
+                    recentlyAdded: [],
+                    recentlyPlayed: null,
+                    joinDate: user.createdAt ? user.createdAt.toLocaleDateString() : 'Unknown'
+                };
+            }
+        }));
+
+        res.render('home', { 
+            title: 'Welcome to VinylVault',
+            users: usersWithRecords
+        });
+    } catch (e) {
+        console.error('Error in home route:', e);
+        res.render('home', { 
+            title: 'Welcome to VinylVault',
+            users: []
+        });
+    }
+});
+
+// GET /users/:username - View a user's public profile
+app.get('/users/:username', async (req, res) => {
+    try {
+        const user = await User.findOne({ 
+            username: req.params.username,
+            isPublic: true
+        });
+
+        if (!user) {
+            return res.redirect('/');
+        }
+
+        const recentlyAdded = await Record.find({ owner: user._id })
+            .sort({ createdAt: -1 })
+            .limit(10);
+
+        const recentlyPlayed = await Record.find({ 
+            owner: user._id,
+            lastPlayed: { $exists: true, $ne: null }
+        })
+            .sort({ lastPlayed: -1 })
+            .limit(10);
+
+        res.render('users/profile', {
+            title: `${user.username}'s Profile`,
+            profileUser: user,
+            recentlyAdded,
+            recentlyPlayed
+        });
+    } catch (e) {
+        console.error('Error in user profile route:', e);
+        res.redirect('/');
+    }
+});
+
+// Protect all routes after this point
 app.use(require('./middleware/ensure-signed-in'));
 
-// Any controller/routes mounted below here will have
-// ALL routes protected by the ensureSignedIn middleware
+// Mount protected routes
 app.use('/records', require('./controllers/records'));
 
 app.listen(port, () => {
-    console.log(`The express app is ready on port ${port}!`);
+    console.log(`Server is running on port ${port}`);
 });
