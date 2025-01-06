@@ -42,6 +42,8 @@ default: 'LP'
 
  },
 
+tags: [String],
+
 plays: {
 
 type: Number,

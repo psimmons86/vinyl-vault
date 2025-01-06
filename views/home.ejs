@@ -1,50 +1,59 @@
 <%- include('./partials/header.ejs') %>
 
 <div class="home-container">
-    <section class="featured-collectors">
-        <h2>Featured Collectors</h2>
-        <div class="collectors-grid">
-            <% if (users && users.length > 0) { %>
-                <% users.forEach(user => { %>
-                    <div class="collector-card">
-                        <div class="collector-header">
-                            <h3><%= user.username %></h3>
-                            <span class="member-since">Member since <%= user.joinDate %></span>
+    <!-- Hero Section with Authentication -->
+    <section class="hero-section">
+        <div class="auth-card">
+            <h2>Join Vinyl Vault</h2>
+            <p class="auth-subtitle">Track your vinyl collection and discover what others are spinning.</p>
+            
+            <!-- Authentication Buttons -->
+            <div class="auth-buttons">
+                <a href="/auth/sign-up" class="btn btn-primary">Create Account</a>
+                <div class="auth-separator">
+                    <span>or</span>
+                </div>
+                <a href="/auth/sign-in" class="btn btn-secondary">Sign In</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Records Grid -->
+    <section class="recent-records">
+        <h2>Recently Added to Collections</h2>
+        <div class="records-showcase">
+            <% if (recentRecords && recentRecords.length > 0) { %>
+                <% recentRecords.forEach(record => { %>
+                    <div class="showcase-record">
+                        <div class="record-artwork">
+                            <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
+                                 alt="Album artwork for <%= record.title %>"
+                                 class="record-img">
+                            <div class="record-overlay">
+                                <p class="record-title"><%= record.title %></p>
+                                <p class="record-artist"><%= record.artist %></p>
+                                <p class="record-owner">Added by <%= record.owner.username %></p>
+                            </div>
                         </div>
-                        
-                        <div class="collection-preview">
-                            <% if (user.recentlyPlayed) { %>
-                                <div class="recent-play">
-                                    <span class="last-played">Last Played:</span>
-                                    <span><%= user.recentlyPlayed.title %> by <%= user.recentlyPlayed.artist %></span>
-                                </div>
-                            <% } %>
-                            
-                            <% if (user.recentlyAdded && user.recentlyAdded.length > 0) { %>
-                                <div class="recent-additions">
-                                    <h4>Recent Additions</h4>
-                                    <ul>
-                                        <% user.recentlyAdded.forEach(record => { %>
-                                            <li>
-                                                <%= record.title %> by <%= record.artist %>
-                                                <% if (record.createdAt) { %>
-                                                    <small class="added-date">
-                                                        Added <%= record.createdAt.toLocaleDateString() %>
-                                                    </small>
-                                                <% } %>
-                                            </li>
-                                        <% }) %>
-                                    </ul>
-                                </div>
-                            <% } %>
-                        </div>
-                        
-                        <a href="/users/<%= user.username %>" class="view-collection">View Collection</a>
                     </div>
-                <% }); %>
-            <% } else { %>
-                <p class="no-users">No collectors to display yet.</p>
+                <% }) %>
             <% } %>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="feature-card">
+            <h3>Track Your Collection</h3>
+            <p>Catalog your vinyl records with ease. Add artwork, notes, and keep track of your plays.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Discover Music</h3>
+            <p>See what other collectors are adding and get inspired by their collections.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Share Your Tastes</h3>
+            <p>Make your collection public and connect with fellow vinyl enthusiasts.</p>
         </div>
     </section>
 </div>

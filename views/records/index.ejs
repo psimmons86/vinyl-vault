@@ -4,6 +4,18 @@
     <p>Total Records: <%= records.length %></p>
 </div>
 
+<!-- Highlight: Add tag filter section -->
+<div class="filter-controls">
+    <h3>Filter by Tag:</h3>
+    <% tags.forEach(tag => { %>
+      <a href="/records?tag=<%= tag %>" class="tag-filter <%= currentTag === tag ? 'active' : '' %>"><%= tag %></a>
+    <% }) %>
+    <% if (currentTag) { %>
+      <a href="/records" class="clear-filter">Clear Filter</a>
+    <% } %>
+  </div>
+  <!-- End Highlight -->
+
 <div class="sort-controls">
     Sort by:
     <a href="/records?sort=artist" class="<%= currentSort === 'artist' ? 'active' : '' %>">Artist</a> |

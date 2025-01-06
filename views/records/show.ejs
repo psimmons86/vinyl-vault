@@ -18,6 +18,17 @@
         <% if (record.notes) { %>
             <p class="record-notes">Notes: <%= record.notes %></p>
         <% } %>
+
+        <!-- Highlight: Display record tags -->
+        <% if (record.tags && record.tags.length) { %>
+            <div class="record-tags">
+                <h4>Tags:</h4>
+                <% record.tags.forEach(tag => { %>
+                    <a href="/records?tag=<%= tag %>" class="tag-link"><%= tag %></a>
+                <% }) %>
+            </div>
+        <% } %>
+        <!-- End Highlight -->
         
         <div class="button-group">
             <form action="/records/<%= record._id %>/play" method="POST">

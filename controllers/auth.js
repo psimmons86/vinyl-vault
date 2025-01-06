@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const Activity = require('../models/activity');
 const bcrypt = require('bcrypt');
 
 // GET /auth/sign-up - Show sign up form
@@ -15,6 +16,12 @@ router.post('/sign-up', async (req, res) => {
     try {
         req.body.password = bcrypt.hashSync(req.body.password, 10);
         const user = await User.create(req.body);
+        
+        await Activity.create({
+            user: user._id,
+            activityType: 'signup'
+        });
+
         req.session.user = user;
         res.redirect('/records/profile');
     } catch (err) {

@@ -46,53 +46,37 @@ app.use('/records', require('./middleware/ensure-signed-in'), require('./control
 
 // GET / (public home page functionality)
 app.get('/', async (req, res) => {
-    try {
-        const users = await User.find({ isPublic: true })
-            .sort({ createdAt: -1 })
-            .limit(12);
+  try {
+      // If user is logged in, redirect to their profile
+      if (req.user) {
+          return res.redirect('/records/profile');
+      }
 
-        const usersWithRecords = await Promise.all(users.map(async user => {
-            try {
-                const recentlyAdded = await Record.find({ owner: user._id })
-                    .sort({ createdAt: -1 })
-                    .limit(3)
-                    .select('title artist createdAt');
+      // Fetch recent records from public profiles
+      const recentRecords = await Record.find()
+          .populate({
+              path: 'owner',
+              match: { isPublic: true },
+              select: 'username'
+          })
+          .sort({ createdAt: -1 })
+          .limit(12)
+          .select('title artist imageUrl createdAt');
 
-                const recentlyPlayed = await Record.findOne({ 
-                    owner: user._id,
-                    lastPlayed: { $exists: true, $ne: null }
-                })
-                    .sort({ lastPlayed: -1 })
-                    .select('title artist lastPlayed');
+      // Filter out records from private profiles
+      const publicRecords = recentRecords.filter(record => record.owner);
 
-                return {
-                    ...user.toObject(),
-                    recentlyAdded: recentlyAdded || [],
-                    recentlyPlayed: recentlyPlayed || null,
-                    joinDate: user.createdAt ? user.createdAt.toLocaleDateString() : 'Unknown'
-                };
-            } catch (e) {
-                console.error('Error processing user records:', e);
-                return {
-                    ...user.toObject(),
-                    recentlyAdded: [],
-                    recentlyPlayed: null,
-                    joinDate: user.createdAt ? user.createdAt.toLocaleDateString() : 'Unknown'
-                };
-            }
-        }));
-
-        res.render('home', { 
-            title: 'Welcome to VinylVault',
-            users: usersWithRecords
-        });
-    } catch (e) {
-        console.error('Error in home route:', e);
-        res.render('home', { 
-            title: 'Welcome to VinylVault',
-            users: []
-        });
-    }
+      res.render('home', { 
+          title: 'Welcome to VinylVault',
+          recentRecords: publicRecords
+      });
+  } catch (e) {
+      console.error('Error in home route:', e);
+      res.render('home', { 
+          title: 'Welcome to VinylVault',
+          recentRecords: []
+      });
+  }
 });
 
 // GET /users/:username - View a user's public profile

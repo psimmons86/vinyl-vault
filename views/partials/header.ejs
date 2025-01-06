@@ -12,22 +12,27 @@
             <a href="<%= user ? '/records/profile' : '/' %>" class="logo">
                 <span class="logo-text">Vinyl Vault</span>
             </a>
-            <div class="nav-links">
-                <a href="/" class="nav-link">Home</a>
-                <% if (user) { %>
-                    <a href="/records/profile" class="nav-link">Profile</a>
-                    <a href="/records" class="nav-link">Collection</a>
-                    <a href="/records/new" class="nav-link">Add Record</a>
+
+            <% if (user) { %>
+                <div class="primary-nav">
+                    <a href="/records" class="nav-link prominent">Collection</a>
+                    <a href="/records/feed" class="nav-link prominent">Feed</a>
+                    <a href="/records/new" class="btn-primary">+ Add Record</a>
+                </div>
+
+                <div class="user-section">
                     <a href="/records/stats" class="nav-link">Stats</a>
-                    <div class="nav-user-group">
+                    <div class="user-menu">
+                        <span class="user-name"><%= user.username %></span>
                         <a href="/records/settings" class="nav-link">Settings</a>
-                        <span class="nav-link user-name"><%= user.username %></span>
                         <a href="/auth/sign-out" class="nav-link">Sign Out</a>
                     </div>
-                <% } else { %>
+                </div>
+            <% } else { %>
+                <div class="auth-links">
                     <a href="/auth/sign-up" class="nav-link">Sign Up</a>
-                    <a href="/auth/sign-in" class="nav-link">Sign In</a>
-                <% } %>
-            </div>
+                    <a href="/auth/sign-in" class="btn-primary">Sign In</a>
+                </div>
+            <% } %>
         </div>
     </nav>
