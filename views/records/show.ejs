@@ -1,9 +1,10 @@
 <%- include('../partials/header.ejs') %>
 
 <div class="record-detail-card">
-    <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
-         alt="Album art for <%= record.title %>"
-         class="record-img">
+    <div class="record-detail-image">
+        <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
+             alt="Album art for <%= record.title %>">
+    </div>
     
     <div class="record-info">
         <h2 class="record-title"><%= record.title %></h2>
@@ -19,7 +20,6 @@
             <p class="record-notes">Notes: <%= record.notes %></p>
         <% } %>
 
-        <!-- Highlight: Display record tags -->
         <% if (record.tags && record.tags.length) { %>
             <div class="record-tags">
                 <h4>Tags:</h4>
@@ -28,7 +28,6 @@
                 <% }) %>
             </div>
         <% } %>
-        <!-- End Highlight -->
         
         <div class="button-group">
             <form action="/records/<%= record._id %>/play" method="POST">

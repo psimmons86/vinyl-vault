@@ -4,35 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %> | Vinyl Vault</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <a href="<%= user ? '/records/profile' : '/' %>" class="logo">
-                <span class="logo-text">Vinyl Vault</span>
+            <a href="<%= user ? '/records' : '/' %>" class="nav-logo">
+                ShareSpace
             </a>
 
             <% if (user) { %>
-                <div class="primary-nav">
-                    <a href="/records" class="nav-link prominent">Collection</a>
-                    <a href="/records/feed" class="nav-link prominent">Feed</a>
-                    <a href="/records/new" class="btn-primary">+ Add Record</a>
-                </div>
-
-                <div class="user-section">
-                    <a href="/records/stats" class="nav-link">Stats</a>
-                    <div class="user-menu">
-                        <span class="user-name"><%= user.username %></span>
-                        <a href="/records/settings" class="nav-link">Settings</a>
-                        <a href="/auth/sign-out" class="nav-link">Sign Out</a>
-                    </div>
+                <div class="nav-links">
+                    <a href="/records">My Collection</a>
+                    <a href="/records/new">Add New Record</a>
+                    <a href="/records/search">Search Discogs</a>
+                    <a href="/auth/sign-out">Sign Out</a>
                 </div>
             <% } else { %>
-                <div class="auth-links">
-                    <a href="/auth/sign-up" class="nav-link">Sign Up</a>
-                    <a href="/auth/sign-in" class="btn-primary">Sign In</a>
+                <div class="nav-links">
+                    <a href="/auth/sign-in">Sign In</a>
                 </div>
             <% } %>
         </div>
     </nav>
+    <main>

@@ -1,47 +1,75 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="collection-stats">
-    <p>Total Records: <%= records.length %></p>
-</div>
-
-<!-- Highlight: Add tag filter section -->
-<div class="filter-controls">
-    <h3>Filter by Tag:</h3>
-    <% tags.forEach(tag => { %>
-      <a href="/records?tag=<%= tag %>" class="tag-filter <%= currentTag === tag ? 'active' : '' %>"><%= tag %></a>
-    <% }) %>
-    <% if (currentTag) { %>
-      <a href="/records" class="clear-filter">Clear Filter</a>
-    <% } %>
-  </div>
-  <!-- End Highlight -->
-
-<div class="sort-controls">
-    Sort by:
-    <a href="/records?sort=artist" class="<%= currentSort === 'artist' ? 'active' : '' %>">Artist</a> |
-    <a href="/records" class="<%= !currentSort ? 'active' : '' %>">Date Added</a>
-</div>
-
-<a href="/records/new" class="nav-link">Add New Record</a>
-
-<% if (records && records.length) { %>
-    <div class="records-grid">
-        <% records.forEach(function(record) { %>
-            <div class="record-card">
-                <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
-                     alt="Album art for <%= record.title %>"
-                     class="record-img">
-                <div class="record-title"><%= record.title %></div>
-                <div class="record-artist"><%= record.artist %></div>
-                <div class="record-format"><%= record.format %></div>
-                <div class="record-details">
-                    <a href="/records/<%= record._id %>">View Details</a>
-                </div>
-            </div>
-        <% }); %>
+<div class="container">
+    <!-- Collection Header -->
+    <div class="collection-header">
+        <h1 class="collection-title">My Collection</h1>
+        <div class="view-controls">
+            <a href="/records?sort=artist" class="<%= currentSort === 'artist' ? 'active' : '' %>">A-Z</a>
+            <a href="/records" class="<%= !currentSort ? 'active' : '' %>">Recent</a>
+        </div>
     </div>
-<% } else { %>
-    <p>No records yet!</p>
-<% } %>
+
+    <!-- Records Grid -->
+    <div class="records-grid">
+        <% if (records && records.length > 0) { %>
+            <% records.forEach(function(record) { %>
+                <a href="/records/<%= record._id %>" class="record-card">
+                    <div class="record-artwork">
+                        <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
+                             alt="Album art for <%= record.title %>"
+                             class="record-img">
+                        <div class="record-overlay">
+                            <h2 class="record-title"><%= record.title %></h2>
+                            <p class="record-artist"><%= record.artist %></p>
+                            <p class="record-plays"><%= record.plays %> plays</p>
+                        </div>
+                    </div>
+                </a>
+            <% }); %>
+        <% } else { %>
+            <div class="empty-state">
+                <p>No records yet!</p>
+                <a href="/records/new" class="btn btn-primary">Add Your First Record</a>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Collapsible Tags Section -->
+    <% if (tags && tags.length > 0) { %>
+        <div class="tags-section">
+            <button class="tags-toggle" onclick="toggleTags()">
+                <span>Filter by Tags</span>
+                <span class="toggle-icon">▼</span>
+            </button>
+            <div class="tag-filters" id="tagFilters">
+                <% tags.forEach(tag => { %>
+                    <a href="/records?tag=<%= tag %>" 
+                       class="tag-filter <%= currentTag === tag ? 'active' : '' %>">
+                        <%= tag %>
+                    </a>
+                <% }) %>
+                <% if (currentTag) { %>
+                    <a href="/records" class="tag-filter clear-filter">Clear Filter</a>
+                <% } %>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Add Record Button -->
+    <a href="/records/new" class="add-record-btn">
+        <span>+</span>
+        Add New Record
+    </a>
+</div>
+
+<script>
+function toggleTags() {
+    const tagFilters = document.getElementById('tagFilters');
+    const toggleIcon = document.querySelector('.toggle-icon');
+    tagFilters.classList.toggle('expanded');
+    toggleIcon.textContent = tagFilters.classList.contains('expanded') ? '▼' : '▶';
+}
+</script>
 
 <%- include('../partials/footer.ejs') %>

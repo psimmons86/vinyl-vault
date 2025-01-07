@@ -5,81 +5,74 @@ const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 const session = require('express-session');
 
-// Connect to MongoDB first
+// Database Connection Setup
 mongoose.connect(process.env.MONGODB_URI);
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Connected to MongoDB'));
 
-// Import models after connection is established
+// Import models after mongoose connection is established
 const User = require('./models/user');
 const Record = require('./models/record');
 
+// Express Application Setup
 const app = express();
 const port = process.env.PORT || "3000";
 
-// Configure Express app
+// Basic Express Configuration
 app.set('view engine', 'ejs');
 
-// Mount Middleware
-app.use(morgan('dev'));
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: false }));
-app.use(methodOverride("_method"));
-
-// Session middleware
-app.use(session({
+// Middleware Stack
+app.use(morgan('dev'));                                    
+app.use(express.static('public'));                        
+app.use(express.urlencoded({ extended: false }));         
+app.use(methodOverride("_method"));                       
+app.use(session({                                         
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true
 }));
 
-// Add the user (if logged in) to req.user & res.locals
+// Custom Middleware
 app.use(require('./middleware/add-user-to-locals-and-req'));
 
-// Mount auth routes
+// Public Routes (No Authentication Required)
 app.use('/auth', require('./controllers/auth'));
 
-// Mount record routes with ensure-signed-in middleware
-app.use('/records', require('./middleware/ensure-signed-in'), require('./controllers/records'));
-
-// GET / (public home page functionality)
+// Home Page Route
 app.get('/', async (req, res) => {
-  try {
-      // If user is logged in, redirect to their profile
-      if (req.user) {
-          return res.redirect('/records/profile');
-      }
+    try {
+        if (req.user) {
+            return res.redirect('/records/profile');
+        }
 
-      // Fetch recent records from public profiles
-      const recentRecords = await Record.find()
-          .populate({
-              path: 'owner',
-              match: { isPublic: true },
-              select: 'username'
-          })
-          .sort({ createdAt: -1 })
-          .limit(12)
-          .select('title artist imageUrl createdAt');
+        const recentRecords = await Record.find()
+            .populate({
+                path: 'owner',
+                match: { isPublic: true },
+                select: 'username'
+            })
+            .sort({ createdAt: -1 })
+            .limit(12)
+            .select('title artist imageUrl createdAt');
 
-      // Filter out records from private profiles
-      const publicRecords = recentRecords.filter(record => record.owner);
+        const publicRecords = recentRecords.filter(record => record.owner);
 
-      res.render('home', { 
-          title: 'Welcome to VinylVault',
-          recentRecords: publicRecords
-      });
-  } catch (e) {
-      console.error('Error in home route:', e);
-      res.render('home', { 
-          title: 'Welcome to VinylVault',
-          recentRecords: []
-      });
-  }
+        res.render('home', { 
+            title: 'Welcome to VinylVault',
+            recentRecords: publicRecords
+        });
+    } catch (e) {
+        console.error('Error in home route:', e);
+        res.render('home', { 
+            title: 'Welcome to VinylVault',
+            recentRecords: []
+        });
+    }
 });
 
-// GET /users/:username - View a user's public profile
+// Public User Profile Route
 app.get('/users/:username', async (req, res) => {
     try {
         const user = await User.findOne({ 
@@ -114,12 +107,28 @@ app.get('/users/:username', async (req, res) => {
     }
 });
 
-// Protect all routes after this point
-app.use(require('./middleware/ensure-signed-in'));
+// Protected Routes (Authentication Required)
+app.use('/records', require('./middleware/ensure-signed-in'), require('./controllers/records'));
 
-// Mount protected routes
-app.use('/records', require('./controllers/records'));
+// Error Handling Middleware (must be last)
+// Handle 404 errors
+app.use((req, res) => {
+    res.status(404).render('records/404', { 
+        title: 'Page Not Found',
+        message: "The page you're looking for doesn't exist."
+    });
+});
 
+// Handle all other errors
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).render('records/error', {
+        title: 'Error',
+        message: err.message || 'Something went wrong!'
+    });
+});
+
+// Start the server
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });

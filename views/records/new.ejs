@@ -1,47 +1,81 @@
 <%- include('../partials/header.ejs') %>
 
 <div class="form-container">
-    <h2>Add New Record</h2>
+    <h2>Add Record</h2>
 
     <form action="/records" method="POST" class="record-form">
         <div class="form-group">
             <label for="title">Title:</label>
-            <input type="text" name="title" id="title" required>
+            <input 
+                type="text" 
+                name="title" 
+                id="title" 
+                value="<%= prefilledData ? prefilledData.title : '' %>"
+                required
+            >
         </div>
 
         <div class="form-group">
             <label for="artist">Artist:</label>
-            <input type="text" name="artist" id="artist" required>
+            <input 
+                type="text" 
+                name="artist" 
+                id="artist" 
+                value="<%= prefilledData ? prefilledData.artist : '' %>"
+                required
+            >
         </div>
 
         <div class="form-group">
             <label for="year">Year:</label>
-            <input type="number" name="year" id="year">
+            <input 
+                type="number" 
+                name="year" 
+                id="year" 
+                value="<%= prefilledData ? prefilledData.year : '' %>"
+            >
         </div>
 
         <div class="form-group">
             <label for="format">Format:</label>
             <select name="format" id="format">
                 <% formats.forEach(format => { %>
-                    <option value="<%= format %>"><%= format %></option>
+                    <option 
+                        value="<%= format %>"
+                        <%= (prefilledData && prefilledData.format === format) ? 'selected' : '' %>
+                    ><%= format %></option>
                 <% }); %>
             </select>
         </div>
 
         <div class="form-group">
             <label for="imageUrl">Album Art URL:</label>
-            <input type="url" name="imageUrl" id="imageUrl">
-        </div>
-
-        <div class="form-group">
-            <label for="notes">Notes:</label>
-            <textarea name="notes" id="notes"></textarea>
+            <input 
+                type="url" 
+                name="imageUrl" 
+                id="imageUrl"
+                value="<%= prefilledData ? prefilledData.imageUrl : '' %>"
+            >
         </div>
 
         <div class="form-group">
             <label for="tags">Tags (comma separated)</label>
-            <input type="text" id="tags" name="tags" class="form-control" value="<%= record.tags ? record.tags.join(', ') : '' %>">
-          </div>
+            <input 
+                type="text" 
+                id="tags" 
+                name="tags" 
+                class="form-control" 
+                value="<%= prefilledData ? prefilledData.tags : '' %>"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="notes">Notes:</label>
+            <textarea 
+                name="notes" 
+                id="notes"
+            ><%= prefilledData ? prefilledData.notes : '' %></textarea>
+        </div>
 
         <button type="submit" class="btn">Add Record</button>
     </form>

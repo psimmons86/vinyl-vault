@@ -1,30 +1,43 @@
 <%- include('./partials/header.ejs') %>
 
 <div class="home-container">
-    <!-- Hero Section with Authentication -->
     <section class="hero-section">
-        <div class="auth-card">
-            <h2>Join Vinyl Vault</h2>
-            <p class="auth-subtitle">Track your vinyl collection and discover what others are spinning.</p>
+        <div class="hero-content">
+            <h1 class="site-title">Share Space</h1>
+            <p class="hero-tagline">Welcome to your space.</p>
             
-            <!-- Authentication Buttons -->
-            <div class="auth-buttons">
-                <a href="/auth/sign-up" class="btn btn-primary">Create Account</a>
-                <div class="auth-separator">
-                    <span>or</span>
-                </div>
-                <a href="/auth/sign-in" class="btn btn-secondary">Sign In</a>
+            <!-- Sign Up Form -->
+            <div class="auth-card">
+                <form action="/auth/sign-up" method="POST" class="signup-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" name="username" id="username" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" id="password" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" name="confirmPassword" id="confirmPassword" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Account</button>
+                    <div class="auth-separator">
+                        <span>Already have an account?</span>
+                    </div>
+                    <a href="/auth/sign-in" class="btn btn-secondary">Sign In</a>
+                </form>
             </div>
         </div>
     </section>
 
     <!-- Recent Records Grid -->
     <section class="recent-records">
-        <h2>Recently Added to Collections</h2>
-        <div class="records-showcase">
+        <h2>Recently Shared</h2>
+        <div class="records-grid">
             <% if (recentRecords && recentRecords.length > 0) { %>
                 <% recentRecords.forEach(record => { %>
-                    <div class="showcase-record">
+                    <div class="record-card">
                         <div class="record-artwork">
                             <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
                                  alt="Album artwork for <%= record.title %>"
@@ -32,28 +45,12 @@
                             <div class="record-overlay">
                                 <p class="record-title"><%= record.title %></p>
                                 <p class="record-artist"><%= record.artist %></p>
-                                <p class="record-owner">Added by <%= record.owner.username %></p>
+                                <p class="record-owner">Shared by <%= record.owner.username %></p>
                             </div>
                         </div>
                     </div>
                 <% }) %>
             <% } %>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features-section">
-        <div class="feature-card">
-            <h3>Track Your Collection</h3>
-            <p>Catalog your vinyl records with ease. Add artwork, notes, and keep track of your plays.</p>
-        </div>
-        <div class="feature-card">
-            <h3>Discover Music</h3>
-            <p>See what other collectors are adding and get inspired by their collections.</p>
-        </div>
-        <div class="feature-card">
-            <h3>Share Your Tastes</h3>
-            <p>Make your collection public and connect with fellow vinyl enthusiasts.</p>
         </div>
     </section>
 </div>
