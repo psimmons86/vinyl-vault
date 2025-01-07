@@ -110,7 +110,7 @@ app.get('/users/:username', async (req, res) => {
 // Protected Routes (Authentication Required)
 app.use('/records', require('./middleware/ensure-signed-in'), require('./controllers/records'));
 
-// Error Handling Middleware (must be last)
+// Error Handling Middleware 
 // Handle 404 errors
 app.use((req, res) => {
     res.status(404).render('records/404', { 
