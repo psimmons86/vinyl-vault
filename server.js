@@ -5,6 +5,11 @@ const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 const session = require('express-session');
 
+// Import models first
+const User = require('./models/user');
+const Record = require('./models/record');
+const Activity = require('./models/activity');
+
 const app = express();
 
 // Set the port from environment variable or default to 3000
@@ -35,9 +40,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: false,  // Set to false for Heroku
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
+    },
+    proxy: true  // Add this for Heroku
 }));
 
 // Add the user to req.user & res.locals
@@ -121,11 +127,19 @@ app.use(require('./middleware/ensure-signed-in'));
 app.use('/records', require('./controllers/records'));
 app.use('/feed', require('./controllers/feed'));
 
-// Error handlers
+// Error handlers must be last
 app.use((req, res) => {
     res.status(404).render('shared/404', {
         title: 'Page Not Found',
         message: "The page you're looking for doesn't exist."
+    });
+});
+
+app.use((err, req, res, next) => {
+    console.log(err);
+    res.status(500).render('shared/error', {
+        title: 'Error',
+        message: 'Something went wrong!'
     });
 });
 
