@@ -1,116 +1,107 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="search-page">
-    <div class="search-container">
-        <!-- Search Header -->
-        <div class="search-header">
-            <h1>Search Discogs Database</h1>
-            <p class="search-description">
-                Find records from Discogs' extensive database and add them directly to your collection.
-                Search by artist name, album title, or both.
-            </p>
+<div class="container">
+    <!-- Search Header -->
+    <div class="collection-header">
+        <h1 class="collection-title">Search Discogs</h1>
+    </div>
+
+    <!-- Search Form -->
+    <div class="row">
+        <div class="col s12 m8 offset-m2">
+            <form action="/records/search" method="GET" class="search-form">
+                <div class="input-field">
+                    <input 
+                        type="search" 
+                        id="search"
+                        name="q" 
+                        value="<%= locals.query || '' %>"
+                        placeholder="Search by artist or album"
+                        class="search-input"
+                        required
+                    >
+                </div>
+                <div class="center-align">
+                    <button type="submit" class="btn">
+                        Search Discogs
+                    </button>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <!-- Search Form -->
-        <form action="/records/search" method="GET" class="search-form">
-            <div class="search-input-group">
-                <input 
-                    type="search" 
-                    name="q" 
-                    placeholder="Example: Pink Floyd Dark Side of the Moon"
-                    value="<%= locals.query || '' %>"
-                    class="search-input"
-                    autofocus
-                    required
-                >
-                <button type="submit" class="btn btn-primary">
-                    Search Discogs
-                </button>
-            </div>
-        </form>
-
-        <!-- Loading State -->
-        <div id="searchLoading" class="search-loading hidden">
-            Searching Discogs database...
-        </div>
-
-        <!-- Error Message -->
-        <% if (locals.error) { %>
-            <div class="alert alert-error">
-                <%= error %>
-            </div>
-        <% } %>
-
-        <!-- Search Results -->
-        <% if (locals.results && results.length > 0) { %>
-            <div class="search-results">
-                <h2>Found <%= results.length %> Records</h2>
-                
-                <div class="results-grid">
-                    <% results.forEach(result => { %>
-                        <div class="result-card">
-                            <!-- Album Artwork -->
-                            <div class="result-image">
-                                <img src="<%= result.thumb %>" 
-                                     alt="Album artwork for <%= result.title %>"
-                                     class="result-thumb"
-                                     onerror="this.src='/images/default-album.png'">
-                            </div>
-                            
-                            <!-- Record Information -->
-                            <div class="result-info">
-                                <h3 class="result-title">
-                                    <%= result.title %>
-                                </h3>
-                                <p class="result-artist">
-                                    by <%= result.artist %>
-                                </p>
-                                
-                                <!-- Additional Details -->
-                                <div class="result-details">
-                                    <% if (result.year) { %>
-                                        <span class="detail-item">
-                                            <%= result.year %>
-                                        </span>
-                                    <% } %>
-                                    
-                                    <% if (result.label) { %>
-                                        <span class="detail-item">
-                                            <%= result.label %>
-                                        </span>
-                                    <% } %>
-                                    
-                                    <% if (result.format) { %>
-                                        <span class="detail-item format-badge">
-                                            <%= result.format %>
-                                        </span>
-                                    <% } %>
-                                </div>
-
-                                <!-- Action Button -->
-                                <div class="result-actions">
-                                    <a href="/records/add-from-discogs/<%= result.id %>" 
-                                       class="btn btn-primary">
-                                        Add to Collection
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    <% }) %>
+    <!-- Loading State -->
+    <div id="searchLoading" class="hidden center-align">
+        <div class="preloader-wrapper small active">
+            <div class="spinner-layer spinner-green-only">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="gap-patch">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
                 </div>
             </div>
-        <% } else if (locals.query) { %>
-            <div class="no-results">
-                <p>No records found matching "<%= query %>"</p>
-                <p class="help-text">Try adjusting your search terms or check the spelling.</p>
-            </div>
-        <% } %>
+        </div>
+        <p>Searching Discogs...</p>
     </div>
+
+    <!-- Error Message -->
+    <% if (locals.error) { %>
+        <div class="row">
+            <div class="col s12">
+                <div class="card-panel red lighten-4 red-text text-darken-4">
+                    <%= error %>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Search Results -->
+    <% if (locals.results && results.length > 0) { %>
+        <div class="row">
+            <% results.forEach(result => { %>
+                <div class="col s12 m6 l3">
+                    <div class="record-card">
+                        <div class="record-artwork">
+                            <img src="<%= result.thumb %>" 
+                                 alt="Album artwork for <%= result.title %>"
+                                 class="record-img"
+                                 onerror="this.src='/images/default-album.png'">
+                            <div class="record-overlay">
+                                <h3 class="record-title truncate"><%= result.title %></h3>
+                                <p class="record-artist"><%= result.artist %></p>
+                                
+                                <% if (result.year || result.label) { %>
+                                    <p class="record-details">
+                                        <%= result.year ? result.year : '' %>
+                                        <%= result.year && result.label ? ' • ' : '' %>
+                                        <%= result.label ? result.label : '' %>
+                                    </p>
+                                <% } %>
+                                
+                                <a href="/records/add-from-discogs/<%= result.id %>" 
+                                   class="btn">
+                                    Add to Collection
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    <% } else if (locals.query) { %>
+        <div class="center-align">
+            <p>No records found matching "<%= query %>"</p>
+            <p class="grey-text">Try adjusting your search terms or check the spelling.</p>
+        </div>
+    <% } %>
 </div>
 
-<!-- Simple JavaScript for loading state -->
 <script>
-document.querySelector('.search-form').addEventListener('submit', function() {
+document.querySelector('form').addEventListener('submit', function() {
     document.getElementById('searchLoading').classList.remove('hidden');
 });
 </script>

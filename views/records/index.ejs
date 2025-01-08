@@ -11,50 +11,31 @@
     </div>
 
     <!-- Records Grid -->
-    <div class="records-grid">
+    <div class="row">
         <% if (records && records.length > 0) { %>
             <% records.forEach(function(record) { %>
-                <a href="/records/<%= record._id %>" class="record-card">
-                    <div class="record-artwork">
-                        <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
-                             alt="Album art for <%= record.title %>"
-                             class="record-img">
-                        <div class="record-overlay">
-                            <h2 class="record-title"><%= record.title %></h2>
-                            <p class="record-artist"><%= record.artist %></p>
-                            <p class="record-plays"><%= record.plays %> plays</p>
+                <div class="col s12 m6 l3">
+                    <a href="/records/<%= record._id %>" class="record-card">
+                        <div class="record-artwork">
+                            <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
+                                 alt="Album art for <%= record.title %>"
+                                 class="record-img">
+                            <div class="record-overlay">
+                                <h2 class="record-title"><%= record.title %></h2>
+                                <p class="record-artist"><%= record.artist %></p>
+                                <p class="record-plays"><%= record.plays %> plays</p>
+                            </div>
                         </div>
-                    </div>
-                </a>
+                    </a>
+                </div>
             <% }); %>
         <% } else { %>
-            <div class="empty-state">
+            <div class="empty-state center-align">
                 <p>No records yet!</p>
-                <a href="/records/new" class="btn btn-primary">Add Your First Record</a>
+                <a href="/records/new" class="btn">Add Your First Record</a>
             </div>
         <% } %>
     </div>
-
-    <!-- Collapsible Tags Section -->
-    <% if (tags && tags.length > 0) { %>
-        <div class="tags-section">
-            <button class="tags-toggle" onclick="toggleTags()">
-                <span>Filter by Tags</span>
-                <span class="toggle-icon">▼</span>
-            </button>
-            <div class="tag-filters" id="tagFilters">
-                <% tags.forEach(tag => { %>
-                    <a href="/records?tag=<%= tag %>" 
-                       class="tag-filter <%= currentTag === tag ? 'active' : '' %>">
-                        <%= tag %>
-                    </a>
-                <% }) %>
-                <% if (currentTag) { %>
-                    <a href="/records" class="tag-filter clear-filter">Clear Filter</a>
-                <% } %>
-            </div>
-        </div>
-    <% } %>
 
     <!-- Add Record Button -->
     <a href="/records/new" class="add-record-btn">
@@ -62,14 +43,5 @@
         Add New Record
     </a>
 </div>
-
-<script>
-function toggleTags() {
-    const tagFilters = document.getElementById('tagFilters');
-    const toggleIcon = document.querySelector('.toggle-icon');
-    tagFilters.classList.toggle('expanded');
-    toggleIcon.textContent = tagFilters.classList.contains('expanded') ? '▼' : '▶';
-}
-</script>
 
 <%- include('../partials/footer.ejs') %>

@@ -17,7 +17,7 @@ async function searchRecords(query, retries = 3) {
             query: query,
             type: 'release',         
             format: 'Vinyl',         
-            per_page: 20,            
+            per_page: 40,            
         });
 
         

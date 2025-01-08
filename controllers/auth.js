@@ -4,18 +4,39 @@ const User = require('../models/user');
 const Activity = require('../models/activity');
 const bcrypt = require('bcrypt');
 
-// GET /auth/sign-up - Show sign up form
+// All routes start with '/auth'
+
+// GET /auth/sign-up (new functionality)
 router.get('/sign-up', (req, res) => {
     res.render('auth/sign-up', { 
-        title: 'Sign Up' 
+        title: 'Sign Up',
+        error: null 
     });
 });
 
-// POST /auth/sign-up - Handle form submission
+// POST /auth/sign-up (create functionality)
 router.post('/sign-up', async (req, res) => {
     try {
-        req.body.password = bcrypt.hashSync(req.body.password, 10);
-        const user = await User.create(req.body);
+        if (req.body.password !== req.body.confirmPassword) {
+            return res.render('auth/sign-up', { 
+                title: 'Sign Up',
+                error: 'Passwords do not match'
+            });
+        }
+
+        const existingUser = await User.findOne({ username: req.body.username });
+        if (existingUser) {
+            return res.render('auth/sign-up', {
+                title: 'Sign Up',
+                error: 'Username already exists'
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        const user = await User.create({
+            username: req.body.username,
+            password: hashedPassword
+        });
         
         await Activity.create({
             user: user._id,
@@ -23,37 +44,47 @@ router.post('/sign-up', async (req, res) => {
         });
 
         req.session.user = user;
-        res.redirect('/records/profile');
-    } catch (err) {
-        console.error('Sign up error:', err);
-        res.redirect('/auth/sign-up');
+        res.redirect('/records');
+    } catch (e) {
+        console.log(e);
+        res.render('auth/sign-up', {
+            title: 'Sign Up',
+            error: 'Error creating account'
+        });
     }
 });
 
-// GET /auth/sign-in - Show sign in form
+// GET /auth/sign-in (new functionality)
 router.get('/sign-in', (req, res) => {
     res.render('auth/sign-in', { 
-        title: 'Sign In' 
+        title: 'Sign In',
+        error: null
     });
 });
 
-// POST /auth/sign-in - Handle sign in form submission
+// POST /auth/sign-in (create session functionality)
 router.post('/sign-in', async (req, res) => {
     try {
         const user = await User.findOne({ username: req.body.username });
-        if (user && bcrypt.compareSync(req.body.password, user.password)) {
-            req.session.user = user;
-            res.redirect('/records/profile');
-        } else {
-            res.redirect('/auth/sign-in');
+        if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
+            return res.render('auth/sign-in', {
+                title: 'Sign In',
+                error: 'Invalid username or password'
+            });
         }
-    } catch (err) {
-        console.error('Sign in error:', err);
-        res.redirect('/auth/sign-in');
+
+        req.session.user = user;
+        res.redirect('/records');
+    } catch (e) {
+        console.log(e);
+        res.render('auth/sign-in', {
+            title: 'Sign In',
+            error: 'Error signing in'
+        });
     }
 });
 
-// GET /auth/sign-out - Sign out user
+// GET /auth/sign-out (delete session functionality)
 router.get('/sign-out', (req, res) => {
     req.session.destroy(() => {
         res.redirect('/');

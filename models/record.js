@@ -36,7 +36,7 @@ format: {
 
 type: String,
 
-enum: ['LP', '45', '78', 'Other'],
+enum: ['LP', 'EP', 'Single'],
 
 default: 'LP'
 

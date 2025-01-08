@@ -1,8 +1,38 @@
 </main>
-<footer class="main-footer">
-    <div class="footer-content">
-        <p>&copy; <%= new Date().getFullYear() %> Share Space. All rights reserved.</p>
+
+<footer class="page-footer white">
+    <div class="footer-copyright grey lighten-4">
+        <div class="container black-text">
+            © <%= new Date().getFullYear() %> Share Space
+        </div>
     </div>
 </footer>
+
+<!-- Materialize JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<!-- Initialize Materialize Components -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize all Materialize components
+        M.AutoInit();
+        
+        // Initialize sidenav
+        var elems = document.querySelectorAll('.sidenav');
+        M.Sidenav.init(elems);
+        
+        // Initialize select elements
+        var selects = document.querySelectorAll('select');
+        M.FormSelect.init(selects);
+        
+        // Initialize tooltips
+        var tooltips = document.querySelectorAll('.tooltipped');
+        M.Tooltip.init(tooltips);
+
+        // Initialize dropdowns
+        var dropdowns = document.querySelectorAll('.dropdown-trigger');
+        M.Dropdown.init(dropdowns);
+    });
+</script>
 </body>
 </html>

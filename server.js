@@ -5,46 +5,51 @@ const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 const session = require('express-session');
 
-// Database Connection Setup
-mongoose.connect(process.env.MONGODB_URI);
-
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => console.log('Connected to MongoDB'));
-
-// Import models after mongoose connection is established
-const User = require('./models/user');
-const Record = require('./models/record');
-
-// Express Application Setup
 const app = express();
+
+// Set the port from environment variable or default to 3000
 const port = process.env.PORT || "3000";
 
-// Basic Express Configuration
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI);
+
+mongoose.connection.on("connected", () => {
+    console.log(`Connected to MongoDB ${mongoose.connection.name}`);
+});
+
+// Configure Express app
 app.set('view engine', 'ejs');
 
-// Middleware Stack
-app.use(morgan('dev'));                                    
-app.use(express.static('public'));                        
-app.use(express.urlencoded({ extended: false }));         
-app.use(methodOverride("_method"));                       
-app.use(session({                                         
+// Mount Middleware
+// Morgan for logging HTTP requests
+app.use(morgan('dev'));
+// Static middleware for serving static files
+app.use(express.static('public'));
+// Middleware to parse URL-encoded data from forms
+app.use(express.urlencoded({ extended: false }));
+// Middleware for using HTTP verbs such as PUT or DELETE
+app.use(methodOverride("_method"));
+// Session middleware
+app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
 }));
 
-// Custom Middleware
+// Add the user to req.user & res.locals
 app.use(require('./middleware/add-user-to-locals-and-req'));
 
-// Public Routes (No Authentication Required)
-app.use('/auth', require('./controllers/auth'));
+// Routes
 
-// Home Page Route
+// GET / (home page functionality)
 app.get('/', async (req, res) => {
     try {
         if (req.user) {
-            return res.redirect('/records/profile');
+            return res.redirect('/records');
         }
 
         const recentRecords = await Record.find()
@@ -59,41 +64,40 @@ app.get('/', async (req, res) => {
 
         const publicRecords = recentRecords.filter(record => record.owner);
 
-        res.render('home', { 
-            title: 'Welcome to VinylVault',
+        res.render('home', {
+            title: 'Welcome to Share Space',
             recentRecords: publicRecords
         });
     } catch (e) {
-        console.error('Error in home route:', e);
-        res.render('home', { 
-            title: 'Welcome to VinylVault',
+        console.log(e);
+        res.render('home', {
+            title: 'Welcome to Share Space',
             recentRecords: []
         });
     }
 });
 
-// Public User Profile Route
+// GET /users/:username (public profile functionality)
 app.get('/users/:username', async (req, res) => {
     try {
-        const user = await User.findOne({ 
+        const user = await User.findOne({
             username: req.params.username,
             isPublic: true
         });
 
-        if (!user) {
-            return res.redirect('/');
-        }
+        if (!user) return res.redirect('/');
 
-        const recentlyAdded = await Record.find({ owner: user._id })
-            .sort({ createdAt: -1 })
-            .limit(10);
-
-        const recentlyPlayed = await Record.find({ 
-            owner: user._id,
-            lastPlayed: { $exists: true, $ne: null }
-        })
-            .sort({ lastPlayed: -1 })
-            .limit(10);
+        const [recentlyAdded, recentlyPlayed] = await Promise.all([
+            Record.find({ owner: user._id })
+                .sort({ createdAt: -1 })
+                .limit(10),
+            Record.find({
+                owner: user._id,
+                lastPlayed: { $exists: true, $ne: null }
+            })
+                .sort({ lastPlayed: -1 })
+                .limit(10)
+        ]);
 
         res.render('users/profile', {
             title: `${user.username}'s Profile`,
@@ -102,33 +106,29 @@ app.get('/users/:username', async (req, res) => {
             recentlyPlayed
         });
     } catch (e) {
-        console.error('Error in user profile route:', e);
+        console.log(e);
         res.redirect('/');
     }
 });
 
-// Protected Routes (Authentication Required)
-app.use('/records', require('./middleware/ensure-signed-in'), require('./controllers/records'));
+// Mount route handlers - no auth required
+app.use('/auth', require('./controllers/auth'));
 
-// Error Handling Middleware 
-// Handle 404 errors
+// Ensure authentication for all routes below
+app.use(require('./middleware/ensure-signed-in'));
+
+// Mount protected routes
+app.use('/records', require('./controllers/records'));
+app.use('/feed', require('./controllers/feed'));
+
+// Error handlers
 app.use((req, res) => {
-    res.status(404).render('records/404', { 
+    res.status(404).render('shared/404', {
         title: 'Page Not Found',
         message: "The page you're looking for doesn't exist."
     });
 });
 
-// Handle all other errors
-app.use((err, req, res, next) => {
-    console.error('Error:', err);
-    res.status(500).render('records/error', {
-        title: 'Error',
-        message: err.message || 'Something went wrong!'
-    });
-});
-
-// Start the server
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Express app is running on port ${port}`);
 });

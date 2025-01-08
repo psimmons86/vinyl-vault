@@ -1,0 +1,341 @@
+/* Base Styles */
+:root {
+  --primary: #2B5329;
+  --text: #1f2937;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* Navigation */
+.main-nav {
+  border-bottom: 1px solid #eee;
+  background: white;
+  padding: 1rem 0;
+}
+
+.nav-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-logo {
+  color: var(--primary);
+  font-size: 1.25rem;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-links a {
+  color: #333;
+  text-decoration: none;
+  font-size: 0.9375rem;
+}
+
+/* Collection Header */
+.collection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.collection-title {
+  font-size: 2rem;
+  margin: 0;
+  color: var(--text);
+}
+
+/* View Controls */
+.view-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.view-controls a {
+  padding: 0.5rem 1.25rem;
+  background: #f0f0f0;
+  border-radius: 999px;
+  color: #333;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.view-controls a.active {
+  background: var(--primary);
+  color: white;
+}
+
+/* Record Cards */
+.record-card {
+  display: block;
+  position: relative;
+  aspect-ratio: 1;
+  margin: 0.5rem 0;
+  border-radius: 4px;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.record-artwork {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.record-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.record-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  color: white;
+}
+
+.record-title {
+  font-size: 1.125rem;
+  margin: 0 0 0.25rem 0;
+  color: white;
+}
+
+.record-artist {
+  font-size: 0.875rem;
+  margin: 0 0 0.25rem 0;
+  opacity: 0.9;
+}
+
+.record-plays {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin: 0;
+}
+
+/* Search Page */
+.search-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.search-input {
+  border: 1px solid #ddd !important;
+  padding: 0 1rem !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+
+/* Forms */
+.form-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+}
+
+.input-field input:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 1px 0 0 var(--primary) !important;
+}
+
+.input-field input:focus + label {
+  color: var(--primary) !important;
+}
+
+/* Stats Page */
+.stats-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.stats-card {
+  background: white;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stats-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: var(--text);
+}
+
+/* Add Record Button */
+.add-record-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: white;
+  color: #333;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.875rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Buttons */
+.btn {
+  background-color: var(--primary) !important;
+}
+
+.btn:hover {
+  background-color: var(--primary) !important;
+  opacity: 0.9;
+}
+
+/* Login/Signup Forms */
+.auth-card {
+  max-width: 400px;
+  margin: 4rem auto;
+  padding: 2rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Search Page Styles */
+.search-form {
+  margin: 2rem 0 3rem;
+}
+
+.search-input {
+  background: white !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  padding: 0 1rem !important;
+  box-shadow: none !important;
+  height: 3rem !important;
+}
+
+.search-input:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 1px var(--primary) !important;
+}
+
+.record-details {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin: 0.5rem 0;
+}
+
+.hidden {
+  display: none;
+}
+
+.record-card .btn {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  height: auto;
+  line-height: 1.5;
+  font-size: 0.875rem;
+}
+/* Stats Page Styles */
+.total-records {
+  padding: 2rem 0 3rem;
+}
+
+.total-number {
+  font-size: 4rem;
+  margin: 0;
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.total-label {
+  font-size: 1.25rem;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card h3 {
+  font-size: 1.25rem;
+  margin: 0 0 1.5rem 0;
+  color: var(--text);
+}
+
+.stat-card .record-card {
+  margin: 0;
+}
+
+.stat-card .empty-state {
+  text-align: center;
+  color: var(--text-light);
+  padding: 2rem 0;
+  margin: 0;
+}
+
+/* Grid Utilities */
+.container {
+  max-width: 1400px !important;
+  width: 95% !important;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .collection-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+  }
+
+  .nav-content {
+      padding: 0 1rem;
+  }
+
+  .search-container,
+  .stats-container {
+      padding: 0 1rem;
+  }
+
+  .nav-links {
+      gap: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .record-title {
+      font-size: 1rem;
+  }
+
+  .record-artist {
+      font-size: 0.8125rem;
+  }
+
+  .add-record-btn {
+      bottom: 1rem;
+      right: 1rem;
+      padding: 0.5rem 0.75rem;
+  }
+}
