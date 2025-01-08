@@ -5,12 +5,7 @@ const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 const session = require('express-session');
 
-// Import models first
-const User = require('./models/user');
-const Record = require('./models/record');
-const Activity = require('./models/activity');
-
-// Import models first
+// Import models
 const User = require('./models/user');
 const Record = require('./models/record');
 const Activity = require('./models/activity');
@@ -135,19 +130,10 @@ app.use('/records', require('./controllers/records'));
 app.use('/feed', require('./controllers/feed'));
 
 // Error handlers must be last
-// Error handlers must be last
 app.use((req, res) => {
     res.status(404).render('shared/404', {
         title: 'Page Not Found',
         message: "The page you're looking for doesn't exist."
-    });
-});
-
-app.use((err, req, res, next) => {
-    console.log(err);
-    res.status(500).render('shared/error', {
-        title: 'Error',
-        message: 'Something went wrong!'
     });
 });
 
