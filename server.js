@@ -5,13 +5,20 @@ const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 const session = require('express-session');
 
+// Import models first
+const User = require('./models/user');
+const Record = require('./models/record');
+const Activity = require('./models/activity');
+
 const app = express();
 
 // Set the port from environment variable or default to 3000
 const port = process.env.PORT || "3000";
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI);
+mongoose.connect(process.env.MONGODB_URI, {
+  // no need for useNewUrlParser or useUnifiedTopology options
+});
 
 mongoose.connection.on("connected", () => {
     console.log(`Connected to MongoDB ${mongoose.connection.name}`);
@@ -35,7 +42,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: false,
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
 }));
@@ -121,11 +128,19 @@ app.use(require('./middleware/ensure-signed-in'));
 app.use('/records', require('./controllers/records'));
 app.use('/feed', require('./controllers/feed'));
 
-// Error handlers
+// Error handlers must be last
 app.use((req, res) => {
     res.status(404).render('shared/404', {
         title: 'Page Not Found',
         message: "The page you're looking for doesn't exist."
+    });
+});
+
+app.use((err, req, res, next) => {
+    console.log(err);
+    res.status(500).render('shared/error', {
+        title: 'Error',
+        message: 'Something went wrong!'
     });
 });
 

@@ -2,25 +2,22 @@ const Discogs = require('disconnect').Client;
 
 // Initialize the Discogs client with proper authentication
 const db = new Discogs({
-    consumerKey: process.env.DISCOGS_CONSUMER_KEY,        
-    consumerSecret: process.env.DISCOGS_CONSUMER_SECRET, 
+    consumerKey: process.env.DISCOGS_CONSUMER_KEY,
+    consumerSecret: process.env.DISCOGS_CONSUMER_SECRET,
 }).database();
 
-
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
 
 async function searchRecords(query, retries = 3) {
     try {
         console.log('Searching Discogs for:', query);
         const searchResults = await db.search({
             query: query,
-            type: 'release',         
-            format: 'Vinyl',         
-            per_page: 40,            
+            type: 'release',
+            format: 'Vinyl',
+            per_page: 40,
         });
 
-        
         return searchResults.results.map(result => ({
             id: result.id,
             title: cleanupTitle(result.title),
@@ -32,10 +29,9 @@ async function searchRecords(query, retries = 3) {
             country: result.country
         }));
     } catch (error) {
-        
         if (error.statusCode === 429 && retries > 0) {
             console.log('Rate limited, waiting before retry...');
-            await sleep(2000); 
+            await sleep(2000);
             return searchRecords(query, retries - 1);
         }
         console.error('Discogs search error:', error);
@@ -43,13 +39,12 @@ async function searchRecords(query, retries = 3) {
     }
 }
 
-
 async function getRecordDetails(releaseId, retries = 3) {
     try {
         console.log('Fetching Discogs release:', releaseId);
         const release = await db.getRelease(releaseId);
-        
-        
+        console.log('Discogs release response:', release);
+
         return {
             title: cleanupTitle(release.title),
             artist: release.artists?.[0]?.name || extractArtist(release.title),
@@ -57,15 +52,13 @@ async function getRecordDetails(releaseId, retries = 3) {
             format: release.formats?.[0]?.name || 'LP',
             imageUrl: release.images?.[0]?.resource_url || release.thumb || '/images/default-album.png',
             label: release.labels?.[0]?.name,
-            
             tags: [...new Set([
-                ...(release.genres || []), 
+                ...(release.genres || []),
                 ...(release.styles || [])
             ])].join(','),
             notes: formatNotes(release)
         };
     } catch (error) {
-        
         if (error.statusCode === 429 && retries > 0) {
             console.log('Rate limited, waiting before retry...');
             await sleep(2000);
@@ -88,12 +81,10 @@ function extractArtist(title) {
 
 function formatNotes(release) {
     const notes = [];
-    
     if (release.notes) notes.push(release.notes);
     if (release.formats?.[0]?.descriptions) {
         notes.push(`Format details: ${release.formats[0].descriptions.join(', ')}`);
     }
-    
     return notes.join('\n\n');
 }
 
