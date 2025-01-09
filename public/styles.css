@@ -1,4 +1,8 @@
-/* Base Styles */
+/*
+===============================
+Root Variables & Base Styles
+===============================
+*/
 :root {
   --primary: #2B5329;
   --text: #1f2937;
@@ -14,7 +18,11 @@ body {
   color: var(--text);
 }
 
-/* Navigation */
+/*
+===============================
+Navigation & Header
+===============================
+*/
 .main-nav {
   border-bottom: 1px solid var(--border);
   background: white;
@@ -48,158 +56,93 @@ body {
   font-size: 0.9375rem;
 }
 
-/* Landing Page */
-.landing-container {
-  min-height: calc(100vh - 64px);
-  background: white;
-}
-
-.no-margin {
-  margin: 0 !important;
-}
-
-/* Auth Section */
-.auth-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 64px);
-  padding: 2rem;
-}
-
-.auth-content {
-  width: 100%;
-  max-width: 400px;
-}
-
-.brand-title {
-  font-size: 2.5rem;
-  color: var(--primary);
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-}
-
-.brand-tagline {
-  color: #666;
-  margin-bottom: 2rem;
-  font-size: 1.1rem;
-}
-
-.auth-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: var(--shadow-lg);
-  max-width: 400px;
-  margin: 4rem auto;
-}
-
-.auth-separator {
-  text-align: center;
-  margin: 1.5rem 0;
-  position: relative;
-}
-
-.auth-separator span {
-  background: white;
-  padding: 0 1rem;
-  color: #666;
-  position: relative;
-  z-index: 1;
-}
-
-.auth-separator::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--border);
-  z-index: 0;
-}
-
-/* Carousel Section */
-.carousel-section {
-  display: flex;
-  align-items: center;
-  background: #f8f9fa;
-  min-height: calc(100vh - 64px);
-  padding: 2rem;
-}
-
-.carousel {
-  height: 500px !important;
-  perspective: 1000px;
-}
-
-.carousel.carousel-slider {
-  height: 500px !important;
-}
-
-.record-slide {
-  position: relative;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.record-slide img {
-  max-width: 100%;
-  max-height: 300px;
-  object-fit: contain;
-  border-radius: 4px;
-  box-shadow: var(--shadow-lg);
-  transition: transform 0.3s ease;
-}
-
-.record-slide img:hover {
-  transform: scale(1.02);
-}
-
-.record-info {
-  text-align: center;
-  margin-top: 1.5rem;
-  color: var(--text);
-}
-
-.record-info h3 {
-  font-size: 1.5rem;
-  margin: 0 0 0.5rem 0;
-  color: var(--primary);
-}
-
-.record-info .artist {
-  font-size: 1.1rem;
-  margin: 0 0 0.25rem 0;
-}
-
-.record-info .owner {
-  font-size: 0.875rem;
-  color: #666;
-}
-
-/* Collection Page */
+/*
+===============================
+Collection Header & Search
+===============================
+*/
 .collection-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin: 2rem 0;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .collection-title {
   font-size: 2rem;
   margin: 0;
   color: var(--text);
+  flex: 1;
+}
+
+.collection-controls {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  justify-content: center;
+}
+
+/* Search Container */
+.search-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.search-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  width: 100%;
+}
+
+.search-form .input-field {
+  flex: 1;
+  margin: 0;
+}
+
+.collection-search-input {
+  background-color: white !important;
+  border-radius: 4px !important;
+  margin: 0 !important;
+  height: 45px !important;
+  padding: 0 1rem 0 3rem !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+.collection-search-input:focus {
+  border-color: var(--primary) !important;
+  box-shadow: var(--shadow), 0 0 0 1px var(--primary) !important;
+}
+
+.search-container .material-icons.prefix {
+  color: #666;
+  top: 10px;
+}
+
+.search-btn {
+  height: 45px;
+  width: 45px;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-btn i {
+  margin: 0;
 }
 
 /* View Controls */
 .view-controls {
   display: flex;
   gap: 0.5rem;
+  margin-left: auto;
 }
 
 .view-controls a {
@@ -216,7 +159,11 @@ body {
   color: white;
 }
 
-/* Record Cards */
+/*
+===============================
+Record Cards
+===============================
+*/
 .record-card {
   display: block;
   position: relative;
@@ -267,7 +214,153 @@ body {
   margin: 0;
 }
 
-/* Forms */
+/*
+===============================
+Record Details Page
+===============================
+*/
+.record-detail-container {
+  padding: 2rem 0;
+}
+
+.record-detail-card {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: var(--shadow);
+  margin: 1rem 0;
+}
+
+.record-detail-image {
+  margin-bottom: 1.5rem;
+}
+
+.record-detail-image img {
+  width: 100%;
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+}
+
+.record-info {
+  padding: 0 1rem;
+}
+
+.record-info .record-title {
+  font-size: 2rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--text);
+}
+
+.record-info .record-artist {
+  font-size: 1.25rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.record-info .record-format,
+.record-info .record-plays,
+.record-info .record-last-played {
+  margin: 0.5rem 0;
+  color: #666;
+}
+
+.record-card {
+  display: block;
+  position: relative;
+  aspect-ratio: 1;
+  margin: 0.5rem 0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.record-link {
+  text-decoration: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.quick-play-form {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 2;
+}
+
+.quick-play-form .btn-floating {
+  background-color: var(--primary) !important;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+
+.quick-play-form .btn-floating:hover {
+  opacity: 1;
+}
+
+.record-card:hover .quick-play-form .btn-floating {
+  transform: scale(1.1);
+}
+
+/* Tags */
+.record-tags {
+  margin: 1.5rem 0;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag-link {
+  background: #f0f0f0;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  color: #666;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.tag-link:hover {
+  background: #e0e0e0;
+}
+
+/* Action Buttons */
+.record-actions {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.play-form {
+  margin-bottom: 1rem;
+}
+
+.play-btn {
+  width: 100%;
+  padding: 0 2rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.management-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.management-buttons .btn {
+  flex: 1;
+}
+
+/*
+===============================
+Forms & Inputs
+===============================
+*/
 .form-container {
   max-width: 600px;
   margin: 2rem auto;
@@ -287,46 +380,34 @@ body {
   color: var(--primary) !important;
 }
 
-/* Stats Page */
-.stats-container {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 2rem;
+/*
+===============================
+Utility Classes
+===============================
+*/
+.container {
+  max-width: 1400px !important;
+  width: 95% !important;
 }
 
-.total-records {
-  padding: 2rem 0 3rem;
+.full-width {
+  width: 100%;
 }
 
-.total-number {
-  font-size: 4rem;
-  margin: 0;
-  color: var(--primary);
-  font-weight: 500;
+.hidden {
+  display: none;
 }
 
-.total-label {
-  font-size: 1.25rem;
-  color: #666;
-  margin: 0;
+.btn {
+  background-color: var(--primary) !important;
 }
 
-.stat-card {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: var(--shadow);
+.btn:hover {
+  background-color: var(--primary) !important;
+  opacity: 0.9;
 }
 
-.stat-card h3 {
-  font-size: 1.25rem;
-  margin: 0 0 1.5rem 0;
-  color: var(--text);
-}
-
-/* Add Record Button */
+/* Fixed Add Button */
 .add-record-btn {
   position: fixed;
   bottom: 2rem;
@@ -343,87 +424,59 @@ body {
   gap: 0.5rem;
 }
 
-/* Utility Classes */
-.full-width {
-  width: 100%;
-}
-
-.hidden {
-  display: none;
-}
-
-.container {
-  max-width: 1400px !important;
-  width: 95% !important;
-}
-
-/* Buttons */
-.btn {
-  background-color: var(--primary) !important;
-}
-
-.btn:hover {
-  background-color: var(--primary) !important;
-  opacity: 0.9;
-}
-
-/* Responsive Design */
+/*
+===============================
+Responsive Design
+===============================
+*/
 @media (max-width: 992px) {
   .nav-content {
-      padding: 0 1rem;
+    padding: 0 1rem;
   }
 
   .nav-links {
-      gap: 1rem;
+    gap: 1rem;
   }
 
   .collection-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .collection-controls {
+    flex-direction: column;
+    gap: 1rem;
   }
 
-  .auth-section,
-  .carousel-section {
-      min-height: auto;
-      padding: 3rem 1rem;
-  }
-
-  .carousel,
-  .carousel.carousel-slider {
-      height: 400px !important;
-  }
-
-  .brand-title {
-      font-size: 2rem;
+  .view-controls {
+    margin: 0 auto;
   }
 }
 
 @media (max-width: 600px) {
+  .record-detail-card {
+    padding: 1rem;
+  }
+  
+  .management-buttons {
+    flex-direction: column;
+  }
+  
+  .record-info {
+    padding: 0;
+  }
+
   .record-title {
-      font-size: 1rem;
+    font-size: 1rem;
   }
 
   .record-artist {
-      font-size: 0.8125rem;
+    font-size: 0.8125rem;
   }
 
   .add-record-btn {
-      bottom: 1rem;
-      right: 1rem;
-      padding: 0.5rem 0.75rem;
-  }
-
-  .carousel,
-  .carousel.carousel-slider {
-      height: 300px !important;
-  }
-
-  .record-info h3 {
-      font-size: 1.25rem;
-  }
-
-  .auth-card {
-      padding: 1.5rem;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.5rem 0.75rem;
   }
 }

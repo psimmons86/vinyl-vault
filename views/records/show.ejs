@@ -1,48 +1,80 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="record-detail-card">
-    <div class="record-detail-image">
-        <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
-             alt="Album art for <%= record.title %>">
-    </div>
-    
-    <div class="record-info">
-        <h2 class="record-title"><%= record.title %></h2>
-        <p class="record-artist"><%= record.artist %></p>
-        <p class="record-format"><%= record.format %></p>
-        <p class="record-plays">Plays: <%= record.plays %></p>
-        
-        <% if (record.lastPlayed) { %>
-            <p class="record-last-played">Last Played: <%= record.lastPlayed.toLocaleDateString() %></p>
-        <% } %>
-        
-        <% if (record.notes) { %>
-            <p class="record-notes">Notes: <%= record.notes %></p>
-        <% } %>
+<div class="container">
+    <div class="record-detail-container">
+        <div class="record-detail-card">
+            <div class="row">
+                <div class="col s12 m5">
+                    <div class="record-detail-image">
+                        <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
+                             alt="Album art for <%= record.title %>"
+                             class="responsive-img">
+                    </div>
+                </div>
+                
+                <div class="col s12 m7">
+                    <div class="record-info">
+                        <h2 class="record-title"><%= record.title %></h2>
+                        <p class="record-artist"><%= record.artist %></p>
+                        <p class="record-format"><%= record.format %></p>
+                        <p class="record-plays">Plays: <%= record.plays %></p>
+                        
+                        <% if (record.lastPlayed) { %>
+                            <p class="record-last-played">Last played: <%= record.lastPlayed.toLocaleDateString() %></p>
+                        <% } %>
+                        
+                        <% if (record.notes) { %>
+                            <div class="record-notes">
+                                <h4>Notes:</h4>
+                                <p><%= record.notes %></p>
+                            </div>
+                        <% } %>
 
-        <% if (record.tags && record.tags.length) { %>
-            <div class="record-tags">
-                <h4>Tags:</h4>
-                <% record.tags.forEach(tag => { %>
-                    <a href="/records?tag=<%= tag %>" class="tag-link"><%= tag %></a>
-                <% }) %>
+                        <% if (record.tags && record.tags.length) { %>
+                            <div class="record-tags">
+                                <h4>Tags:</h4>
+                                <div class="tags-container">
+                                    <% record.tags.forEach(tag => { %>
+                                        <a href="/records?tag=<%= tag %>" class="tag-link"><%= tag %></a>
+                                    <% }) %>
+                                </div>
+                            </div>
+                        <% } %>
+                        
+                        <div class="record-actions">
+                            <form action="/records/<%= record._id %>/play" method="POST" class="play-form">
+                                <button type="submit" class="btn waves-effect waves-light play-btn">
+                                    <i class="material-icons left">play_arrow</i>
+                                    Play
+                                </button>
+                            </form>
+
+                            <div class="management-buttons">
+                                <a href="/records/<%= record._id %>/edit" class="btn">
+                                    <i class="material-icons left">edit</i>
+                                    Edit
+                                </a>
+
+                                <form action="/records/<%= record._id %>?_method=DELETE" method="POST" class="delete-form">
+                                    <button type="submit" class="btn red">
+                                        <i class="material-icons left">delete</i>
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        <% } %>
-        
-        <div class="button-group">
-            <form action="/records/<%= record._id %>/play" method="POST">
-                <button type="submit" class="btn">🎵 Play</button>
-            </form>
-
-            <a href="/records/<%= record._id %>/edit" class="btn">Edit</a>
-
-            <form action="/records/<%= record._id %>?_method=DELETE" method="POST">
-                <button type="submit" class="btn btn-delete">Delete</button>
-            </form>
         </div>
     </div>
-</div>
 
-<a href="/records" class="back-link">Back to Collection</a>
+    <div class="back-section">
+        <a href="/records" class="btn-flat waves-effect">
+            <i class="material-icons left">arrow_back</i>
+            Back to Collection
+        </a>
+    </div>
+</div>
 
 <%- include('../partials/footer.ejs') %>
