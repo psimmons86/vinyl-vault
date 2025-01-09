@@ -4,49 +4,67 @@
     <h2>Edit Record</h2>
 
     <form action="/records/<%= record._id %>?_method=PUT" method="POST" class="record-form">
-        <div class="form-group">
-            <label for="title">Title:</label>
-            <input type="text" name="title" id="title" value="<%= record.title %>" required>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" name="title" id="title" value="<%= record.title %>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="artist">Artist</label>
+                <input type="text" name="artist" id="artist" value="<%= record.artist %>" required>
+            </div>
+
+            <div class="form-group">
+                <label for="year">Year</label>
+                <input type="number" name="year" id="year" value="<%= record.year %>">
+            </div>
+
+            <div class="form-group">
+                <label for="format">Format</label>
+                <select name="format" id="format">
+                    <% formats.forEach(format => { %>
+                        <option value="<%= format %>" <%= record.format === format ? 'selected' : '' %>>
+                            <%= format %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="imageUrl">Album Art URL</label>
+                <input type="url" name="imageUrl" id="imageUrl" value="<%= record.imageUrl %>">
+                <div id="imagePreview" class="image-preview">
+                    <img src="<%= record.imageUrl || '/images/default-album.png' %>" alt="Album preview">
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="tags">Tags (comma separated)</label>
+                <input type="text" id="tags" name="tags" value="<%= record.tags ? record.tags.join(', ') : '' %>">
+            </div>
+
+            <div class="form-group full-width">
+                <label for="notes">Notes</label>
+                <textarea name="notes" id="notes" rows="4"><%= record.notes %></textarea>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="artist">Artist:</label>
-            <input type="text" name="artist" id="artist" value="<%= record.artist %>" required>
+        <div class="form-footer">
+            <a href="/records/<%= record._id %>" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update Record</button>
         </div>
-
-        <div class="form-group">
-            <label for="year">Year:</label>
-            <input type="number" name="year" id="year" value="<%= record.year %>">
-        </div>
-
-        <div class="form-group">
-            <label for="format">Format:</label>
-            <select name="format" id="format">
-                <% formats.forEach(format => { %>
-                    <option value="<%= format %>" <%= record.format === format ? 'selected' : '' %>><%= format %></option>
-                <% }); %>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="imageUrl">Album Art URL:</label>
-            <input type="url" name="imageUrl" id="imageUrl" value="<%= record.imageUrl %>">
-        </div>
-
-        <div class="form-group">
-            <label for="notes">Notes:</label>
-            <textarea name="notes" id="notes"><%= record.notes %></textarea>
-        </div>
-
-        <div class="form-group">
-            <label for="tags">Tags (comma separated)</label>
-            <input type="text" id="tags" name="tags" class="form-control" value="<%= record.tags ? record.tags.join(', ') : '' %>">
-          </div>
-
-        <button type="submit" class="btn">Update Record</button>
     </form>
-
-    <a href="/records/<%= record._id %>" class="back-link">Cancel</a>
 </div>
+
+<script>
+const imageUrl = document.getElementById('imageUrl');
+const imagePreview = document.querySelector('#imagePreview img');
+
+imageUrl.addEventListener('input', function() {
+    const url = this.value;
+    imagePreview.src = url || '/images/default-album.png';
+});
+</script>
 
 <%- include('../partials/footer.ejs') %>

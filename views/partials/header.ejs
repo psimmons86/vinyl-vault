@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %> | ShareSpace</title>
+    <title><%= title %> | Vinyl Vault</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
     <nav class="main-nav">
         <div class="nav-content">
-            <a href="<%= user ? '/records' : '/' %>" class="nav-logo">ShareSpace</a>
-            
+            <a href="<%= user ? '/records' : '/' %>" class="nav-logo">Vinyl Vault</a>
             <% if (user) { %>
                 <div class="nav-links">
                     <a href="/records">My Collection</a>
                     <a href="/records/new">Add New Record</a>
                     <a href="/records/search">Search Discogs</a>
                     <a href="/records/stats">Stats</a>
+                    <a href="/records/settings">Settings</a>
                     <a href="/auth/sign-out">Sign Out</a>
                 </div>
             <% } else { %>

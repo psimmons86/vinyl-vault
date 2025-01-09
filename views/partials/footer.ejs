@@ -1,30 +1,29 @@
+</main>
 <footer class="page-footer white">
-  <div class="footer-copyright grey lighten-4">
-      <div class="container black-text">
-          &copy; <script>document.write(new Date().getFullYear())</script> Share Space
-      </div>
-  </div>
+    <div class="footer-copyright grey lighten-4">
+        <div class="container black-text">
+            &copy; <script>document.write(new Date().getFullYear())</script> Share Space
+        </div>
+    </div>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-      M.AutoInit();
-
-      const sidenavElems = document.querySelectorAll('.sidenav');
-      M.Sidenav.init(sidenavElems);
-
-      const selectElems = document.querySelectorAll('select');
-      M.FormSelect.init(selectElems);
-
-      
-      const tooltipElems = document.querySelectorAll('.tooltipped');
-      M.Tooltip.init(tooltipElems);
-
-      const dropdownElems = document.querySelectorAll('.dropdown-trigger');
-      M.Dropdown.init(dropdownElems);
-  });
+    document.addEventListener('DOMContentLoaded', () => {
+        M.AutoInit();
+        
+        const sidenavElems = document.querySelectorAll('.sidenav');
+        M.Sidenav.init(sidenavElems);
+        
+        const selectElems = document.querySelectorAll('select');
+        M.FormSelect.init(selectElems);
+        
+        const tooltipElems = document.querySelectorAll('.tooltipped');
+        M.Tooltip.init(tooltipElems);
+        
+        const dropdownElems = document.querySelectorAll('.dropdown-trigger');
+        M.Dropdown.init(dropdownElems);
+    });
 </script>
 </body>
 </html>

@@ -1,13 +1,49 @@
 <%- include('../partials/header.ejs') %>
 
-<form action="/auth/sign-up" method="POST">
-  <label for="username">Username:</label>
-  <input type="text" name="username" id="username" />
-  <label for="password">Password:</label>
-  <input type="password" name="password" id="password" />
-  <label for="confirmPassword">Confirm Password:</label>
-  <input type="password" name="confirmPassword" id="confirmPassword" />
-  <button type="submit">SIGN UP</button>
-</form>
+<div class="container">
+    <div class="row">
+        <div class="col s12 m8 offset-m2 l6 offset-l3">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title center-align">Create Account</span>
+                    
+                    <% if (error) { %>
+                        <div class="card-panel red lighten-4 red-text text-darken-4">
+                            <%= error %>
+                        </div>
+                    <% } %>
 
-<%- include('../partials/footer.ejs')%>
+                    <form action="/auth/sign-up" method="POST">
+                        <div class="input-field">
+                            <input type="text" id="username" name="username" required>
+                            <label for="username">Username</label>
+                        </div>
+
+                        <div class="input-field">
+                            <input type="password" id="password" name="password" required>
+                            <label for="password">Password</label>
+                        </div>
+
+                        <div class="input-field">
+                            <input type="password" id="confirmPassword" name="confirmPassword" required>
+                            <label for="confirmPassword">Confirm Password</label>
+                        </div>
+
+                        <div class="center-align">
+                            <button type="submit" class="btn waves-effect waves-light">
+                                Create Account
+                                <i class="material-icons right">person_add</i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-action center-align">
+                    <p>Already have an account? <a href="/auth/sign-in">Sign In</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs') %>

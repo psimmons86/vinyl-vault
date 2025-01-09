@@ -6,54 +6,129 @@
     </div>
 
     <div class="row">
-        <div class="col s12">
-            <div class="total-records center-align">
-                <h2 class="total-number"><%= totalRecords %></h2>
-                <p class="total-label">Total Records</p>
+        <div class="col s12 m6 l3">
+            <div class="card">
+                <div class="card-content center-align">
+                    <span class="card-title"><%= totalRecords %></span>
+                    <p>Total Records</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m6 l3">
+            <div class="card">
+                <div class="card-content center-align">
+                    <span class="card-title"><%= totalPlays %></span>
+                    <p>Total Plays</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m12 l6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Most Played Record</span>
+                    <% if (mostPlayed && mostPlayed.plays > 0) { %>
+                        <div class="record-card">
+                            <div class="record-artwork">
+                                <img src="<%= mostPlayed.imageUrl || '/images/default-album.png' %>" 
+                                     alt="Album art for <%= mostPlayed.title %>"
+                                     class="record-img">
+                                <div class="record-overlay">
+                                    <h2 class="record-title"><%= mostPlayed.title %></h2>
+                                    <p class="record-artist"><%= mostPlayed.artist %></p>
+                                    <p class="record-plays"><%= mostPlayed.plays %> plays</p>
+                                </div>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <p class="center-align">No records played yet</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Top 10 Artists by Collection Size</span>
+                    <div class="collection">
+                        <% topArtists.forEach(artist => { %>
+                            <div class="collection-item">
+                                <span class="badge"><%= artist.count %> records</span>
+                                <%= artist._id %>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="col s12 m6">
-            <div class="stat-card">
-                <h3>Most Played Record</h3>
-                <% if (mostPlayed && mostPlayed.plays > 0) { %>
-                    <div class="record-card">
-                        <div class="record-artwork">
-                            <img src="<%= mostPlayed.imageUrl || '/images/default-album.png' %>" 
-                                 alt="Album art for <%= mostPlayed.title %>"
-                                 class="record-img">
-                            <div class="record-overlay">
-                                <h2 class="record-title"><%= mostPlayed.title %></h2>
-                                <p class="record-artist"><%= mostPlayed.artist %></p>
-                                <p class="record-plays"><%= mostPlayed.plays %> plays</p>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Most Played Artists</span>
+                    <div class="collection">
+                        <% topPlayedArtists.forEach(artist => { %>
+                            <div class="collection-item">
+                                <span class="new badge" data-badge-caption="plays"><%= artist.totalPlays %></span>
+                                <span class="badge" data-badge-caption="records"><%= artist.recordCount %></span>
+                                <%= artist._id %>
                             </div>
-                        </div>
+                        <% }) %>
                     </div>
-                <% } else { %>
-                    <p class="empty-state">No records played yet</p>
-                <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12 m6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Top Tags</span>
+                    <% if (topTags.length > 0) { %>
+                        <div class="collection">
+                            <% topTags.forEach(tag => { %>
+                                <a href="/records?tag=<%= tag._id %>" class="collection-item">
+                                    <span class="badge"><%= tag.count %></span>
+                                    <%= tag._id %>
+                                </a>
+                            <% }) %>
+                        </div>
+                    <% } else { %>
+                        <p class="center-align">No tags added yet</p>
+                    <% } %>
+                </div>
             </div>
         </div>
 
         <div class="col s12 m6">
-            <div class="stat-card">
-                <h3>Last Played</h3>
-                <% if (recentlyPlayed) { %>
-                    <div class="record-card">
-                        <div class="record-artwork">
-                            <img src="<%= recentlyPlayed.imageUrl || '/images/default-album.png' %>" 
-                                 alt="Album art for <%= recentlyPlayed.title %>"
-                                 class="record-img">
-                            <div class="record-overlay">
-                                <h2 class="record-title"><%= recentlyPlayed.title %></h2>
-                                <p class="record-artist"><%= recentlyPlayed.artist %></p>
-                                <p class="record-plays">Played on <%= recentlyPlayed.lastPlayed.toLocaleDateString() %></p>
-                            </div>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Records by Decade</span>
+                    <% if (recordsByYear.length > 0) { %>
+                        <div class="collection">
+                            <% 
+                            const decades = {};
+                            recordsByYear.forEach(year => {
+                                const decade = Math.floor(year._id / 10) * 10;
+                                decades[decade] = (decades[decade] || 0) + year.count;
+                            });
+                            Object.entries(decades).sort((a, b) => b[0] - a[0]).forEach(([decade, count]) => { 
+                            %>
+                                <div class="collection-item">
+                                    <span class="badge"><%= count %></span>
+                                    <%= decade %>s
+                                </div>
+                            <% }) %>
                         </div>
-                    </div>
-                <% } else { %>
-                    <p class="empty-state">No records played yet</p>
-                <% } %>
+                    <% } else { %>
+                        <p class="center-align">No years added yet</p>
+                    <% } %>
+                </div>
             </div>
         </div>
     </div>

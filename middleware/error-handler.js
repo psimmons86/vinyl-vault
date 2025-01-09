@@ -1,4 +1,3 @@
-// Error handling middleware
 module.exports = {
     notFound: (req, res) => {
         res.status(404).render('shared/404', {

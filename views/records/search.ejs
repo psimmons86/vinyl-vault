@@ -1,25 +1,21 @@
 <%- include('../partials/header.ejs') %>
 
 <div class="container">
-    <!-- Search Header -->
     <div class="collection-header">
         <h1 class="collection-title">Search Discogs</h1>
     </div>
 
-    <!-- Search Form -->
     <div class="row">
         <div class="col s12 m8 offset-m2">
             <form action="/records/search" method="GET" class="search-form">
                 <div class="input-field">
-                    <input 
-                        type="search" 
-                        id="search"
-                        name="q" 
-                        value="<%= locals.query || '' %>"
-                        placeholder="Search by artist or album"
-                        class="search-input"
-                        required
-                    >
+                    <input type="search" 
+                           id="search"
+                           name="q" 
+                           value="<%= locals.query || '' %>"
+                           placeholder="Search by artist or album"
+                           class="search-input"
+                           required>
                 </div>
                 <div class="center-align">
                     <button type="submit" class="btn">
@@ -30,7 +26,6 @@
         </div>
     </div>
 
-    <!-- Loading State -->
     <div id="searchLoading" class="hidden center-align">
         <div class="preloader-wrapper small active">
             <div class="spinner-layer spinner-green-only">
@@ -48,7 +43,6 @@
         <p>Searching Discogs...</p>
     </div>
 
-    <!-- Error Message -->
     <% if (locals.error) { %>
         <div class="row">
             <div class="col s12">
@@ -59,7 +53,6 @@
         </div>
     <% } %>
 
-    <!-- Search Results -->
     <% if (locals.results && results.length > 0) { %>
         <div class="row">
             <% results.forEach(result => { %>
@@ -82,8 +75,7 @@
                                     </p>
                                 <% } %>
                                 
-                                <a href="/records/add-from-discogs/<%= result.id %>" 
-                                   class="btn">
+                                <a href="/records/add-from-discogs/<%= result.id %>" class="btn">
                                     Add to Collection
                                 </a>
                             </div>

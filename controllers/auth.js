@@ -4,17 +4,15 @@ const User = require('../models/user');
 const Activity = require('../models/activity');
 const bcrypt = require('bcrypt');
 
-// All routes start with '/auth'
+const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
 
-// GET /auth/sign-up (new functionality)
-router.get('/sign-up', (req, res) => {
+router.get('/sign-up', async (req, res) => {
     res.render('auth/sign-up', { 
         title: 'Sign Up',
         error: null 
     });
 });
 
-// POST /auth/sign-up (create functionality)
 router.post('/sign-up', async (req, res) => {
     try {
         if (req.body.password !== req.body.confirmPassword) {
@@ -32,7 +30,7 @@ router.post('/sign-up', async (req, res) => {
             });
         }
 
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        const hashedPassword = await bcrypt.hash(req.body.password, SALT_ROUNDS);
         const user = await User.create({
             username: req.body.username,
             password: hashedPassword
@@ -45,8 +43,8 @@ router.post('/sign-up', async (req, res) => {
 
         req.session.user = user;
         res.redirect('/records');
-    } catch (e) {
-        console.log(e);
+        
+    } catch (err) {
         res.render('auth/sign-up', {
             title: 'Sign Up',
             error: 'Error creating account'
@@ -54,19 +52,26 @@ router.post('/sign-up', async (req, res) => {
     }
 });
 
-// GET /auth/sign-in (new functionality)
-router.get('/sign-in', (req, res) => {
+router.get('/sign-in', async (req, res) => {
     res.render('auth/sign-in', { 
         title: 'Sign In',
         error: null
     });
 });
 
-// POST /auth/sign-in (create session functionality)
 router.post('/sign-in', async (req, res) => {
     try {
         const user = await User.findOne({ username: req.body.username });
-        if (!user || !(await bcrypt.compare(req.body.password, user.password))) {
+        
+        if (!user) {
+            return res.render('auth/sign-in', {
+                title: 'Sign In',
+                error: 'Invalid username or password'
+            });
+        }
+
+        const isValidPassword = await bcrypt.compare(req.body.password, user.password);
+        if (!isValidPassword) {
             return res.render('auth/sign-in', {
                 title: 'Sign In',
                 error: 'Invalid username or password'
@@ -75,8 +80,8 @@ router.post('/sign-in', async (req, res) => {
 
         req.session.user = user;
         res.redirect('/records');
-    } catch (e) {
-        console.log(e);
+        
+    } catch (err) {
         res.render('auth/sign-in', {
             title: 'Sign In',
             error: 'Error signing in'
@@ -84,11 +89,13 @@ router.post('/sign-in', async (req, res) => {
     }
 });
 
-// GET /auth/sign-out (delete session functionality)
-router.get('/sign-out', (req, res) => {
-    req.session.destroy(() => {
+router.get('/sign-out', async (req, res) => {
+    try {
+        await new Promise((resolve) => req.session.destroy(resolve));
         res.redirect('/');
-    });
+    } catch (err) {
+        res.redirect('/');
+    }
 });
 
 module.exports = router;
