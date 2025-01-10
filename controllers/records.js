@@ -35,65 +35,76 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/stats', async (req, res) => {
-  try {
-      const [
-          totalRecords,
-          mostPlayed,
-          totalPlays,
-          topArtists,
-          topTags,
-          recordsByYear,
-          topPlayedArtists
-      ] = await Promise.all([
-          Record.countDocuments({ owner: req.user._id }),
-          Record.findOne({ owner: req.user._id }).sort('-plays').limit(1),
-          Record.aggregate([
-              { $match: { owner: req.user._id } },
-              { $group: { _id: null, total: { $sum: '$plays' } } }
-          ]),
-          Record.aggregate([
-              { $match: { owner: req.user._id } },
-              { $group: { _id: '$artist', count: { $sum: 1 } } },
-              { $sort: { count: -1 } },
-              { $limit: 10 }
-          ]),
-          Record.aggregate([
-              { $match: { owner: req.user._id, tags: { $exists: true, $ne: [] } } },
-              { $unwind: '$tags' },
-              { $group: { _id: '$tags', count: { $sum: 1 } } },
-              { $sort: { count: -1 } },
-              { $limit: 5 }
-          ]),
-          Record.aggregate([
-              { $match: { owner: req.user._id, year: { $exists: true, $ne: null } } },
-              { $group: { _id: '$year', count: { $sum: 1 } } },
-              { $sort: { _id: 1 } }
-          ]),
-          Record.aggregate([
-              { $match: { owner: req.user._id, plays: { $gt: 0 } } },
-              { $group: { 
-                  _id: '$artist',
-                  totalPlays: { $sum: '$plays' },
-                  recordCount: { $sum: 1 }
-              }},
-              { $sort: { totalPlays: -1 } },
-              { $limit: 10 }
-          ])
-      ]);
+    try {
+        const [
+            totalRecords,
+            mostPlayed,
+            totalPlays,
+            topArtists,
+            topTags,
+            recordsByYear,
+            topPlayedArtists,
+            collectionValue,
+            mostValuableRecords
+        ] = await Promise.all([
+            Record.countDocuments({ owner: req.user._id }),
+            Record.findOne({ owner: req.user._id }).sort('-plays').limit(1),
+            Record.aggregate([
+                { $match: { owner: req.user._id } },
+                { $group: { _id: null, total: { $sum: '$plays' } } }
+            ]),
+            Record.aggregate([
+                { $match: { owner: req.user._id } },
+                { $group: { _id: '$artist', count: { $sum: 1 } } },
+                { $sort: { count: -1 } },
+                { $limit: 10 }
+            ]),
+            Record.aggregate([
+                { $match: { owner: req.user._id, tags: { $exists: true, $ne: [] } } },
+                { $unwind: '$tags' },
+                { $group: { _id: '$tags', count: { $sum: 1 } } },
+                { $sort: { count: -1 } },
+                { $limit: 5 }
+            ]),
+            Record.aggregate([
+                { $match: { owner: req.user._id, year: { $exists: true, $ne: null } } },
+                { $group: { _id: '$year', count: { $sum: 1 } } },
+                { $sort: { _id: 1 } }
+            ]),
+            Record.aggregate([
+                { $match: { owner: req.user._id, plays: { $gt: 0 } } },
+                { $group: { 
+                    _id: '$artist',
+                    totalPlays: { $sum: '$plays' },
+                    recordCount: { $sum: 1 }
+                }},
+                { $sort: { totalPlays: -1 } },
+                { $limit: 10 }
+            ]),
+            Record.aggregate([
+                { $match: { owner: req.user._id } },
+                { $group: { _id: null, total: { $sum: '$value' } } }
+            ]),
+            Record.find({ owner: req.user._id })
+                .sort('-value')
+                .limit(5)
+        ]);
 
-      res.render('records/stats', {
-          title: 'Collection Stats',
-          totalRecords,
-          mostPlayed,
-          totalPlays: totalPlays[0]?.total || 0,
-          topArtists,
-          topTags,
-          recordsByYear,
-          topPlayedArtists
-      });
-  } catch (err) {
-      res.redirect('/records');
-  }
+        res.render('records/stats', {
+            title: 'Collection Stats',
+            totalRecords,
+            mostPlayed,
+            totalPlays: totalPlays[0]?.total || 0,
+            topArtists,
+            topTags,
+            recordsByYear,
+            topPlayedArtists,
+            collectionValue: collectionValue[0]?.total || 0,
+            mostValuableRecords
+        });
+    } catch (err) {
+        res.redirect('/records');
+    }
 });
 
 router.get('/search', async (req, res) => {
