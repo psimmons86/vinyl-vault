@@ -52,9 +52,6 @@
                        name="imageUrl" 
                        id="imageUrl"
                        value="<%= prefilledData ? prefilledData.imageUrl : '' %>">
-                <div id="imagePreview" class="image-preview">
-                    <img src="/images/default-album.png" alt="Album preview">
-                </div>
             </div>
 
             <div class="form-group full-width">
@@ -80,15 +77,5 @@
         </div>
     </form>
 </div>
-
-<script>
-const imageUrl = document.getElementById('imageUrl');
-const imagePreview = document.querySelector('#imagePreview img');
-
-imageUrl.addEventListener('input', function() {
-    const url = this.value;
-    imagePreview.src = url || '/images/default-album.png';
-});
-</script>
 
 <%- include('../partials/footer.ejs') %>
