@@ -29,7 +29,6 @@ const recordSchema = new Schema({
     lastPlayed: Date,
     imageUrl: {
         type: String,
-        default: '/images/default-album.png'
     },
     notes: String
 }, {
