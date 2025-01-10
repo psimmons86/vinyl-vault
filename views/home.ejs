@@ -1,121 +1,144 @@
+<!-- Include header partial -->
 <%- include('./partials/header.ejs') %>
 
+<!-- Main landing page container -->
 <div class="landing-container">
-    <div class="row no-margin">
-        <div class="col s12 m6 auth-section">
-            <div class="auth-content center-align">
-                <h1 class="brand-title">Vinyl Vault</h1>
-                <p class="brand-tagline">Your Records Online</p>
-                
-                <div class="auth-card">
-                    <form action="/auth/sign-up" method="POST" class="signup-form">
-                        <div class="input-field">
-                            <input 
-                                type="text" 
-                                id="username" 
-                                name="username" 
-                                required
-                                class="validate"
-                            >
-                            <label for="username">Username</label>
-                        </div>
-                        
-                        <div class="input-field">
-                            <input 
-                                type="password" 
-                                id="password" 
-                                name="password" 
-                                required
-                                class="validate"
-                            >
-                            <label for="password">Password</label>
-                        </div>
-                        
-                        <div class="input-field">
-                            <input 
-                                type="password" 
-                                id="confirmPassword" 
-                                name="confirmPassword" 
-                                required
-                                class="validate"
-                            >
-                            <label for="confirmPassword">Confirm Password</label>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-large full-width waves-effect">
-                            Create Account
-                        </button>
-                        
-                        <div class="auth-separator">
-                            <span>Already have an account?</span>
-                        </div>
-                        
-                        <a href="/auth/sign-in" class="btn-flat full-width waves-effect">
-                            Sign In
-                        </a>
-                    </form>
-                </div>
-            </div>
-        </div>
+   <div class="row no-margin">
+       <!-- Authentication Section (Left Half) -->
+       <div class="col s12 m6 auth-section">
+           <div class="auth-content center-align">
+               <!-- Branding -->
+               <h1 class="brand-title">Vinyl Vault</h1>
+               <p class="brand-tagline">Your Records Online</p>
 
-        <!-- Recent Records Carousel -->
-        <div class="col s12 m6 carousel-section">
-            <div class="carousel carousel-slider">
-                <% if (recentRecords?.length > 0) { %>
-                    <% recentRecords.forEach(record => { %>
-                        <div class="carousel-item">
-                            <div class="record-slide">
-                                <img 
-                                    src="<%= record.imageUrl || '/images/default-album.png' %>"
-                                    alt="Album artwork for <%= record.title %>"
-                                    loading="lazy"
-                                >
-                                <div class="record-info">
-                                    <h3><%= record.title %></h3>
-                                    <p class="artist"><%= record.artist %></p>
-                                    <p class="owner">Shared by <%= record.owner.username %></p>
-                                </div>
-                            </div>
-                        </div>
-                    <% }) %>
-                <% } %>
-            </div>
-        </div>
-    </div>
+               <!-- Sign Up Card -->
+               <div class="auth-card">
+                   <!-- Sign Up Form -->
+                   <form action="/auth/sign-up" method="POST" class="signup-form">
+                       <!-- Username Field -->
+                       <div class="input-field">
+                           <input
+                               type="text"
+                               id="username"
+                               name="username"
+                               required
+                               class="validate"
+                           >
+                           <label for="username">Username</label>
+                       </div>
+
+                       <!-- Password Field -->
+                       <div class="input-field">
+                           <input
+                               type="password"
+                               id="password"
+                               name="password"
+                               required
+                               class="validate"
+                           >
+                           <label for="password">Password</label>
+                       </div>
+
+                       <!-- Confirm Password Field -->
+                       <div class="input-field">
+                           <input
+                               type="password"
+                               id="confirmPassword"
+                               name="confirmPassword"
+                               required
+                               class="validate"
+                           >
+                           <label for="confirmPassword">Confirm Password</label>
+                       </div>
+
+                       <!-- Submit Button -->
+                       <button type="submit" class="btn btn-large full-width waves-effect">
+                           Create Account
+                       </button>
+
+                       <!-- Sign In Link Section -->
+                       <div class="auth-separator">
+                           <span>Already have an account?</span>
+                       </div>
+                       <a href="/auth/sign-in" class="btn-flat full-width waves-effect">
+                           Sign In
+                       </a>
+                   </form>
+               </div>
+           </div>
+       </div>
+
+       <!-- Recent Records Carousel Section (Right Half) -->
+       <div class="col s12 m6 carousel-section">
+           <div class="carousel carousel-slider">
+               <!-- Check if there are any recent records -->
+               <% if (recentRecords?.length > 0) { %>
+                   <!-- Loop through each record -->
+                   <% recentRecords.forEach(record => { %>
+                       <div class="carousel-item">
+                           <div class="record-slide">
+                               <!-- Record Image -->
+                               <img
+                                   src="<%= record.imageUrl || '/images/default-album.png' %>"
+                                   alt="Album artwork for <%= record.title %>"
+                                   loading="lazy"
+                               >
+                               <!-- Record Info Overlay -->
+                               <div class="record-info">
+                                   <h3><%= record.title %></h3>
+                                   <p class="artist"><%= record.artist %></p>
+                                   <p class="owner">Shared by <%= record.owner.username %></p>
+                               </div>
+                           </div>
+                       </div>
+                   <% }) %>
+               <% } %>
+           </div>
+       </div>
+   </div>
 </div>
 
+<!-- Carousel Initialization Script -->
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const initCarousel = () => {
-            const carouselElements = document.querySelectorAll('.carousel');
-            const carouselOptions = {
-                fullWidth: true,
-                indicators: true,
-                duration: 200,
-                interval: 3000
-            };
-            
-            const carouselInstances = M.Carousel.init(carouselElements, carouselOptions);
+   document.addEventListener('DOMContentLoaded', () => {
+       const initCarousel = () => {
+           // Get carousel elements
+           const carouselElements = document.querySelectorAll('.carousel');
+           
+           // Set carousel options
+           const carouselOptions = {
+               fullWidth: true,
+               indicators: true,
+               duration: 200,
+               interval: 3000
+           };
+           
+           // Initialize carousel
+           const carouselInstances = M.Carousel.init(carouselElements, carouselOptions);
 
-            const autoPlay = () => {
-                if (carouselInstances?.[0]) {
-                    carouselInstances[0].next();
-                }
-            };
+           // Auto-play function
+           const autoPlay = () => {
+               if (carouselInstances?.[0]) {
+                   carouselInstances[0].next();
+               }
+           };
 
-            try {
-                setInterval(autoPlay, carouselOptions.interval);
-            } catch (error) {
-                console.error('Carousel autoplay error:', error);
-            }
-        };
+           // Set up auto-play interval
+           try {
+               setInterval(autoPlay, carouselOptions.interval);
+           } catch (error) {
+               console.error('Carousel autoplay error:', error);
+           }
+       };
 
-        try {
-            initCarousel();
-        } catch (error) {
-            console.error('Carousel initialization error:', error);
-        }
-    });
+       // Initialize carousel when DOM loads
+       try {
+           initCarousel();
+       } catch (error) {
+           console.error('Carousel initialization error:', error);
+       }
+   });
 </script>
 
+<!-- Include footer partial -->
 <%- include('./partials/footer.ejs') %>

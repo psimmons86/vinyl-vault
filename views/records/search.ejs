@@ -1,101 +1,119 @@
+<!-- Include header template -->
 <%- include('../partials/header.ejs') %>
 
+<!-- Main container -->
 <div class="container">
-    <div class="collection-header">
-        <h1 class="collection-title">Search Discogs</h1>
-    </div>
+   <!-- Page header -->
+   <div class="collection-header">
+       <h1 class="collection-title">Search Discogs</h1>
+   </div>
 
-    <div class="row">
-        <div class="col s12 m8 offset-m2">
-            <form action="/records/search" method="GET" class="search-form">
-                <div class="input-field">
-                    <input type="search" 
-                           id="search"
-                           name="q" 
-                           value="<%= locals.query || '' %>"
-                           placeholder="Search by artist or album"
-                           class="search-input"
-                           required>
-                </div>
-                <div class="center-align">
-                    <button type="submit" class="btn">
-                        Search Discogs
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+   <!-- Search form row -->
+   <div class="row">
+       <!-- Centered search form with responsive width -->
+       <div class="col s12 m8 offset-m2">
+           <!-- Search form that submits to /records/search -->
+           <form action="/records/search" method="GET" class="search-form">
+               <div class="input-field">
+                   <!-- Search input with previous query value if it exists -->
+                   <input type="search"
+                          id="search"
+                          name="q"
+                          value="<%= locals.query || '' %>"
+                          placeholder="Search by artist or album"
+                          class="search-input"
+                          required>
+               </div>
+               <div class="center-align">
+                   <button type="submit" class="btn">
+                       Search Discogs
+                   </button>
+               </div>
+           </form>
+       </div>
+   </div>
 
-    <div id="searchLoading" class="hidden center-align">
-        <div class="preloader-wrapper small active">
-            <div class="spinner-layer spinner-green-only">
-                <div class="circle-clipper left">
-                    <div class="circle"></div>
-                </div>
-                <div class="gap-patch">
-                    <div class="circle"></div>
-                </div>
-                <div class="circle-clipper right">
-                    <div class="circle"></div>
-                </div>
-            </div>
-        </div>
-        <p>Searching Discogs...</p>
-    </div>
+   <!-- Loading spinner (hidden by default) -->
+   <div id="searchLoading" class="hidden center-align">
+       <!-- Materialize preloader component -->
+       <div class="preloader-wrapper small active">
+           <div class="spinner-layer spinner-green-only">
+               <div class="circle-clipper left">
+                   <div class="circle"></div>
+               </div>
+               <div class="gap-patch">
+                   <div class="circle"></div>
+               </div>
+               <div class="circle-clipper right">
+                   <div class="circle"></div>
+               </div>
+           </div>
+       </div>
+       <p>Searching Discogs...</p>
+   </div>
 
-    <% if (locals.error) { %>
-        <div class="row">
-            <div class="col s12">
-                <div class="card-panel red lighten-4 red-text text-darken-4">
-                    <%= error %>
-                </div>
-            </div>
-        </div>
-    <% } %>
+   <!-- Error message display if there's an error -->
+   <% if (locals.error) { %>
+       <div class="row">
+           <div class="col s12">
+               <div class="card-panel red lighten-4 red-text text-darken-4">
+                   <%= error %>
+               </div>
+           </div>
+       </div>
+   <% } %>
 
-    <% if (locals.results && results.length > 0) { %>
-        <div class="row">
-            <% results.forEach(result => { %>
-                <div class="col s12 m6 l3">
-                    <div class="record-card">
-                        <div class="record-artwork">
-                            <img src="<%= result.thumb %>" 
-                                 alt="Album artwork for <%= result.title %>"
-                                 class="record-img"
-                                 onerror="this.src='/images/default-album.png'">
-                            <div class="record-overlay">
-                                <h3 class="record-title truncate"><%= result.title %></h3>
-                                <p class="record-artist"><%= result.artist %></p>
-                                
-                                <% if (result.year || result.label) { %>
-                                    <p class="record-details">
-                                        <%= result.year ? result.year : '' %>
-                                        <%= result.year && result.label ? ' • ' : '' %>
-                                        <%= result.label ? result.label : '' %>
-                                    </p>
-                                <% } %>
-                                
-                                <a href="/records/add-from-discogs/<%= result.id %>" class="btn">
-                                    Add to Collection
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <% }) %>
-        </div>
-    <% } else if (locals.query) { %>
-        <div class="center-align">
-            <p>No records found matching "<%= query %>"</p>
-            <p class="grey-text">Try adjusting your search terms or check the spelling.</p>
-        </div>
-    <% } %>
+   <!-- Search results display -->
+   <% if (locals.results && results.length > 0) { %>
+       <div class="row">
+           <!-- Loop through each search result -->
+           <% results.forEach(result => { %>
+               <!-- Responsive grid column for each record -->
+               <div class="col s12 m6 l3">
+                   <div class="record-card">
+                       <div class="record-artwork">
+                           <!-- Record image with fallback -->
+                           <img src="<%= result.thumb %>"
+                                alt="Album artwork for <%= result.title %>"
+                                class="record-img"
+                                onerror="this.src='/images/default-album.png'">
+                           <!-- Record information overlay -->
+                           <div class="record-overlay">
+                               <h3 class="record-title truncate"><%= result.title %></h3>
+                               <p class="record-artist"><%= result.artist %></p>
+                               <!-- Optional year and label display -->
+                               <% if (result.year || result.label) { %>
+                                   <p class="record-details">
+                                       <%= result.year ? result.year : '' %>
+                                       <%= result.year && result.label ? ' • ' : '' %>
+                                       <%= result.label ? result.label : '' %>
+                                   </p>
+                               <% } %>
+                               <!-- Add to collection button -->
+                               <a href="/records/add-from-discogs/<%= result.id %>" class="btn">
+                                   Add to Collection
+                               </a>
+                           </div>
+                       </div>
+                   </div>
+               </div>
+           <% }) %>
+       </div>
+   <!-- No results message -->
+   <% } else if (locals.query) { %>
+       <div class="center-align">
+           <p>No records found matching "<%= query %>"</p>
+           <p class="grey-text">Try adjusting your search terms or check the spelling.</p>
+       </div>
+   <% } %>
 </div>
 
+<!-- Show loading spinner when form is submitted -->
 <script>
-document.querySelector('form').addEventListener('submit', function() {
-    document.getElementById('searchLoading').classList.remove('hidden');
-});
+   document.querySelector('form').addEventListener('submit', function() {
+       document.getElementById('searchLoading').classList.remove('hidden');
+   });
 </script>
 
+<!-- Include footer template -->
 <%- include('../partials/footer.ejs') %>

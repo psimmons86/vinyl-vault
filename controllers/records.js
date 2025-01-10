@@ -4,18 +4,22 @@ const Record = require('../models/record');
 const User = require('../models/user');
 const discogs = require('../services/discogs');
 
+// Get all records for the logged-in user
 router.get('/', async (req, res) => {
     try {
+        // Filter by tag if provided
         const query = { owner: req.user._id };
         if (req.query.tag) {
             query.tags = req.query.tag;
         }
         
+        // Get records and available tags
         const [records, tags] = await Promise.all([
             Record.find(query),
             Record.distinct('tags', { owner: req.user._id })
         ]);
         
+        // Sort by artist name or date added
         const sortedRecords = [...records].sort((a, b) => 
             req.query.sort === 'artist' 
                 ? a.artist.toLowerCase().localeCompare(b.artist.toLowerCase())
@@ -34,8 +38,10 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Get collection statistics
 router.get('/stats', async (req, res) => {
     try {
+        // Get various stats about the collection
         const [
             totalRecords,
             mostPlayed,
@@ -47,18 +53,27 @@ router.get('/stats', async (req, res) => {
             collectionValue,
             mostValuableRecords
         ] = await Promise.all([
+            // Count total records
             Record.countDocuments({ owner: req.user._id }),
+            
+            // Get most played record
             Record.findOne({ owner: req.user._id }).sort('-plays').limit(1),
+            
+            // Get total play count
             Record.aggregate([
                 { $match: { owner: req.user._id } },
                 { $group: { _id: null, total: { $sum: '$plays' } } }
             ]),
+            
+            // Get top 10 artists by record count
             Record.aggregate([
                 { $match: { owner: req.user._id } },
                 { $group: { _id: '$artist', count: { $sum: 1 } } },
                 { $sort: { count: -1 } },
                 { $limit: 10 }
             ]),
+            
+            // Get top 5 tags
             Record.aggregate([
                 { $match: { owner: req.user._id, tags: { $exists: true, $ne: [] } } },
                 { $unwind: '$tags' },
@@ -66,11 +81,15 @@ router.get('/stats', async (req, res) => {
                 { $sort: { count: -1 } },
                 { $limit: 5 }
             ]),
+            
+            // Get records by year
             Record.aggregate([
                 { $match: { owner: req.user._id, year: { $exists: true, $ne: null } } },
                 { $group: { _id: '$year', count: { $sum: 1 } } },
                 { $sort: { _id: 1 } }
             ]),
+            
+            // Get top artists by play count
             Record.aggregate([
                 { $match: { owner: req.user._id, plays: { $gt: 0 } } },
                 { $group: { 
@@ -81,10 +100,14 @@ router.get('/stats', async (req, res) => {
                 { $sort: { totalPlays: -1 } },
                 { $limit: 10 }
             ]),
+            
+            // Get total collection value
             Record.aggregate([
                 { $match: { owner: req.user._id } },
                 { $group: { _id: null, total: { $sum: '$value' } } }
             ]),
+            
+            // Get most valuable records
             Record.find({ owner: req.user._id })
                 .sort('-value')
                 .limit(5)
@@ -107,6 +130,7 @@ router.get('/stats', async (req, res) => {
     }
 });
 
+// Search Discogs database
 router.get('/search', async (req, res) => {
     try {
         if (!req.query.q) {
@@ -136,6 +160,7 @@ router.get('/search', async (req, res) => {
     }
 });
 
+// Show new record form
 router.get('/new', async (req, res) => {
     const formats = Record.schema.path('format').enumValues;
     res.render('records/new', {
@@ -145,6 +170,7 @@ router.get('/new', async (req, res) => {
     });
 });
 
+// Get user settings page
 router.get('/settings', async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
@@ -157,6 +183,7 @@ router.get('/settings', async (req, res) => {
     }
 });
 
+// Update user settings
 router.post('/settings', async (req, res) => {
     try {
         await User.findByIdAndUpdate(req.user._id, {
@@ -171,8 +198,10 @@ router.post('/settings', async (req, res) => {
     }
 });
 
+// Create new record
 router.post('/', async (req, res) => {
     try {
+        // Add owner and process tags
         req.body.owner = req.user._id;
         req.body.tags = req.body.tags
             ? req.body.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
@@ -185,6 +214,7 @@ router.post('/', async (req, res) => {
     }
 });
 
+// Add record from Discogs
 router.get('/add-from-discogs/:id', async (req, res) => {
     try {
         const recordDetails = await discogs.getRecordDetails(req.params.id);
@@ -202,6 +232,7 @@ router.get('/add-from-discogs/:id', async (req, res) => {
     }
 });
 
+// Show single record
 router.get('/:id', async (req, res) => {
     try {
         const record = await Record.findById(req.params.id);
@@ -216,6 +247,7 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// Show edit form
 router.get('/:id/edit', async (req, res) => {
     try {
         const record = await Record.findById(req.params.id);
@@ -231,11 +263,13 @@ router.get('/:id/edit', async (req, res) => {
     }
 });
 
+// Track record play
 router.post('/:id/play', async (req, res) => {
     try {
         const record = await Record.findById(req.params.id);
         if (!record) return res.redirect('/records');
         
+        // Increment plays and update last played date
         record.plays += 1;
         record.lastPlayed = new Date();
         await record.save();
@@ -246,8 +280,10 @@ router.post('/:id/play', async (req, res) => {
     }
 });
 
+// Update record
 router.put('/:id', async (req, res) => {
     try {
+        // Process tags if provided
         if (req.body.tags) {
             req.body.tags = req.body.tags.split(',')
                 .map(tag => tag.trim())
@@ -261,6 +297,7 @@ router.put('/:id', async (req, res) => {
     }
 });
 
+// Delete record
 router.delete('/:id', async (req, res) => {
     try {
         await Record.findByIdAndDelete(req.params.id);
