@@ -13,8 +13,6 @@ Vinyl Vault is a full-stack web application built for vinyl enthusiasts who want
 - Track play counts and listening history
 - Tag records for easy categorization
 - Add notes and details to each record
-- Track collection value and individual record values
-- Support for multiple media types (Vinyl, CD, Cassette, etc.)
 
 ### Discogs Integration
 - Search the Discogs database
@@ -31,24 +29,6 @@ Vinyl Vault is a full-stack web application built for vinyl enthusiasts who want
 - Financial insights and value tracking
 - Detailed collection analytics
 
-### Social Features
-- MySpace-inspired profile customization
-- Top 8 favorite records display
-- Public/private profile options
-- Activity feed of recent plays
-- Share collections and wishlists
-
-### Location Features
-- Record store map integration
-- Find nearest vinyl shops
-- Store favorites and visited locations
-- Community store ratings and reviews
-
-### User Features
-- Secure user authentication
-- Public/private profile options
-- Personalized collection dashboard
-- Customizable profile themes
 
 ## Prerequisites
 - Node.js
