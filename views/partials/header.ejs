@@ -1,31 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= title %> | Vinyl Vault</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        vertical-align: middle;
+        margin-right: 8px;
+      }
+      .user-dropdown {
+        min-width: 200px !important;
+        padding: 8px 0;
+      }
+    </style>
+  </head>
+  <body>
     <nav class="main-nav">
-        <div class="nav-content">
-            <a href="<%= user ? '/records' : '/' %>" class="nav-logo">Vinyl Vault</a>
-            <% if (user) { %>
-                <div class="nav-links">
-                    <a href="/records">My Collection</a>
-                    <a href="/records/new">Add New Record</a>
-                    <a href="/records/search">Search Discogs</a>
-                    <a href="/records/stats">Stats</a>
-                    <a href="/records/settings">Settings</a>
-                    <a href="/auth/sign-out">Sign Out</a>
-                </div>
-            <% } else { %>
-                <div class="nav-links">
-                    <a href="/auth/sign-in">Sign In</a>
-                </div>
-            <% } %>
+      <div class="nav-content">
+        <a href="<%= user ? '/records' : '/' %>" class="nav-logo"
+          >Vinyl Vault</a
+        >
+        <% if (user) { %>
+        <div class="nav-links">
+          <a href="/records">My Collection</a>
+          <a href="/records/new">Add New Record</a>
+          <a href="/records/search">Search Discogs</a>
+          <a href="/records/stats">Stats</a>
+
+          <!-- User dropdown trigger -->
+          <a class="dropdown-trigger" href="#" data-target="user-dropdown">
+            <img
+              src="<%= user.profile?.avatarUrl || '/images/default-avatar.png' %>"
+              alt="Avatar"
+              class="user-avatar"
+            />
+            <%= user.profile?.name || user.username %>
+            <i class="material-icons right">arrow_drop_down</i>
+          </a>
+
+          <!-- User dropdown structure -->
+          <ul id="user-dropdown" class="dropdown-content user-dropdown">
+            <li>
+              <a href="/records/profile"
+                ><i class="material-icons">person</i>View Profile</a
+              >
+            </li>
+            <li>
+              <a href="/records/settings"
+                ><i class="material-icons">settings</i>Settings</a
+              >
+            </li>
+            <li class="divider"></li>
+            <li>
+              <a href="/auth/sign-out"
+                ><i class="material-icons">exit_to_app</i>Sign Out</a
+              >
+            </li>
+          </ul>
         </div>
+        <% } else { %>
+        <div class="nav-links">
+          <a href="/auth/sign-in">Sign In</a>
+        </div>
+        <% } %>
+      </div>
     </nav>
-    <main>
+    <main></main>
+  </body>
+</html>

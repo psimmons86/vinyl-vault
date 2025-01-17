@@ -14,6 +14,23 @@ const userSchema = new Schema({
     isPublic: {
         type: Boolean,
         default: false
+    },
+    // New profile fields
+    profile: {
+        name: String,
+        bio: String,
+        location: String,
+        favoriteGenres: [String],
+        avatarUrl: String,
+        socialLinks: {
+            discogs: String,
+            instagram: String,
+            twitter: String
+        },
+        showStats: {
+            type: Boolean,
+            default: true
+        }
     }
 }, {
     timestamps: true

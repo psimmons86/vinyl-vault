@@ -38,6 +38,34 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Get user profile page
+router.get('/profile', async (req, res) => {
+    try {
+        // Get recent records and recently played in parallel
+        const [recentlyAdded, recentlyPlayed] = await Promise.all([
+            // Recently added records
+            Record.find({ owner: req.user._id })
+                .sort('-createdAt')
+                .limit(5),
+            // Recently played records    
+            Record.find({ 
+                owner: req.user._id, 
+                lastPlayed: { $exists: true, $ne: null } 
+            })
+                .sort('-lastPlayed')
+                .limit(5)
+        ]);
+
+        res.render('records/profile', {
+            title: 'My Profile',
+            recentlyAdded,
+            recentlyPlayed
+        });
+    } catch (err) {
+        res.redirect('/records');
+    }
+});
+
 // Get collection statistics
 router.get('/stats', async (req, res) => {
     try {
@@ -173,13 +201,13 @@ router.get('/new', async (req, res) => {
     });
 });
 
-// Get user settings page
 router.get('/settings', async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
         res.render('records/settings', { 
             title: 'Profile Settings',
-            error: null
+            error: null,
+            user
         });
     } catch (err) {
         res.redirect('/records');
@@ -189,14 +217,33 @@ router.get('/settings', async (req, res) => {
 // Update user settings
 router.post('/settings', async (req, res) => {
     try {
-        await User.findByIdAndUpdate(req.user._id, {
-            isPublic: !!req.body.isPublic
-        });
-        res.redirect('/records');
+        const updateData = {
+            isPublic: !!req.body.isPublic,
+            profile: {
+                name: req.body.name,
+                bio: req.body.bio,
+                location: req.body.location,
+                favoriteGenres: req.body.favoriteGenres?.split(',').map(genre => genre.trim()) || [],
+                avatarUrl: req.body.avatarUrl,
+                socialLinks: {
+                    discogs: req.body.discogsLink,
+                    instagram: req.body.instagramLink,
+                    twitter: req.body.twitterLink
+                },
+                showStats: !!req.body.showStats
+            }
+        };
+
+        await User.findByIdAndUpdate(req.user._id, updateData);
+        
+        // Redirect back to settings with success message
+        req.session.message = { type: 'success', text: 'Profile updated successfully!' };
+        res.redirect('/records/settings');
     } catch (err) {
         res.render('records/settings', {
             title: 'Profile Settings',
-            error: 'Error updating settings'
+            error: 'Error updating settings',
+            user: req.user
         });
     }
 });

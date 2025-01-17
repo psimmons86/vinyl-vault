@@ -33,7 +33,11 @@ router.post('/sign-up', async (req, res) => {
         const hashedPassword = await bcrypt.hash(req.body.password, SALT_ROUNDS);
         const user = await User.create({
             username: req.body.username,
-            password: hashedPassword
+            password: hashedPassword,
+            profile: {
+                name: req.body.username,  // Default display name to username
+                showStats: true          // Default to showing stats
+            }
         });
         
         await Activity.create({

@@ -424,6 +424,90 @@ Utility Classes
   gap: 0.5rem;
 }
 
+/* Profile Settings Styles */
+.profile-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.section {
+  padding: 20px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+/* Avatar in navbar */
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+/* Dropdown menu */
+.dropdown-content {
+  min-width: 200px !important;
+}
+
+.dropdown-content li > a {
+  color: rgba(0,0,0,0.87);
+  padding: 14px 16px;
+}
+
+.dropdown-content .divider {
+  margin: 8px 0;
+}
+
+.profile-avatar {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.profile-name {
+  font-size: 2rem;
+  margin: 0 0 10px 0;
+}
+
+.profile-bio {
+  margin: 15px 0;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.social-links {
+  margin: 15px 0;
+}
+
+.social-links .btn-floating {
+  margin-right: 10px;
+}
+
+.favorite-genres {
+  margin-top: 20px;
+}
+
+.favorite-genres .chip {
+  margin: 5px;
+}
+
+.collection .collection-item.avatar {
+  min-height: 64px;
+}
+
+/* Dropdown icon alignment */
+.dropdown-content li > a > i {
+  margin: 0 16px 0 0;
+}
+
 /*
 ===============================
 Responsive Design
