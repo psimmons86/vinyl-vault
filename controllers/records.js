@@ -51,29 +51,24 @@ router.get('/stats', async (req, res) => {
             recordsByYear,
             topPlayedArtists,
             collectionValue,
-            mostValuableRecords
+            mostValuableRecords,
+            // Add these new queries
+            topPlayedRecords,
+            recentlyPlayedRecords
         ] = await Promise.all([
-            // Count total records
+            // Keep existing queries...
             Record.countDocuments({ owner: req.user._id }),
-            
-            // Get most played record
             Record.findOne({ owner: req.user._id }).sort('-plays').limit(1),
-            
-            // Get total play count
             Record.aggregate([
                 { $match: { owner: req.user._id } },
                 { $group: { _id: null, total: { $sum: '$plays' } } }
             ]),
-            
-            // Get top 10 artists by record count
             Record.aggregate([
                 { $match: { owner: req.user._id } },
                 { $group: { _id: '$artist', count: { $sum: 1 } } },
                 { $sort: { count: -1 } },
                 { $limit: 10 }
             ]),
-            
-            // Get top 5 tags
             Record.aggregate([
                 { $match: { owner: req.user._id, tags: { $exists: true, $ne: [] } } },
                 { $unwind: '$tags' },
@@ -81,15 +76,11 @@ router.get('/stats', async (req, res) => {
                 { $sort: { count: -1 } },
                 { $limit: 5 }
             ]),
-            
-            // Get records by year
             Record.aggregate([
                 { $match: { owner: req.user._id, year: { $exists: true, $ne: null } } },
                 { $group: { _id: '$year', count: { $sum: 1 } } },
                 { $sort: { _id: 1 } }
             ]),
-            
-            // Get top artists by play count
             Record.aggregate([
                 { $match: { owner: req.user._id, plays: { $gt: 0 } } },
                 { $group: { 
@@ -100,17 +91,26 @@ router.get('/stats', async (req, res) => {
                 { $sort: { totalPlays: -1 } },
                 { $limit: 10 }
             ]),
-            
-            // Get total collection value
             Record.aggregate([
                 { $match: { owner: req.user._id } },
                 { $group: { _id: null, total: { $sum: '$value' } } }
             ]),
-            
-            // Get most valuable records
             Record.find({ owner: req.user._id })
                 .sort('-value')
-                .limit(5)
+                .limit(5),
+            // Get top 10 most played records with full details
+            Record.find({ owner: req.user._id, plays: { $gt: 0 } })
+                .sort('-plays')
+                .limit(10)
+                .select('title artist plays imageUrl _id'),
+            // Get last 10 played records with full details
+            Record.find({ 
+                owner: req.user._id, 
+                lastPlayed: { $exists: true, $ne: null } 
+            })
+                .sort('-lastPlayed')
+                .limit(10)
+                .select('title artist lastPlayed imageUrl _id')
         ]);
 
         res.render('records/stats', {
@@ -123,7 +123,10 @@ router.get('/stats', async (req, res) => {
             recordsByYear,
             topPlayedArtists,
             collectionValue: collectionValue[0]?.total || 0,
-            mostValuableRecords
+            mostValuableRecords,
+            // Add new data to template
+            topPlayedRecords,
+            recentlyPlayedRecords
         });
     } catch (err) {
         res.redirect('/records');
