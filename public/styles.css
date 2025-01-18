@@ -508,6 +508,29 @@ Utility Classes
   margin: 0 16px 0 0;
 }
 
+
+[data-theme="dark"] {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .card {
+  background-color: #1e1e1e;
+}
+
+[data-theme="dark"] .card-content {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .collection {
+  border-color: #333;
+}
+
+[data-theme="dark"] .collection .collection-item {
+  background-color: #1e1e1e;
+  border-color: #333;
+}
+
 /*
 ===============================
 Responsive Design

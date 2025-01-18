@@ -1,52 +1,337 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="stats-container">
-    <h1>Welcome, <%= user.username %>!</h1>
-
-    <div class="stats-info">
-        <!-- Recently Added Records -->
-        <div class="stat-card">
-            <h3>Recently Added Records</h3>
-            <% if (recentlyAdded.length === 0) { %>
-                <p>No records added yet.</p>
-            <% } else { %>
-                <% recentlyAdded.forEach(record => { %>
-                    <div class="record-entry">
-                        <a href="/records/<%= record._id %>" class="record-link">
-                            <%= record.title %> by <%= record.artist %>
-                        </a>
-                        <small class="text-muted">
-                            Added <%= record.createdAt.toLocaleDateString() %>
-                        </small>
-                    </div>
-                <% }) %>
-            <% } %>
-        </div>
-
-        <!-- Recently Played Records -->
-        <div class="stat-card">
-            <h3>Recently Played Records</h3>
-            <% if (recentlyPlayed.length === 0) { %>
-                <p>No records played yet.</p>
-            <% } else { %>
-                <% recentlyPlayed.forEach(record => { %>
-                    <div class="record-entry">
-                        <a href="/records/<%= record._id %>" class="record-link">
-                            <%= record.title %> by <%= record.artist %>
-                        </a>
-                        <small class="text-muted">
-                            Played <%= record.lastPlayed.toLocaleDateString() %>
-                        </small>
-                    </div>
-                <% }) %>
-            <% } %>
-        </div>
-    </div>
-
-    <div class="button-group">
-        <a href="/records" class="btn">View All Records</a>
-        <a href="/records/new" class="btn">Add New Record</a>
-    </div>
+<!-- Profile Banner -->
+<div 
+  class="profile-banner"
+  style="background-image: url('<%= encodeURI((user.profile?.bannerUrl || "/images/default-banner.jpg").replace(/\\/g, "/")) %>');"
+>
+  <div class="banner-overlay"></div>
 </div>
+
+<div class="container">
+  <!-- Profile Header -->
+  <div class="row profile-header-row">
+    <div class="col s12">
+      <div class="card z-depth-0 profile-card">
+        <div class="card-content">
+          <div class="row valign-wrapper">
+            <!-- Profile Avatar -->
+            <div class="col s12 m4 center-align">
+              <img
+                src="<%= user.profile?.avatarUrl || '/images/default-avatar.png' %>"
+                alt="<%= user.profile?.name || user.username %>'s profile picture"
+                class="circle responsive-img profile-avatar"
+                onerror="this.src='/images/default-avatar.png'"
+              />
+            </div>
+            
+            <!-- Profile Info -->
+            <div class="col s12 m8">
+              <h2 class="profile-name">
+                <%= user.profile?.name || user.username %>
+              </h2>
+
+              <!-- Location -->
+              <% if (user.profile?.location) { %>
+                <p class="profile-location">
+                  <i class="material-icons tiny">location_on</i>
+                  <%= user.profile.location %>
+                </p>
+              <% } %>
+
+              <!-- Bio -->
+              <% if (user.profile?.bio) { %>
+                <p class="profile-bio"><%= user.profile.bio %></p>
+              <% } %>
+
+              <!-- Social Links -->
+              <div class="social-links">
+                <% if (user.profile?.socialLinks?.discogs) { %>
+                  <a
+                    href="<%= user.profile.socialLinks.discogs %>"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn-floating waves-effect waves-light"
+                    title="Discogs Profile"
+                  >
+                    <i class="material-icons">album</i>
+                  </a>
+                <% } %>
+
+                <% if (user.profile?.socialLinks?.instagram) { %>
+                  <a
+                    href="<%= user.profile.socialLinks.instagram %>"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn-floating waves-effect waves-light"
+                    title="Instagram Profile"
+                  >
+                    <i class="material-icons">photo_camera</i>
+                  </a>
+                <% } %>
+
+                <% if (user.profile?.socialLinks?.twitter) { %>
+                  <a
+                    href="<%= user.profile.socialLinks.twitter %>"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn-floating waves-effect waves-light"
+                    title="Twitter Profile"
+                  >
+                    <i class="material-icons">trending_up</i>
+                  </a>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Summary -->
+  <div class="row stats-row">
+    <div class="col s12 m4">
+      <div class="card-panel center-align hoverable">
+        <h3 class="stat-number"><%= totalRecords || 0 %></h3>
+        <p class="stat-label">Records</p>
+      </div>
+    </div>
+    <div class="col s12 m4">
+      <div class="card-panel center-align hoverable">
+        <h3 class="stat-number"><%= totalPlays || 0 %></h3>
+        <p class="stat-label">Total Plays</p>
+      </div>
+    </div>
+    <div class="col s12 m4">
+      <div class="card-panel center-align hoverable">
+        <h3 class="stat-number">
+          <%= user.profile?.favoriteGenres?.length || 0 %>
+        </h3>
+        <p class="stat-label">Favorite Genres</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top 8 Records -->
+  <% if (typeof top8Records !== 'undefined' && top8Records && top8Records.length > 0) { %>
+    <div class="row">
+      <div class="col s12">
+        <h4 class="section-title">Top 8 Records</h4>
+        <div class="row top-8-grid">
+          <% top8Records.forEach(record => { %>
+            <div class="col s6 m3">
+              <div class="card hoverable">
+                <div class="card-image">
+                  <img
+                    src="<%= record.imageUrl || '/images/default-album.png' %>"
+                    alt="<%= record.title %> by <%= record.artist %>"
+                    class="responsive-img"
+                    onerror="this.src='/images/default-album.png'"
+                  />
+                  <div class="card-overlay">
+                    <h5 class="truncate"><%= record.title %></h5>
+                    <p class="truncate"><%= record.artist %></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- Feed and News Section -->
+  <div class="row">
+    <div id="feed-root"></div>
+  </div>
+</div>
+
+<!-- React Dependencies -->
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+<!-- React Components -->
+<script type="text/babel" src="/javascripts/components/ActivityCard.jsx"></script>
+<script type="text/babel" src="/javascripts/components/NewsCard.jsx"></script>
+<script type="text/babel" src="/javascripts/components/feed.jsx"></script>
+
+<!-- Mount React Feed Component -->
+<script type="text/babel">
+  try {
+    const container = document.getElementById('feed-root');
+    if (container) {
+      const root = ReactDOM.createRoot(container);
+      root.render(React.createElement(window.Feed));
+    } else {
+      console.error('Feed root element not found');
+    }
+  } catch (error) {
+    console.error('Error mounting Feed component:', error);
+  }
+</script>
+
+<!-- Custom Styles -->
+<style>
+  .profile-banner {
+    height: 300px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    margin-bottom: -50px;
+  }
+
+  .banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.1),
+      rgba(0, 0, 0, 0.4)
+    );
+  }
+
+  .profile-header-row {
+    position: relative;
+    z-index: 1;
+  }
+
+  .profile-card {
+    background: rgba(255, 255, 255, 0.98);
+  }
+
+  .profile-avatar {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  .profile-name {
+    font-size: 2.5rem;
+    margin: 0 0 10px 0;
+    color: #333;
+  }
+
+  .profile-location {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #666;
+  }
+
+  .profile-bio {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 15px 0;
+    line-height: 1.6;
+  }
+
+  .social-links {
+    margin: 15px 0;
+    display: flex;
+    gap: 10px;
+  }
+
+  .social-links .btn-floating {
+    transition: transform 0.2s ease;
+  }
+
+  .social-links .btn-floating:hover {
+    transform: scale(1.1);
+  }
+
+  .stats-row {
+    margin-top: 2rem;
+  }
+
+  .stat-number {
+    font-size: 2.5rem;
+    margin: 0;
+    font-weight: 300;
+    color: #333;
+  }
+
+  .stat-label {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 5px 0 0 0;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .top-8-grid .card {
+    margin: 0.5rem 0;
+    transition: transform 0.2s ease;
+  }
+
+  .top-8-grid .card:hover {
+    transform: translateY(-5px);
+  }
+
+  .top-8-grid .card-image {
+    position: relative;
+    padding-top: 100%;
+  }
+
+  .top-8-grid .card-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .top-8-grid .card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    padding: 1rem;
+    color: white;
+  }
+
+  .top-8-grid .card-overlay h5 {
+    font-size: 1rem;
+    margin: 0 0 0.5rem 0;
+    font-weight: 500;
+  }
+
+  .top-8-grid .card-overlay p {
+    font-size: 0.875rem;
+    margin: 0;
+    opacity: 0.9;
+  }
+
+  /* Dark theme support */
+  [data-theme="dark"] .profile-card {
+    background: rgba(30, 30, 30, 0.98);
+  }
+
+  [data-theme="dark"] .profile-name,
+  [data-theme="dark"] .stat-number,
+  [data-theme="dark"] .section-title {
+    color: #fff;
+  }
+
+  [data-theme="dark"] .profile-bio,
+  [data-theme="dark"] .profile-location,
+  [data-theme="dark"] .stat-label {
+    color: #aaa;
+  }
+</style>
 
 <%- include('../partials/footer.ejs') %>
