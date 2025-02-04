@@ -1,0 +1,304 @@
+<%- include('../partials/header.ejs') %>
+
+<div class="container">
+  <div class="row">
+    <div class="col s12">
+      <h1 class="admin-title">Admin Analytics Dashboard</h1>
+    </div>
+  </div>
+
+  <!-- Overview Cards -->
+  <div class="row">
+    <div class="col s12 m4">
+      <div class="card-panel stats-card">
+        <i class="material-icons">people</i>
+        <h3><%= stats.totalUsers %></h3>
+        <p>Total Users</p>
+      </div>
+    </div>
+    <div class="col s12 m4">
+      <div class="card-panel stats-card">
+        <i class="material-icons">album</i>
+        <h3><%= stats.totalRecords %></h3>
+        <p>Total Records</p>
+      </div>
+    </div>
+    <div class="col s12 m4">
+      <div class="card-panel stats-card">
+        <i class="material-icons">play_circle</i>
+        <h3><%= stats.totalPlays %></h3>
+        <p>Total Plays</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Growth Charts -->
+  <div class="row">
+    <div class="col s12 m6">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">User Growth</span>
+          <canvas id="userGrowthChart"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col s12 m6">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Record Growth</span>
+          <canvas id="recordGrowthChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Genres -->
+  <div class="row">
+    <div class="col s12">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Top Genres</span>
+          <div class="genres-chart-container">
+            <canvas id="genresChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popular Records -->
+  <div class="row">
+    <div class="col s12">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Most Popular Records</span>
+          <table class="striped">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Owner</th>
+                <th>Plays</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% stats.popularRecords.forEach(record => { %>
+                <tr>
+                  <td><%= record.title %></td>
+                  <td><%= record.artist %></td>
+                  <td><%= record.owner.username %></td>
+                  <td><%= record.plays %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="row">
+    <div class="col s12">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Recent Activity</span>
+          <ul class="activity-list">
+            <% stats.userActivity.forEach(activity => { %>
+              <li class="activity-item">
+                <i class="material-icons">
+                  <% if (activity.activityType === 'play_record') { %>
+                    play_circle
+                  <% } else if (activity.activityType === 'comment') { %>
+                    comment
+                  <% } else if (activity.activityType === 'update') { %>
+                    edit
+                  <% } else { %>
+                    info
+                  <% } %>
+                </i>
+                <span class="activity-text">
+                  <%= activity.user.username %> 
+                  <%= activity.activityType.replace('_', ' ') %>
+                  <small class="activity-time">
+                    <%= new Date(activity.createdAt).toLocaleString() %>
+                  </small>
+                </span>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Analytics Scripts -->
+<script>
+  // User Growth Chart
+  const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+  new Chart(userGrowthCtx, {
+    type: 'line',
+    data: {
+      labels: JSON.parse('<%- JSON.stringify(stats.userGrowth.map(d => `${d._id.year}-${d._id.month}`)) %>'),
+      datasets: [{
+        label: 'New Users',
+        data: JSON.parse('<%- JSON.stringify(stats.userGrowth.map(d => d.count)) %>'),
+        borderColor: '#26a69a',
+        tension: 0.1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+
+  // Record Growth Chart
+  const recordGrowthCtx = document.getElementById('recordGrowthChart').getContext('2d');
+  new Chart(recordGrowthCtx, {
+    type: 'line',
+    data: {
+      labels: JSON.parse('<%- JSON.stringify(stats.recordGrowth.map(d => `${d._id.year}-${d._id.month}`)) %>'),
+      datasets: [{
+        label: 'New Records',
+        data: JSON.parse('<%- JSON.stringify(stats.recordGrowth.map(d => d.count)) %>'),
+        borderColor: '#ef5350',
+        tension: 0.1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+
+  // Genres Chart
+  const genresCtx = document.getElementById('genresChart').getContext('2d');
+  new Chart(genresCtx, {
+    type: 'bar',
+    data: {
+      labels: JSON.parse('<%- JSON.stringify(stats.topGenres.map(g => g._id)) %>'),
+      datasets: [{
+        label: 'Records per Genre',
+        data: JSON.parse('<%- JSON.stringify(stats.topGenres.map(g => g.count)) %>'),
+        backgroundColor: '#26a69a'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
+<style>
+  .admin-title {
+    font-size: 2rem;
+    margin: 2rem 0;
+    color: var(--primary-color, #26a69a);
+  }
+
+  .stats-card {
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .stats-card i {
+    font-size: 3rem;
+    color: var(--primary-color, #26a69a);
+    margin-bottom: 1rem;
+  }
+
+  .stats-card h3 {
+    font-size: 2.5rem;
+    margin: 0.5rem 0;
+    font-weight: 300;
+  }
+
+  .stats-card p {
+    font-size: 1.1rem;
+    color: #666;
+    margin: 0;
+  }
+
+  .genres-chart-container {
+    height: 300px;
+    position: relative;
+  }
+
+  .activity-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .activity-item:last-child {
+    border-bottom: none;
+  }
+
+  .activity-item i {
+    margin-right: 1rem;
+    color: var(--primary-color, #26a69a);
+  }
+
+  .activity-text {
+    flex: 1;
+  }
+
+  .activity-time {
+    display: block;
+    color: #999;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
+  /* Dark theme support */
+  [data-theme="dark"] .admin-title {
+    color: var(--primary-color, #26a69a);
+  }
+
+  [data-theme="dark"] .card,
+  [data-theme="dark"] .card-panel {
+    background: rgba(30, 30, 30, 0.98);
+  }
+
+  [data-theme="dark"] .card-title,
+  [data-theme="dark"] .stats-card h3 {
+    color: #fff;
+  }
+
+  [data-theme="dark"] .stats-card p,
+  [data-theme="dark"] .activity-time {
+    color: #aaa;
+  }
+
+  [data-theme="dark"] .activity-item {
+    border-bottom-color: #444;
+  }
+
+  [data-theme="dark"] table.striped > tbody > tr:nth-child(odd) {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  [data-theme="dark"] table.striped > tbody > tr > td {
+    color: #fff;
+  }
+</style>
+
+<%- include('../partials/footer.ejs') %>

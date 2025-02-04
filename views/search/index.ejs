@@ -1,0 +1,464 @@
+<%- include('../partials/header') %>
+
+<div class="container section">
+    <div class="row">
+        <div class="col s12">
+            <div class="search-header">
+                <div class="search-bar">
+                    <div class="input-field">
+                        <i class="fas fa-search prefix"></i>
+                        <input type="text" id="search" value="<%= query %>" 
+                               autocomplete="off" placeholder="Search users...">
+                        <div class="search-suggestions"></div>
+                    </div>
+                </div>
+                
+                <div class="search-filters">
+                    <div class="input-field">
+                        <select id="filter">
+                            <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All Users</option>
+                            <option value="collectors" <%= filter === 'collectors' ? 'selected' : '' %>>Collectors (50+ Records)</option>
+                            <option value="active" <%= filter === 'active' ? 'selected' : '' %>>Recently Active</option>
+                            <option value="new" <%= filter === 'new' ? 'selected' : '' %>>New Users</option>
+                        </select>
+                        <label>Filter Results</label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="searchResults"></div>
+            <div id="pagination" class="center-align"></div>
+        </div>
+    </div>
+</div>
+
+<template id="userCardTemplate">
+    <div class="user-card card hoverable">
+        <div class="card-content">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <img src="" alt="" class="circle responsive-img">
+                </div>
+                <div class="user-details">
+                    <div class="user-header">
+                        <span class="username"></span>
+                        <span class="admin-badge blue white-text" style="display: none">Admin</span>
+                    </div>
+                    <p class="bio grey-text"></p>
+                    <div class="user-stats">
+                        <span class="stat">
+                            <i class="fas fa-record-vinyl"></i>
+                            <span class="record-count"></span> records
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-clock"></i>
+                            <span class="joined-date"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="recent-records">
+                <h6>Recent Records</h6>
+                <div class="records-grid"></div>
+            </div>
+        </div>
+        <div class="card-action">
+            <a href="" class="view-profile blue-text">View Profile</a>
+        </div>
+    </div>
+</template>
+
+<style>
+.search-header {
+    margin-bottom: 2rem;
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 1rem 0;
+    z-index: 100;
+    border-bottom: 1px solid #eee;
+}
+
+.search-bar {
+    margin-bottom: 1rem;
+}
+
+.search-bar .input-field {
+    position: relative;
+}
+
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 1000;
+}
+
+.suggestion-item {
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background: #f5f5f5;
+}
+
+.suggestion-item img {
+    width: 30px;
+    height: 30px;
+}
+
+.user-card {
+    margin: 1rem 0;
+}
+
+.user-info {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.user-avatar {
+    flex-shrink: 0;
+}
+
+.user-avatar img {
+    width: 80px;
+    height: 80px;
+}
+
+.user-details {
+    flex-grow: 1;
+}
+
+.user-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.username {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.admin-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.bio {
+    margin: 0.5rem 0;
+    line-height: 1.4;
+}
+
+.user-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+}
+
+.records-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.record-thumb {
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.record-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#pagination {
+    margin: 2rem 0;
+}
+
+.pagination-btn {
+    margin: 0 0.25rem;
+}
+
+@media (max-width: 600px) {
+    .user-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .user-stats {
+        justify-content: center;
+    }
+
+    .records-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Materialize components
+    M.FormSelect.init(document.querySelectorAll('select'));
+    
+    const searchInput = document.getElementById('search');
+    const filterSelect = document.getElementById('filter');
+    const resultsContainer = document.getElementById('searchResults');
+    const paginationContainer = document.getElementById('pagination');
+    const suggestionsContainer = document.querySelector('.search-suggestions');
+    
+    let currentPage = 1;
+    let searchTimeout;
+    let lastQuery = '';
+
+    // Handle search input
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        // Show suggestions if 2 or more characters
+        if (query.length >= 2) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                fetchSuggestions(query);
+            }, 300);
+        } else {
+            suggestionsContainer.style.display = 'none';
+        }
+        
+        // Perform search if query changes
+        if (query !== lastQuery) {
+            lastQuery = query;
+            currentPage = 1;
+            performSearch();
+        }
+    });
+
+    // Handle filter changes
+    filterSelect.addEventListener('change', function() {
+        currentPage = 1;
+        performSearch();
+    });
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!suggestionsContainer.contains(e.target) && e.target !== searchInput) {
+            suggestionsContainer.style.display = 'none';
+        }
+    });
+
+    // Fetch user suggestions
+    async function fetchSuggestions(query) {
+        try {
+            const response = await fetch(`/search/api/users/suggest?q=${encodeURIComponent(query)}`);
+            const users = await response.json();
+            
+            if (users.length > 0) {
+                suggestionsContainer.innerHTML = users.map(user => `
+                    <div class="suggestion-item" data-username="${user.username}">
+                        <img src="${user.avatar || '/images/default-avatar.png'}" 
+                             alt="${user.username}" class="circle">
+                        <span>${user.username}</span>
+                    </div>
+                `).join('');
+                
+                suggestionsContainer.style.display = 'block';
+                
+                // Handle suggestion clicks
+                suggestionsContainer.querySelectorAll('.suggestion-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        searchInput.value = this.dataset.username;
+                        suggestionsContainer.style.display = 'none';
+                        performSearch();
+                    });
+                });
+            } else {
+                suggestionsContainer.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error fetching suggestions:', error);
+        }
+    }
+
+    // Perform search
+    async function performSearch() {
+        const query = searchInput.value.trim();
+        const filter = filterSelect.value;
+        
+        try {
+            const response = await fetch(
+                `/search/api/users?q=${encodeURIComponent(query)}&filter=${filter}&page=${currentPage}`
+            );
+            const data = await response.json();
+            
+            displayResults(data.users);
+            updatePagination(data.page, data.totalPages);
+        } catch (error) {
+            console.error('Error performing search:', error);
+            resultsContainer.innerHTML = `
+                <div class="card-panel red white-text">
+                    Error performing search. Please try again.
+                </div>
+            `;
+        }
+    }
+
+    // Display search results
+    function displayResults(users) {
+        if (users.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="card-panel">No users found matching your search.</div>
+            `;
+            return;
+        }
+
+        resultsContainer.innerHTML = '';
+        const template = document.getElementById('userCardTemplate');
+        
+        users.forEach(user => {
+            const card = template.content.cloneNode(true);
+            
+            // Set user info
+            card.querySelector('.user-avatar img').src = user.avatar || '/images/default-avatar.png';
+            card.querySelector('.user-avatar img').alt = user.username;
+            card.querySelector('.username').textContent = user.username;
+            card.querySelector('.bio').textContent = user.bio || 'No bio provided';
+            card.querySelector('.record-count').textContent = user.recordCount || 0;
+            card.querySelector('.joined-date').textContent = 
+                new Date(user.createdAt).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    year: 'numeric' 
+                });
+            
+            // Show admin badge if applicable
+            if (user.isAdmin) {
+                card.querySelector('.admin-badge').style.display = 'inline-block';
+            }
+            
+            // Set profile link
+            card.querySelector('.view-profile').href = `/users/${user.username}`;
+            
+            // Add recent records
+            const recordsGrid = card.querySelector('.records-grid');
+            if (user.recentRecords && user.recentRecords.length > 0) {
+                user.recentRecords.forEach(record => {
+                    const thumb = document.createElement('div');
+                    thumb.className = 'record-thumb tooltipped';
+                    thumb.setAttribute('data-position', 'top');
+                    thumb.setAttribute('data-tooltip', `${record.title} - ${record.artist}`);
+                    
+                    const img = document.createElement('img');
+                    img.src = record.imageUrl || '/images/default-album.png';
+                    img.alt = record.title;
+                    
+                    thumb.appendChild(img);
+                    recordsGrid.appendChild(thumb);
+                });
+            } else {
+                recordsGrid.innerHTML = '<p class="grey-text">No records yet</p>';
+            }
+            
+            resultsContainer.appendChild(card);
+        });
+        
+        // Initialize tooltips
+        M.Tooltip.init(document.querySelectorAll('.tooltipped'));
+    }
+
+    // Update pagination
+    function updatePagination(currentPage, totalPages) {
+        if (totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+
+        let paginationHtml = '<ul class="pagination">';
+        
+        // Previous button
+        paginationHtml += `
+            <li class="${currentPage === 1 ? 'disabled' : 'waves-effect'}">
+                <a href="#!" data-page="${currentPage - 1}" 
+                   class="${currentPage === 1 ? 'disabled' : ''}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+        `;
+        
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            if (
+                i === 1 || 
+                i === totalPages || 
+                (i >= currentPage - 2 && i <= currentPage + 2)
+            ) {
+                paginationHtml += `
+                    <li class="${i === currentPage ? 'active blue' : 'waves-effect'}">
+                        <a href="#!" data-page="${i}">${i}</a>
+                    </li>
+                `;
+            } else if (
+                i === currentPage - 3 || 
+                i === currentPage + 3
+            ) {
+                paginationHtml += '<li class="disabled"><a href="#!">...</a></li>';
+            }
+        }
+        
+        // Next button
+        paginationHtml += `
+            <li class="${currentPage === totalPages ? 'disabled' : 'waves-effect'}">
+                <a href="#!" data-page="${currentPage + 1}" 
+                   class="${currentPage === totalPages ? 'disabled' : ''}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        `;
+        
+        paginationHtml += '</ul>';
+        paginationContainer.innerHTML = paginationHtml;
+        
+        // Add click handlers
+        paginationContainer.querySelectorAll('a[data-page]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (!this.classList.contains('disabled')) {
+                    currentPage = parseInt(this.dataset.page);
+                    performSearch();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        });
+    }
+
+    // Initial search if query exists
+    if (searchInput.value.trim()) {
+        performSearch();
+    }
+});
+</script>
+
+<%- include('../partials/footer') %>

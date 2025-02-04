@@ -40,6 +40,10 @@ const userSchema = new Schema({
     type: Boolean,
     default: false
   },
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
   profile: {
     name: String,
     bio: String,
@@ -60,12 +64,47 @@ const userSchema = new Schema({
       type: String,
       enum: ['light', 'dark'],
       default: 'light'
+    },
+    showStats: {
+      type: Boolean,
+      default: true
     }
   },
-  showStats: {
-    type: Boolean,
-    default: true
-  }
+  following: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  followers: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  posts: [{
+    content: String,
+    imageUrl: String,
+    recordRef: {
+      type: Schema.Types.ObjectId,
+      ref: 'Record'
+    },
+    likes: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    }],
+    comments: [{
+      user: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      content: String,
+      createdAt: {
+        type: Date,
+        default: Date.now
+      }
+    }],
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });

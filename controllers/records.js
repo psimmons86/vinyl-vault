@@ -35,6 +35,7 @@ async function cleanupFiles(files) {
 
 // Get all records for the logged-in user
 // Get all records for the logged-in user
+// Get all records (HTML or JSON)
 router.get('/', asyncHandler(async (req, res) => {
     // Filter by tag if provided
     const query = { owner: req.user._id };
@@ -54,7 +55,13 @@ router.get('/', asyncHandler(async (req, res) => {
             ? a.artist.toLowerCase().localeCompare(b.artist.toLowerCase())
             : b.createdAt - a.createdAt
     );
+
+    // Return JSON if requested
+    if (req.headers.accept?.includes('application/json')) {
+        return res.json(sortedRecords);
+    }
     
+    // Otherwise render HTML
     res.render('records/index', {
         records: sortedRecords,
         title: 'My Records',
@@ -102,7 +109,8 @@ router.get('/profile', asyncHandler(async (req, res) => {
         recentlyAdded,
         recentlyPlayed,
         top8Records: user.profile?.top8Records || [],
-        user: user // Add this to ensure user data is available in the template
+        user: user,
+        currentUser: req.user // Add currentUser from the request
     });
 }));
 
@@ -110,9 +118,13 @@ router.post('/settings', upload.fields([
     { name: 'profilePicture', maxCount: 1 },
     { name: 'bannerImage', maxCount: 1 }
 ]), asyncHandler(async (req, res) => {
+    // Get current user data
+    const currentUser = await User.findById(req.user._id);
+    
     const updateData = {
         isPublic: !!req.body.isPublic,
         profile: {
+            ...currentUser.profile,
             name: req.body.name,
             bio: req.body.bio,
             location: req.body.location,
@@ -122,27 +134,37 @@ router.post('/settings', upload.fields([
                 instagram: req.body.instagramLink,
                 twitter: req.body.twitterLink
             },
-            showStats: !!req.body.showStats,
-            theme: req.body.darkMode ? 'dark' : 'light'
+            theme: req.body.darkMode ? 'dark' : 'light',
+            showStats: !!req.body.showStats
         }
     };
 
-    // Add uploaded files to update data if they exist
+    // Handle file uploads
     if (req.files) {
         if (req.files.profilePicture && req.files.profilePicture[0]) {
             updateData.profile.avatarUrl = '/uploads/' + req.files.profilePicture[0].filename;
+            // Delete old profile picture if it exists
+            if (currentUser.profile?.avatarUrl && !currentUser.profile.avatarUrl.includes('default-avatar')) {
+                const oldPath = 'public' + currentUser.profile.avatarUrl;
+                try {
+                    await fs.unlink(oldPath);
+                } catch (err) {
+                    console.error('Error deleting old profile picture:', err);
+                }
+            }
         }
         if (req.files.bannerImage && req.files.bannerImage[0]) {
             updateData.profile.bannerUrl = '/uploads/' + req.files.bannerImage[0].filename;
+            // Delete old banner if it exists
+            if (currentUser.profile?.bannerUrl && !currentUser.profile.bannerUrl.includes('default-banner')) {
+                const oldPath = 'public' + currentUser.profile.bannerUrl;
+                try {
+                    await fs.unlink(oldPath);
+                } catch (err) {
+                    console.error('Error deleting old banner:', err);
+                }
+            }
         }
-    }
-
-    // Maintain existing avatar/banner if no new files uploaded
-    if (!req.files?.profilePicture) {
-        updateData.profile.avatarUrl = req.user.profile?.avatarUrl;
-    }
-    if (!req.files?.bannerImage) {
-        updateData.profile.bannerUrl = req.user.profile?.bannerUrl;
     }
 
     await User.findByIdAndUpdate(req.user._id, updateData, { new: true });

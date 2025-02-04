@@ -13,9 +13,8 @@
           </div>
           <% } %>
 
-          <form action="/records/settings" method="POST">
+          <form action="/records/settings" method="POST" enctype="multipart/form-data">
             <!-- Profile Picture Section -->
-            <form action="/records/settings" method="POST" enctype="multipart/form-data">
               <!-- Image Upload Section -->
               <div class="section">
                   <h5>Profile Images</h5>
@@ -152,7 +151,7 @@
               <p>
                 <label>
                   <input type="checkbox" name="showStats" <%=
-                  user.profile?.showStats ? 'checked' : '' %>>
+                  user.showStats ? 'checked' : '' %>>
                   <span>Show my stats on my public profile</span>
                 </label>
               </p>

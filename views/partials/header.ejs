@@ -26,6 +26,64 @@
         min-width: 200px !important;
         padding: 8px 0;
       }
+      .nav-content {
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        flex: 1;
+      }
+      .nav-links > a {
+        padding: 0 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 64px;
+        color: white;
+      }
+      .nav-links > a i {
+        margin: 0;
+      }
+      .nav-links > a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      .user-menu {
+        margin-left: auto;
+      }
+      .main-nav {
+        background-color: var(--primary);
+      }
+      .nav-logo {
+        color: white !important;
+      }
+      .mobile-menu-toggle {
+        color: white;
+      }
+      @media (max-width: 992px) {
+        .nav-links {
+          display: none;
+          position: absolute;
+          top: 64px;
+          left: 0;
+          right: 0;
+          background: var(--primary);
+          flex-direction: column;
+          align-items: stretch;
+          padding: 1rem;
+        }
+        .nav-links.active {
+          display: flex;
+        }
+        .nav-links > a {
+          height: 48px;
+        }
+        .user-menu {
+          margin: 0;
+        }
+      }
     </style>
   </head>
   <body>
@@ -37,45 +95,104 @@
           <i class="material-icons">menu</i>
         </button>
         <% if (user) { %>
-        <div class="nav-links">
-          <a href="/records">My Collection</a>
-          <a href="/records/new">Add New Record</a>
-          <a href="/records/search">Search Discogs</a>
-          <a href="/records/stats">Stats</a>
-          <a href="/stores/nearby">Find Stores</a>
-          <a href="/stores/search">Search Store Inventory</a>
-
-          <!-- User dropdown trigger -->
-          <a class="dropdown-trigger" href="#" data-target="user-dropdown">
-            <img
-              src="<%= user.profile?.avatarUrl || '/images/default-avatar.png' %>"
-              alt="Avatar"
-              class="user-avatar"
-            />
-            <%= user.profile?.name || user.username %>
-            <i class="material-icons right">arrow_drop_down</i>
+        <div class="nav-links hide-on-med-and-down">
+          <a href="/records">
+            <i class="material-icons">album</i>Collection
           </a>
-
-          <!-- User dropdown structure -->
-          <ul id="user-dropdown" class="dropdown-content user-dropdown">
-            <li>
-              <a href="/records/profile"
-                ><i class="material-icons">person</i>View Profile</a
-              >
-            </li>
-            <li>
-              <a href="/records/settings"
-                ><i class="material-icons">settings</i>Settings</a
-              >
-            </li>
-            <li class="divider"></li>
-            <li>
-              <a href="/auth/sign-out"
-                ><i class="material-icons">exit_to_app</i>Sign Out</a
-              >
-            </li>
-          </ul>
+          <a href="/records/stats">
+            <i class="material-icons">bar_chart</i>Stats
+          </a>
+          <a href="/records/new">
+            <i class="material-icons">add</i>Add
+          </a>
+          <a href="/records/search">
+            <i class="material-icons">search</i>Discogs
+          </a>
+          <a href="/stores/nearby">
+            <i class="material-icons">store</i>Stores
+          </a>
+          <a href="/search">
+            <i class="material-icons">group</i>Users
+          </a>
+          <a href="/blog">
+            <i class="material-icons">article</i>Blog
+          </a>
+          <% if (user.isAdmin) { %>
+            <a href="/blog/admin/featured">
+              <i class="material-icons">featured_play_list</i>Featured
+            </a>
+          <% } %>
+          <div class="user-menu">
+            <a class="dropdown-trigger" href="#" data-target="user-dropdown">
+              <img
+                src="<%= user.profile?.avatarUrl || '/images/default-avatar.png' %>"
+                alt="Avatar"
+                class="user-avatar"
+              />
+              <%= user.profile?.name || user.username %>
+              <i class="material-icons right">arrow_drop_down</i>
+            </a>
+          </div>
         </div>
+
+        <!-- Mobile Navigation -->
+        <div class="nav-links hide-on-large-only">
+          <a href="/records">
+            <i class="material-icons">album</i>My Collection
+          </a>
+          <a href="/records/stats">
+            <i class="material-icons">bar_chart</i>Stats
+          </a>
+          <a href="/records/new">
+            <i class="material-icons">add</i>Add Record
+          </a>
+          <a href="/records/search">
+            <i class="material-icons">search</i>Search Discogs
+          </a>
+          <a href="/stores/nearby">
+            <i class="material-icons">store</i>Find Stores
+          </a>
+          <a href="/search">
+            <i class="material-icons">group</i>Find Users
+          </a>
+          <a href="/blog">
+            <i class="material-icons">article</i>Blog
+          </a>
+          <% if (user.isAdmin) { %>
+            <a href="/blog/admin/featured">
+              <i class="material-icons">featured_play_list</i>Featured Records
+            </a>
+          <% } %>
+          <a href="/records/profile">
+            <i class="material-icons">person</i>View Profile
+          </a>
+          <a href="/records/settings">
+            <i class="material-icons">settings</i>Settings
+          </a>
+          <a href="/auth/sign-out">
+            <i class="material-icons">exit_to_app</i>Sign Out
+          </a>
+        </div>
+
+        <!-- User dropdown structure -->
+        <ul id="user-dropdown" class="dropdown-content user-dropdown">
+          <li>
+            <a href="/records/profile">
+              <i class="material-icons">person</i>View Profile
+            </a>
+          </li>
+          <li>
+            <a href="/records/settings">
+              <i class="material-icons">settings</i>Settings
+            </a>
+          </li>
+          <li class="divider"></li>
+          <li>
+            <a href="/auth/sign-out">
+              <i class="material-icons">exit_to_app</i>Sign Out
+            </a>
+          </li>
+        </ul>
         <% } else { %>
         <div class="nav-links">
           <a href="/auth/sign-in">Sign In</a>
@@ -99,7 +216,7 @@
 
         // Mobile menu toggle
         const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-        const navLinks = document.querySelector('.nav-links');
+        const navLinks = document.querySelector('.nav-links.hide-on-large-only');
         
         if (mobileMenuToggle && navLinks) {
           mobileMenuToggle.addEventListener('click', function() {

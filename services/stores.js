@@ -1,5 +1,5 @@
 const axios = require('axios');
-
+const Store = require('../models/store');
 require('dotenv').config();
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
@@ -9,6 +9,7 @@ const DISCOGS_SECRET = process.env.DISCOGS_SECRET;
 if (!GOOGLE_API_KEY) throw new Error('GOOGLE_API_KEY environment variable is required');
 if (!DISCOGS_KEY) throw new Error('DISCOGS_KEY environment variable is required');
 if (!DISCOGS_SECRET) throw new Error('DISCOGS_SECRET environment variable is required');
+
 
 const googleMapsClient = axios.create({
     baseURL: 'https://maps.googleapis.com/maps/api',
@@ -110,22 +111,42 @@ async function findNearbyStores({ location, latitude, longitude, radius = 5000 }
 
                     const details = detailsResponse.data.result;
 
+                    // Try to find existing store in database
+                    let store = await Store.findOne({ placeId: place.place_id });
+                    
+                    if (!store) {
+                        // Create new store if not found
+                        store = await Store.create({
+                            placeId: place.place_id,
+                            name: details.name,
+                            address: details.formatted_address,
+                            location: {
+                                lat: details.geometry.location.lat,
+                                lng: details.geometry.location.lng
+                            },
+                            rating: details.rating,
+                            photos: details.photos?.map(photo => 
+                                `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${GOOGLE_API_KEY}`
+                            ),
+                            website: details.website
+                        });
+                    }
+
                     return {
-                        id: place.place_id,
-                        name: details.name,
-                        address: details.formatted_address,
-                        location: details.geometry.location,
-                        rating: details.rating,
-                        photos: details.photos?.map(photo => 
-                            `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${GOOGLE_API_KEY}`
-                        ),
+                        id: store.placeId,
+                        name: store.name,
+                        address: store.address,
+                        location: store.location,
+                        rating: store.rating,
+                        photos: store.photos,
                         openNow: details.opening_hours?.open_now,
                         distance: calculateDistance(
                             searchLocation.lat,
                             searchLocation.lng,
-                            details.geometry.location.lat,
-                            details.geometry.location.lng
-                        )
+                            store.location.lat,
+                            store.location.lng
+                        ),
+                        hasInventory: !!store.discogsUsername
                     };
                 } catch (error) {
                     console.error(`Error getting details for store ${place.name}:`, error);
@@ -154,7 +175,17 @@ async function findNearbyStores({ location, latitude, longitude, radius = 5000 }
  */
 async function searchStoreInventory({ storeId, query }) {
     try {
-        const response = await discogsClient.get(`/users/${storeId}/inventory`, {
+        // Get store from database
+        const store = await Store.findOne({ placeId: storeId });
+        if (!store || !store.discogsUsername) {
+            return {
+                hasInventory: false,
+                message: 'This store does not have a linked Discogs inventory',
+                listings: []
+            };
+        }
+
+        const response = await discogsClient.get(`/users/${store.discogsUsername}/inventory`, {
             params: {
                 q: query,
                 format: 'Vinyl',
@@ -162,24 +193,134 @@ async function searchStoreInventory({ storeId, query }) {
             }
         });
 
-        return response.data.listings.map(item => ({
-            id: item.id.toString(),
-            title: item.release.title,
-            artist: item.release.artist,
-            thumb: item.release.thumb || '/images/default-album.png',
-            format: item.release.format || 'Vinyl',
-            year: item.release.year || 'Unknown',
-            url: item.uri,
-            condition: item.condition,
-            price: item.price
-        }));
+        return {
+            hasInventory: true,
+            listings: response.data.listings.map(item => ({
+                id: item.id.toString(),
+                title: item.release.title,
+                artist: item.release.artist,
+                thumb: item.release.thumb || '/images/default-album.png',
+                format: item.release.format || 'Vinyl',
+                year: item.release.year || 'Unknown',
+                url: item.uri,
+                condition: item.condition,
+                price: item.price
+            }))
+        };
     } catch (error) {
         console.error('Error searching inventory:', error);
         throw error;
     }
 }
 
+/**
+ * Get store details by place ID
+ * @param {string} placeId Google Places ID of the store
+ * @returns {Promise<Object>} Store details
+ */
+async function getStoreDetails(placeId) {
+    try {
+        // Try to get store from database first
+        let store = await Store.findOne({ placeId });
+        
+        // Fetch fresh details from Google Places
+        const detailsResponse = await googleMapsClient.get('/place/details/json', {
+            params: {
+                place_id: placeId,
+                fields: 'name,formatted_address,geometry,rating,photos,opening_hours,website'
+            }
+        });
+
+        if (detailsResponse.data.status !== 'OK') {
+            throw new Error(detailsResponse.data.error_message || 'Store not found');
+        }
+
+        const details = detailsResponse.data.result;
+        const photos = details.photos?.map(photo => 
+            `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo.photo_reference}&key=${GOOGLE_API_KEY}`
+        );
+
+        // Update or create store in database
+        if (!store) {
+            store = await Store.create({
+                placeId,
+                name: details.name,
+                address: details.formatted_address,
+                location: {
+                    lat: details.geometry.location.lat,
+                    lng: details.geometry.location.lng
+                },
+                rating: details.rating,
+                photos,
+                website: details.website
+            });
+        } else {
+            store.name = details.name;
+            store.address = details.formatted_address;
+            store.location = {
+                lat: details.geometry.location.lat,
+                lng: details.geometry.location.lng
+            };
+            store.rating = details.rating;
+            store.photos = photos;
+            store.website = details.website;
+            store.lastUpdated = new Date();
+            await store.save();
+        }
+
+        return {
+            id: store.placeId,
+            name: store.name,
+            address: store.address,
+            location: store.location,
+            rating: store.rating,
+            photos: store.photos,
+            openNow: details.opening_hours?.open_now,
+            website: store.website,
+            hasInventory: !!store.discogsUsername
+        };
+    } catch (error) {
+        console.error('Error getting store details:', error);
+        throw error;
+    }
+}
+
+/**
+ * Link a store with a Discogs seller account
+ * @param {string} placeId Google Places ID of the store
+ * @param {string} discogsUsername Discogs seller username
+ */
+async function linkDiscogsAccount(placeId, discogsUsername) {
+    try {
+        // Verify the Discogs account exists and is a seller
+        const response = await discogsClient.get(`/users/${discogsUsername}`);
+        if (!response.data || response.data.num_for_sale === undefined) {
+            throw new Error('Invalid Discogs seller account');
+        }
+
+        // Update store in database
+        const store = await Store.findOne({ placeId });
+        if (!store) {
+            throw new Error('Store not found');
+        }
+
+        store.discogsUsername = discogsUsername;
+        store.lastUpdated = new Date();
+        await store.save();
+
+        return {
+            success: true,
+            message: 'Successfully linked Discogs account'
+        };
+    } catch (error) {
+        console.error('Error linking Discogs account:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     findNearbyStores,
-    searchStoreInventory
+    searchStoreInventory,
+    getStoreDetails,
+    linkDiscogsAccount
 };

@@ -1,0 +1,139 @@
+<%- include('../partials/header') %>
+
+<div class="container section">
+    <div class="row">
+        <div class="col s12">
+            <h4>Edit Post</h4>
+            <div class="card">
+                <div class="card-content">
+                    <form action="/blog/<%= post.slug %>?_method=PUT" method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <input type="text" id="title" name="title" value="<%= post.title %>" required>
+                                <label for="title" class="active">Title</label>
+                            </div>
+
+                            <div class="col s12">
+                                <div class="current-cover">
+                                    <p>Current Cover Image:</p>
+                                    <img src="<%= post.coverImage %>" alt="Current cover" class="responsive-img">
+                                </div>
+                            </div>
+
+                            <div class="file-field input-field col s12">
+                                <div class="btn blue">
+                                    <span>Change Cover Image</span>
+                                    <input type="file" name="coverImage" accept="image/*">
+                                </div>
+                                <div class="file-path-wrapper">
+                                    <input class="file-path validate" type="text" 
+                                           placeholder="Upload a new cover image (optional)">
+                                </div>
+                            </div>
+
+                            <div class="input-field col s12">
+                                <textarea id="content" name="content" class="materialize-textarea" required><%= post.content %></textarea>
+                                <label for="content" class="active">Content (Markdown supported)</label>
+                            </div>
+
+                            <div class="input-field col s12">
+                                <input type="text" id="tags" name="tags" value="<%= post.tags.join(', ') %>">
+                                <label for="tags" class="active">Tags (comma separated)</label>
+                            </div>
+
+                            <div class="col s12">
+                                <div class="preview-section">
+                                    <h5>Preview</h5>
+                                    <div id="preview" class="markdown-body"></div>
+                                </div>
+                            </div>
+
+                            <div class="col s12">
+                                <button type="submit" class="btn waves-effect waves-light blue">
+                                    <i class="fas fa-save left"></i>
+                                    <% if (user.isAdmin) { %>
+                                        Update Post
+                                    <% } else { %>
+                                        Submit Changes for Review
+                                    <% } %>
+                                </button>
+                                <a href="/blog/<%= post.slug %>" class="btn-flat waves-effect">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.preview-section {
+    margin: 2rem 0;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.preview-section h5 {
+    margin-top: 0;
+    color: #666;
+}
+
+.markdown-body {
+    padding: 1rem;
+    background: #f9f9f9;
+    border-radius: 4px;
+    min-height: 100px;
+}
+
+#content {
+    min-height: 300px;
+    font-family: monospace;
+}
+
+.current-cover {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.current-cover p {
+    margin-top: 0;
+    color: #666;
+}
+
+.current-cover img {
+    max-height: 200px;
+    object-fit: cover;
+}
+</style>
+
+<!-- Include Marked.js for Markdown preview -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const contentArea = document.getElementById('content');
+    const preview = document.getElementById('preview');
+    
+    // Initialize Materialize components
+    M.textareaAutoResize(contentArea);
+    
+    // Setup markdown preview
+    function updatePreview() {
+        const content = contentArea.value;
+        preview.innerHTML = marked.parse(content);
+    }
+    
+    contentArea.addEventListener('input', updatePreview);
+    
+    // Initialize preview
+    updatePreview();
+});
+</script>
+
+<!-- Add GitHub Markdown CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css">
+
+<%- include('../partials/footer') %>

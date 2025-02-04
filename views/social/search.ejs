@@ -1,0 +1,210 @@
+<%- include('../partials/header.ejs') %>
+
+<div class="container">
+  <div class="row">
+    <div class="col s12">
+      <div class="card">
+        <div class="card-content">
+          <span class="card-title">Find Users</span>
+          
+          <!-- Search Form -->
+          <form action="/social/search" method="GET" class="search-form">
+            <div class="input-field">
+              <i class="material-icons prefix">search</i>
+              <input 
+                type="text" 
+                id="search" 
+                name="q" 
+                value="<%= query %>"
+                placeholder="Search by username, name, or location"
+              >
+              <label for="search">Search Users</label>
+            </div>
+          </form>
+
+          <!-- Search Results -->
+          <% if (users.length > 0) { %>
+            <div class="user-results">
+              <% users.forEach(user => { %>
+                <div class="user-card">
+                  <div class="user-info">
+                    <img 
+                      src="<%= user.profile?.avatarUrl || '/images/default-avatar.png' %>" 
+                      alt="<%= user.profile?.name || user.username %>"
+                      class="circle responsive-img user-avatar"
+                      onerror="this.src='/images/default-avatar.png'"
+                    >
+                    <div class="user-details">
+                      <h5 class="user-name">
+                        <%= user.profile?.name || user.username %>
+                      </h5>
+                      <p class="username">@<%= user.username %></p>
+                      <% if (user.profile?.location) { %>
+                        <p class="location">
+                          <i class="material-icons tiny">location_on</i>
+                          <%= user.profile.location %>
+                        </p>
+                      <% } %>
+                    </div>
+                  </div>
+                  <div class="user-actions">
+                    <button 
+                      class="btn waves-effect waves-light follow-btn"
+                      data-user-id="<%= user._id %>"
+                      onclick="toggleFollow(this)"
+                    >
+                      Follow
+                    </button>
+                    <a 
+                      href="/users/<%= user.username %>" 
+                      class="btn-floating waves-effect waves-light"
+                      title="View Profile"
+                    >
+                      <i class="material-icons">person</i>
+                    </a>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          <% } else if (query) { %>
+            <div class="no-results">
+              <i class="material-icons large">search_off</i>
+              <p>No users found matching "<%= query %>"</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .search-form {
+    margin: 2rem 0;
+  }
+
+  .user-results {
+    margin-top: 2rem;
+  }
+
+  .user-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .user-card:last-child {
+    border-bottom: none;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .user-avatar {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+  }
+
+  .user-details {
+    flex: 1;
+  }
+
+  .user-name {
+    font-size: 1.2rem;
+    margin: 0;
+    color: #333;
+  }
+
+  .username {
+    color: #666;
+    margin: 0.25rem 0;
+  }
+
+  .location {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #666;
+    margin: 0.25rem 0;
+  }
+
+  .user-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 3rem 0;
+    color: #666;
+  }
+
+  .no-results i {
+    color: #ddd;
+    margin-bottom: 1rem;
+  }
+
+  /* Dark theme support */
+  [data-theme="dark"] .user-card {
+    border-bottom-color: #444;
+  }
+
+  [data-theme="dark"] .user-name {
+    color: #fff;
+  }
+
+  [data-theme="dark"] .username,
+  [data-theme="dark"] .location {
+    color: #aaa;
+  }
+
+  [data-theme="dark"] .no-results {
+    color: #aaa;
+  }
+
+  [data-theme="dark"] .no-results i {
+    color: #444;
+  }
+</style>
+
+<script>
+async function toggleFollow(btn) {
+  const userId = btn.dataset.userId;
+  const isFollowing = btn.classList.contains('following');
+  
+  try {
+    const response = await fetch(`/social/${isFollowing ? 'unfollow' : 'follow'}/${userId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      if (isFollowing) {
+        btn.classList.remove('following');
+        btn.classList.remove('red');
+        btn.textContent = 'Follow';
+      } else {
+        btn.classList.add('following');
+        btn.classList.add('red');
+        btn.textContent = 'Following';
+      }
+      
+      M.toast({html: `Successfully ${isFollowing ? 'unfollowed' : 'followed'} user`});
+    }
+  } catch (error) {
+    console.error('Error toggling follow:', error);
+    M.toast({html: 'Error updating follow status'});
+  }
+}
+</script>
+
+<%- include('../partials/footer.ejs') %>

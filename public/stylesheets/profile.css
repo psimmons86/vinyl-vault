@@ -1,0 +1,222 @@
+/* Profile Styles */
+.profile-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.genres-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chip {
+  background-color: var(--primary-color, #26a69a);
+  color: white;
+}
+
+.profile-banner {
+  height: 300px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  margin-bottom: -50px;
+}
+
+.banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 0;
+}
+
+.profile-header-row {
+  position: relative;
+  z-index: 1;
+}
+
+.profile-card {
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.profile-avatar {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.profile-name {
+  font-size: 2.5rem;
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.profile-location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #666;
+}
+
+.profile-bio {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 15px 0;
+  line-height: 1.6;
+}
+
+.social-links {
+  margin: 15px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.social-links .btn-floating {
+  transition: transform 0.2s ease;
+}
+
+.social-links .btn-floating:hover {
+  transform: scale(1.1);
+}
+
+.stats-row {
+  margin-top: 2rem;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  margin: 0;
+  font-weight: 300;
+  color: #333;
+}
+
+.stat-label {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 5px 0 0 0;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  margin: 2rem 0 1rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.top-8-grid .card {
+  margin: 0.5rem 0;
+  transition: transform 0.2s ease;
+}
+
+.top-8-grid .card:hover {
+  transform: translateY(-5px);
+}
+
+.top-8-grid .card-image {
+  position: relative;
+  padding-top: 100%;
+}
+
+.top-8-grid .card-image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.top-8-grid .card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.8));
+  padding: 1rem;
+  color: white;
+}
+
+.top-8-grid .card-overlay h5 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.top-8-grid .card-overlay p {
+  font-size: 0.875rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Dark theme support */
+[data-theme="dark"] .profile-card,
+[data-theme="dark"] .card,
+[data-theme="dark"] .card-panel,
+[data-theme="dark"] .collection,
+[data-theme="dark"] .collection .collection-item {
+  background: rgba(30, 30, 30, 0.98);
+}
+
+[data-theme="dark"] .collection .collection-item {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .collection a.collection-item {
+  color: #fff;
+}
+
+[data-theme="dark"] .collection .collection-item .title {
+  color: #fff;
+}
+
+[data-theme="dark"] .collection .collection-item p {
+  color: #aaa;
+}
+
+[data-theme="dark"] .collection .collection-item .secondary-content i {
+  color: #aaa;
+}
+
+[data-theme="dark"] .collection a.collection-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .profile-name,
+[data-theme="dark"] .stat-number,
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .card-title {
+  color: #fff;
+}
+
+[data-theme="dark"] .profile-bio,
+[data-theme="dark"] .profile-location,
+[data-theme="dark"] .stat-label {
+  color: #aaa;
+}
+
+[data-theme="dark"] .chip {
+  background-color: var(--primary-color, #26a69a);
+  color: #fff;
+}
+
+[data-theme="dark"] .btn-floating {
+  background-color: var(--primary-color, #26a69a);
+}
+
+/* Utility Classes */
+.hidden {
+  display: none !important;
+}

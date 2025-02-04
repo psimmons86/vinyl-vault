@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const asyncHandler = require('../middleware/async-handler');
-const { findNearbyStores, searchStoreInventory } = require('../services/stores');
+const { findNearbyStores, searchStoreInventory, getStoreDetails, linkDiscogsAccount } = require('../services/stores');
+const ensureSignedIn = require('../middleware/ensure-signed-in');
 
 // Find record stores by location
 router.get('/nearby', asyncHandler(async (req, res) => {
@@ -63,18 +64,20 @@ router.get('/search', asyncHandler(async (req, res) => {
     }
 
     try {
-        const results = await searchStoreInventory({
+        const response = await searchStoreInventory({
             storeId: store,
             query: q
         });
         
         if (req.xhr) {
-            return res.json({ results });
+            return res.json(response);
         }
 
         res.render('stores/search', {
             title: 'Search Results',
-            results,
+            results: response.listings,
+            hasInventory: response.hasInventory,
+            message: response.message,
             query: q,
             error: null,
             store
@@ -103,12 +106,16 @@ router.get('/record/:id', asyncHandler(async (req, res) => {
     const { store } = req.query;
     
     try {
-        const results = await searchStoreInventory({
+        const response = await searchStoreInventory({
             storeId: store,
             query: recordId // Use record ID as query to get specific record
         });
 
-        const record = results.find(r => r.id === recordId);
+        if (!response.hasInventory) {
+            throw new Error(response.message || 'Store inventory not available');
+        }
+
+        const record = response.listings.find(r => r.id === recordId);
         if (!record) {
             throw new Error('Record not found');
         }
@@ -125,15 +132,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
     const storeId = req.params.id;
     
     try {
-        const stores = await findNearbyStores({
-            location: storeId // Use store ID as location to get details
-        });
-
-        const store = stores.find(s => s.id === storeId);
-        
-        if (!store) {
-            throw new Error('Store not found');
-        }
+        const store = await getStoreDetails(storeId);
 
         // If it's an AJAX request, return JSON
         if (req.xhr) {
@@ -156,8 +155,32 @@ router.get('/:id', asyncHandler(async (req, res) => {
         res.render('stores/show', {
             title: 'Store Not Found',
             store: null,
-            error: 'Store not found',
+            error: err.message || 'Store not found',
             googleApiKey: process.env.GOOGLE_API_KEY
+        });
+    }
+}));
+
+// Link store to Discogs account (admin only)
+router.post('/:id/link-discogs', ensureSignedIn, asyncHandler(async (req, res) => {
+    const storeId = req.params.id;
+    const { discogsUsername } = req.body;
+
+    if (!req.user.isAdmin) {
+        return res.status(403).json({ error: 'Unauthorized' });
+    }
+
+    if (!discogsUsername) {
+        return res.status(400).json({ error: 'Discogs username is required' });
+    }
+
+    try {
+        const result = await linkDiscogsAccount(storeId, discogsUsername);
+        res.json(result);
+    } catch (err) {
+        console.error('Error linking Discogs account:', err);
+        res.status(500).json({ 
+            error: err.message || 'Error linking Discogs account' 
         });
     }
 }));

@@ -12,6 +12,8 @@ const session = require('express-session');     // Session management
 const User = require('./models/user');
 const Record = require('./models/record');
 const Activity = require('./models/activity');
+const Post = require('./models/post');
+const FeaturedRecord = require('./models/featured');
 
 // Initialize Express app and port
 const app = express();
@@ -144,6 +146,19 @@ app.use('/auth', require('./controllers/auth'));           // Authentication rou
 app.use(require('./middleware/ensure-signed-in'));         // Require login for routes below
 app.use('/records', require('./controllers/records'));     // Record routes
 app.use('/stores', require('./controllers/stores'));       // Store routes
+app.use('/api/profile', require('./controllers/profile')); // Profile API routes
+app.use('/admin', require('./controllers/admin'));         // Admin routes
+app.use('/social', require('./controllers/social'));       // Social routes
+app.use('/blog', require('./controllers/blog'));           // Blog routes
+app.use('/search', require('./controllers/search'));       // Search routes
+
+// Create blog uploads directory if it doesn't exist
+const fs = require('fs');
+const path = require('path');
+const blogUploadsDir = path.join(__dirname, 'public/uploads/blog');
+if (!fs.existsSync(blogUploadsDir)) {
+    fs.mkdirSync(blogUploadsDir, { recursive: true });
+}
 
 // 404 handler - for undefined routes
 app.use((req, res) => {

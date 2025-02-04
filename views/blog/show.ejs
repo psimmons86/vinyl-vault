@@ -1,0 +1,207 @@
+<%- include('../partials/header') %>
+
+<div class="container section">
+    <div class="row">
+        <div class="col s12 m8 offset-m2">
+            <% if (post) { %>
+                <div class="blog-post">
+                    <div class="post-header">
+                        <% if (post.coverImage) { %>
+                            <div class="post-cover">
+                                <img src="<%= post.coverImage %>" alt="<%= post.title %>" 
+                                     class="responsive-img">
+                            </div>
+                        <% } %>
+                        
+                        <h2 class="post-title"><%= post.title %></h2>
+                        
+                        <div class="post-meta">
+                            <div class="author-info">
+                                <img src="/images/default-avatar.png" alt="<%= post.author.username %>" 
+                                     class="circle author-avatar">
+                                <span class="author-name">
+                                    <%= post.author.username %>
+                                    <% if (post.author.isAdmin) { %>
+                                        <span class="admin-badge">Admin</span>
+                                    <% } %>
+                                </span>
+                            </div>
+                            <div class="post-date">
+                                <i class="fas fa-calendar"></i>
+                                <%= post.formattedDate %>
+                            </div>
+                        </div>
+
+                        <% if (post.tags && post.tags.length > 0) { %>
+                            <div class="post-tags">
+                                <% post.tags.forEach(tag => { %>
+                                    <div class="chip"><%= tag %></div>
+                                <% }); %>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <div class="post-content markdown-body">
+                        <%- marked.parse(post.content) %>
+                    </div>
+
+                    <div class="post-footer">
+                        <% if (user && (user.isAdmin || user._id.toString() === post.author._id.toString())) { %>
+                            <div class="post-actions">
+                                <a href="/blog/<%= post.slug %>/edit" 
+                                   class="btn waves-effect waves-light blue">
+                                    <i class="fas fa-edit left"></i> Edit Post
+                                </a>
+                                <form action="/blog/<%= post.slug %>?_method=DELETE" 
+                                      method="POST" class="delete-form">
+                                    <button type="submit" class="btn waves-effect waves-light red"
+                                            onclick="return confirm('Are you sure you want to delete this post?')">
+                                        <i class="fas fa-trash left"></i> Delete Post
+                                    </button>
+                                </form>
+                            </div>
+                        <% } %>
+
+                        <% if (!post.approved) { %>
+                            <div class="card-panel orange lighten-4">
+                                <i class="fas fa-clock"></i>
+                                This post is pending approval from an administrator.
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="card-panel red white-text">Post not found.</div>
+            <% } %>
+
+            <div class="back-link">
+                <a href="/blog" class="btn-flat waves-effect">
+                    <i class="fas fa-arrow-left"></i> Back to Blog
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.blog-post {
+    margin: 2rem 0;
+}
+
+.post-header {
+    margin-bottom: 2rem;
+}
+
+.post-cover {
+    margin: -2rem -2rem 2rem -2rem;
+    max-height: 400px;
+    overflow: hidden;
+}
+
+.post-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-title {
+    margin: 1rem 0;
+    font-size: 2.5rem;
+    line-height: 1.2;
+}
+
+.post-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 1rem 0;
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.author-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.author-avatar {
+    width: 40px;
+    height: 40px;
+}
+
+.admin-badge {
+    background: #2196f3;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+
+.post-date {
+    color: #666;
+}
+
+.post-tags {
+    margin: 1rem 0;
+}
+
+.post-tags .chip {
+    margin-right: 5px;
+}
+
+.post-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin: 2rem 0;
+}
+
+.post-footer {
+    margin: 2rem 0;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+}
+
+.post-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.delete-form {
+    display: inline;
+}
+
+.back-link {
+    margin: 2rem 0;
+}
+
+@media (max-width: 600px) {
+    .post-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .post-actions {
+        flex-direction: column;
+    }
+
+    .post-actions .btn {
+        width: 100%;
+    }
+
+    .post-title {
+        font-size: 2rem;
+    }
+}
+</style>
+
+<!-- Include Marked.js for Markdown rendering -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<!-- Add GitHub Markdown CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.1.0/github-markdown.min.css">
+
+<%- include('../partials/footer') %>

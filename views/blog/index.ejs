@@ -1,0 +1,217 @@
+<%- include('../partials/header') %>
+
+<div class="container section">
+    <!-- Featured Records Section -->
+    <% if (featured && featured.length > 0) { %>
+        <div class="section">
+            <h4>Heavy Rotation</h4>
+            <div class="featured-records">
+                <div class="row">
+                    <% featured.forEach(record => { %>
+                        <div class="col s12 m6 l2-4">
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="<%= record.albumArt %>" alt="<%= record.title %>" class="responsive-img">
+                                    <% if (record.link) { %>
+                                        <a href="<%= record.link %>" target="_blank" 
+                                           class="btn-floating halfway-fab waves-effect waves-light blue">
+                                            <i class="fas fa-play"></i>
+                                        </a>
+                                    <% } %>
+                                </div>
+                                <div class="card-content">
+                                    <span class="card-title truncate"><%= record.title %></span>
+                                    <p class="grey-text truncate"><%= record.artist %></p>
+                                    <% if (record.description) { %>
+                                        <p class="description"><%= record.description %></p>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Blog Posts Section -->
+    <div class="section">
+        <div class="row">
+            <div class="col s12">
+                <div class="blog-header">
+                    <h4>Blog Posts</h4>
+                    <% if (user) { %>
+                        <a href="/blog/new" class="btn waves-effect waves-light blue">
+                            <i class="fas fa-plus left"></i> New Post
+                        </a>
+                    <% } %>
+                </div>
+
+                <% if (posts && posts.length > 0) { %>
+                    <% posts.forEach(post => { %>
+                        <div class="card horizontal hoverable">
+                            <div class="card-image hide-on-small-only">
+                                <img src="<%= post.coverImage %>" alt="<%= post.title %>">
+                            </div>
+                            <div class="card-stacked">
+                                <div class="card-content">
+                                    <div class="post-meta">
+                                        <span class="post-date grey-text">
+                                            <%= post.formattedDate %>
+                                        </span>
+                                        <span class="author">
+                                            by <%= post.author.username %>
+                                            <% if (post.author.isAdmin) { %>
+                                                <span class="admin-badge">Admin</span>
+                                            <% } %>
+                                        </span>
+                                    </div>
+                                    <h5 class="card-title">
+                                        <a href="/blog/<%= post.slug %>"><%= post.title %></a>
+                                    </h5>
+                                    <p class="post-excerpt">
+                                        <%= post.content.substring(0, 200) %>...
+                                    </p>
+                                    <% if (post.tags && post.tags.length > 0) { %>
+                                        <div class="post-tags">
+                                            <% post.tags.forEach(tag => { %>
+                                                <div class="chip"><%= tag %></div>
+                                            <% }); %>
+                                        </div>
+                                    <% } %>
+                                </div>
+                                <div class="card-action">
+                                    <a href="/blog/<%= post.slug %>" class="blue-text">Read More</a>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+
+                    <!-- Pagination -->
+                    <% if (totalPages > 1) { %>
+                        <ul class="pagination center">
+                            <% if (currentPage > 1) { %>
+                                <li class="waves-effect">
+                                    <a href="/blog?page=<%= currentPage - 1 %>">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            <% } %>
+                            
+                            <% for(let i = 1; i <= totalPages; i++) { %>
+                                <li class="<%= i === currentPage ? 'active blue' : 'waves-effect' %>">
+                                    <a href="/blog?page=<%= i %>"><%= i %></a>
+                                </li>
+                            <% } %>
+                            
+                            <% if (currentPage < totalPages) { %>
+                                <li class="waves-effect">
+                                    <a href="/blog?page=<%= currentPage + 1 %>">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            <% } %>
+                        </ul>
+                    <% } %>
+                <% } else { %>
+                    <div class="card-panel">No posts yet.</div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.featured-records {
+    margin-bottom: 2rem;
+}
+
+.featured-records .card {
+    height: 100%;
+}
+
+.featured-records .card-image {
+    height: 200px;
+    overflow: hidden;
+}
+
+.featured-records .card-image img {
+    height: 100%;
+    object-fit: cover;
+}
+
+.featured-records .card-content {
+    padding: 12px;
+}
+
+.featured-records .description {
+    font-size: 0.9rem;
+    margin-top: 8px;
+}
+
+.blog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.post-meta {
+    margin-bottom: 1rem;
+}
+
+.post-meta > * {
+    margin-right: 1rem;
+}
+
+.admin-badge {
+    background: #2196f3;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+
+.post-excerpt {
+    color: #666;
+    margin: 1rem 0;
+}
+
+.post-tags {
+    margin-top: 1rem;
+}
+
+.post-tags .chip {
+    margin-right: 5px;
+}
+
+.card.horizontal .card-image {
+    max-width: 200px;
+}
+
+.card.horizontal .card-image img {
+    height: 100%;
+    object-fit: cover;
+}
+
+@media (max-width: 600px) {
+    .blog-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+}
+
+/* Custom grid for featured records */
+@media (min-width: 993px) {
+    .l2-4 {
+        width: 20% !important;
+        margin-left: auto;
+        left: auto;
+        right: auto;
+    }
+}
+</style>
+
+<%- include('../partials/footer') %>
