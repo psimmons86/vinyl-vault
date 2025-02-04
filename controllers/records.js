@@ -1,13 +1,25 @@
 const express = require('express');
 const router = express.Router();
+const fs = require('fs/promises');
 const Record = require('../models/record');
 const User = require('../models/user');
 const Activity = require('../models/activity');
-const Comment = require('../models/comment');  // Add this
+const Comment = require('../models/comment');
 const { getMusicNews } = require('../services/newsapi');
 const discogs = require('../services/discogs');
 const upload = require('../config/uploads');
+const asyncHandler = require('../middleware/async-handler');
 
+// Utility function to validate record ownership
+const validateOwnership = async (recordId, userId) => {
+    const record = await Record.findById(recordId);
+    if (!record || record.owner.toString() !== userId.toString()) {
+        throw new Error('Record not found or unauthorized');
+    }
+    return record;
+};
+
+// File cleanup utility
 async function cleanupFiles(files) {
     try {
         if (!files) return;
@@ -22,214 +34,177 @@ async function cleanupFiles(files) {
 }
 
 // Get all records for the logged-in user
-router.get('/', async (req, res) => {
-    try {
-        // Filter by tag if provided
-        const query = { owner: req.user._id };
-        if (req.query.tag) {
-            query.tags = req.query.tag;
-        }
-        
-        // Get records and available tags
-        const [records, tags] = await Promise.all([
-            Record.find(query),
-            Record.distinct('tags', { owner: req.user._id })
-        ]);
-        
-        // Sort by artist name or date added
-        const sortedRecords = [...records].sort((a, b) => 
-            req.query.sort === 'artist' 
-                ? a.artist.toLowerCase().localeCompare(b.artist.toLowerCase())
-                : b.createdAt - a.createdAt
-        );
-        
-        res.render('records/index', {
-            records: sortedRecords,
-            title: 'My Records',
-            currentSort: req.query.sort,
-            currentTag: req.query.tag,
-            tags
-        });
-    } catch (err) {
-        res.redirect('/');
+// Get all records for the logged-in user
+router.get('/', asyncHandler(async (req, res) => {
+    // Filter by tag if provided
+    const query = { owner: req.user._id };
+    if (req.query.tag) {
+        query.tags = req.query.tag;
     }
-});
+    
+    // Get records and available tags
+    const [records, tags] = await Promise.all([
+        Record.find(query),
+        Record.distinct('tags', { owner: req.user._id })
+    ]);
+    
+    // Sort by artist name or date added
+    const sortedRecords = [...records].sort((a, b) => 
+        req.query.sort === 'artist' 
+            ? a.artist.toLowerCase().localeCompare(b.artist.toLowerCase())
+            : b.createdAt - a.createdAt
+    );
+    
+    res.render('records/index', {
+        records: sortedRecords,
+        title: 'My Records',
+        currentSort: req.query.sort,
+        currentTag: req.query.tag,
+        tags
+    });
+}));
 
-router.get('/profile', async (req, res) => {
-    try {
-        const [
-            totalRecords,
-            totalPlays,
-            recentlyAdded,
-            recentlyPlayed,
-            user
-        ] = await Promise.all([
-            Record.countDocuments({ owner: req.user._id }),
+router.get('/profile', asyncHandler(async (req, res) => {
+    const [
+        totalRecords,
+        totalPlays,
+        recentlyAdded,
+        recentlyPlayed,
+        user
+    ] = await Promise.all([
+        Record.countDocuments({ owner: req.user._id }),
+        
+        Record.aggregate([
+            { $match: { owner: req.user._id } },
+            { $group: { _id: null, total: { $sum: '$plays' } } }
+        ]),
+        
+        Record.find({ owner: req.user._id })
+            .sort('-createdAt')
+            .limit(5),
             
-            Record.aggregate([
-                { $match: { owner: req.user._id } },
-                { $group: { _id: null, total: { $sum: '$plays' } } }
-            ]),
-            
-            Record.find({ owner: req.user._id })
-                .sort('-createdAt')
-                .limit(5),
-                
-            Record.find({ 
-                owner: req.user._id, 
-                lastPlayed: { $exists: true, $ne: null } 
-            })
-                .sort('-lastPlayed')
-                .limit(5),
-            
-            // Fetch user with populated top8Records
-            User.findById(req.user._id)
-                .populate('profile.top8Records')
-        ]);
+        Record.find({ 
+            owner: req.user._id, 
+            lastPlayed: { $exists: true, $ne: null } 
+        })
+            .sort('-lastPlayed')
+            .limit(5),
+        
+        // Fetch user with populated top8Records
+        User.findById(req.user._id)
+            .populate('profile.top8Records')
+    ]);
 
-        res.render('records/profile', {
-            title: 'My Profile',
-            totalRecords,
-            totalPlays: totalPlays[0]?.total || 0,
-            recentlyAdded,
-            recentlyPlayed,
-            top8Records: user.profile?.top8Records || [],
-            user: user // Add this to ensure user data is available in the template
-        });
-    } catch (err) {
-        console.error('Profile error:', err);
-        res.redirect('/records');
-    }
-});
+    res.render('records/profile', {
+        title: 'My Profile',
+        totalRecords,
+        totalPlays: totalPlays[0]?.total || 0,
+        recentlyAdded,
+        recentlyPlayed,
+        top8Records: user.profile?.top8Records || [],
+        user: user // Add this to ensure user data is available in the template
+    });
+}));
 
 router.post('/settings', upload.fields([
     { name: 'profilePicture', maxCount: 1 },
     { name: 'bannerImage', maxCount: 1 }
-]), async (req, res) => {
-    try {
-        const updateData = {
-            isPublic: !!req.body.isPublic,
-            profile: {
-                name: req.body.name,
-                bio: req.body.bio,
-                location: req.body.location,
-                favoriteGenres: req.body.favoriteGenres?.split(',').map(genre => genre.trim()) || [],
-                socialLinks: {
-                    discogs: req.body.discogsLink,
-                    instagram: req.body.instagramLink,
-                    twitter: req.body.twitterLink
-                },
-                showStats: !!req.body.showStats,
-                theme: req.body.darkMode ? 'dark' : 'light'
-            }
-        };
-
-        // Add uploaded files to update data if they exist
-        if (req.files) {
-            if (req.files.profilePicture && req.files.profilePicture[0]) {
-                updateData.profile.avatarUrl = '/uploads/' + req.files.profilePicture[0].filename;
-            }
-            if (req.files.bannerImage && req.files.bannerImage[0]) {
-                updateData.profile.bannerUrl = '/uploads/' + req.files.bannerImage[0].filename;
-            }
+]), asyncHandler(async (req, res) => {
+    const updateData = {
+        isPublic: !!req.body.isPublic,
+        profile: {
+            name: req.body.name,
+            bio: req.body.bio,
+            location: req.body.location,
+            favoriteGenres: req.body.favoriteGenres?.split(',').map(genre => genre.trim()) || [],
+            socialLinks: {
+                discogs: req.body.discogsLink,
+                instagram: req.body.instagramLink,
+                twitter: req.body.twitterLink
+            },
+            showStats: !!req.body.showStats,
+            theme: req.body.darkMode ? 'dark' : 'light'
         }
+    };
 
-        // Maintain existing avatar/banner if no new files uploaded
-        if (!req.files?.profilePicture) {
-            updateData.profile.avatarUrl = req.user.profile?.avatarUrl;
+    // Add uploaded files to update data if they exist
+    if (req.files) {
+        if (req.files.profilePicture && req.files.profilePicture[0]) {
+            updateData.profile.avatarUrl = '/uploads/' + req.files.profilePicture[0].filename;
         }
-        if (!req.files?.bannerImage) {
-            updateData.profile.bannerUrl = req.user.profile?.bannerUrl;
+        if (req.files.bannerImage && req.files.bannerImage[0]) {
+            updateData.profile.bannerUrl = '/uploads/' + req.files.bannerImage[0].filename;
         }
-
-        await User.findByIdAndUpdate(req.user._id, updateData, { new: true });
-        
-        req.session.message = { type: 'success', text: 'Profile updated successfully!' };
-        res.redirect('/records/settings');
-    } catch (err) {
-        console.error('Settings update error:', err);
-        res.render('records/settings', {
-            title: 'Profile Settings',
-            error: 'Error updating settings',
-            user: req.user,
-            userRecords: await Record.find({ owner: req.user._id }).sort('artist title')
-        });
     }
-});
+
+    // Maintain existing avatar/banner if no new files uploaded
+    if (!req.files?.profilePicture) {
+        updateData.profile.avatarUrl = req.user.profile?.avatarUrl;
+    }
+    if (!req.files?.bannerImage) {
+        updateData.profile.bannerUrl = req.user.profile?.bannerUrl;
+    }
+
+    await User.findByIdAndUpdate(req.user._id, updateData, { new: true });
+    
+    req.session.message = { type: 'success', text: 'Profile updated successfully!' };
+    res.redirect('/records/settings');
+}));
 
 // Get feed items with pagination
-router.get('/feed', async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = 10;
-        const skip = (page - 1) * limit;
+router.get('/feed', asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
 
-        const activities = await Activity.find()
-            .populate('user', 'username profile.name profile.avatarUrl')
-            .populate('record')
-            .populate('targetUser', 'username profile.name')
-            .populate('comment')
-            .sort('-createdAt')
-            .skip(skip)
-            .limit(limit);
+    const activities = await Activity.find()
+        .populate('user', 'username profile.name profile.avatarUrl')
+        .populate('record')
+        .populate('targetUser', 'username profile.name')
+        .populate('comment')
+        .sort('-createdAt')
+        .skip(skip)
+        .limit(limit);
 
-        res.json(activities);
-    } catch (err) {
-        console.error('Feed error:', err);
-        res.status(500).json({ error: 'Error loading feed' });
-    }
-});
+    res.json(activities);
+}));
 
 // Get music news
-router.get('/news', async (req, res) => {
-    try {
-        const genre = req.query.genre || '';
-        const news = await getMusicNews(genre);
-        res.json(news || []); // Ensure we always return an array
-    } catch (err) {
-        console.error('News error:', err);
-        res.status(500).json({ error: 'Error loading news' });
-    }
-});
+router.get('/news', asyncHandler(async (req, res) => {
+    const genre = req.query.genre || '';
+    const news = await getMusicNews(genre);
+    res.json(news || []); // Ensure we always return an array
+}));
 
 // Add comment
-router.post('/comments', async (req, res) => {
-    try {
-        const comment = await Comment.create({
-            user: req.user._id,
-            content: req.body.content,
-            target: req.body.target,
-            targetType: req.body.targetType
-        });
+router.post('/comments', asyncHandler(async (req, res) => {
+    const comment = await Comment.create({
+        user: req.user._id,
+        content: req.body.content,
+        target: req.body.target,
+        targetType: req.body.targetType
+    });
 
-        // Create activity for comment
-        await Activity.create({
-            user: req.user._id,
-            activityType: 'comment',
-            comment: comment._id
-        });
+    // Create activity for comment
+    await Activity.create({
+        user: req.user._id,
+        activityType: 'comment',
+        comment: comment._id
+    });
 
-        res.json(comment);
-    } catch (err) {
-        res.status(500).json({ error: 'Error creating comment' });
-    }
-});
+    res.json(comment);
+}));
 
 // Get comments for a target
-router.get('/comments/:target', async (req, res) => {
-    try {
-        const comments = await Comment.find({ target: req.params.target })
-            .populate('user', 'username profile.name profile.avatarUrl')
-            .sort('-createdAt');
-        res.json(comments);
-    } catch (err) {
-        res.status(500).json({ error: 'Error loading comments' });
-    }
-});
+router.get('/comments/:target', asyncHandler(async (req, res) => {
+    const comments = await Comment.find({ target: req.params.target })
+        .populate('user', 'username profile.name profile.avatarUrl')
+        .sort('-createdAt');
+    res.json(comments);
+}));
 
 // Get collection statistics
-router.get('/stats', async (req, res) => {
-    try {
+router.get('/stats', asyncHandler(async (req, res) => {
         // Get various stats about the collection
         const [
             totalRecords,
@@ -317,243 +292,193 @@ router.get('/stats', async (req, res) => {
             topPlayedRecords,
             recentlyPlayedRecords
         });
-    } catch (err) {
-        res.redirect('/records');
-    }
-});
+}));
 
 // Search Discogs database
-router.get('/search', async (req, res) => {
-    try {
-        if (!req.query.q) {
-            return res.render('records/search', {
-                title: 'Search Discogs',
-                results: [],
-                query: '',
-                error: null
-            });
-        }
-
-        const results = await discogs.searchRecords(req.query.q);
-        
-        res.render('records/search', {
-            title: 'Search Results',
-            results,
-            query: req.query.q,
+router.get('/search', asyncHandler(async (req, res) => {
+    if (!req.query.q) {
+        return res.render('records/search', {
+            title: 'Search Discogs',
+            results: [],
+            query: '',
             error: null
         });
-    } catch (err) {
-        res.render('records/search', {
-            title: 'Search Results',
-            results: [],
-            query: req.query.q || '',
-            error: 'Error searching records'
-        });
     }
-});
+
+    const results = await discogs.searchRecords(req.query.q);
+    
+    res.render('records/search', {
+        title: 'Search Results',
+        results,
+        query: req.query.q,
+        error: null
+    });
+}));
 
 // Show new record form
-router.get('/new', async (req, res) => {
+router.get('/new', asyncHandler(async (req, res) => {
     const formats = Record.schema.path('format').enumValues;
     res.render('records/new', {
         title: 'Add Record',
         formats,
         prefilledData: null
     });
-});
+}));
 
-router.get('/settings', async (req, res) => {
-    try {
-        const [user, userRecords] = await Promise.all([
-            User.findById(req.user._id)
-                .populate('profile.top8Records'),
-            Record.find({ owner: req.user._id })
-                .sort('artist title')
-        ]);
+router.get('/settings', asyncHandler(async (req, res) => {
+    const [user, userRecords] = await Promise.all([
+        User.findById(req.user._id)
+            .populate('profile.top8Records'),
+        Record.find({ owner: req.user._id })
+            .sort('artist title')
+    ]);
 
-        res.render('records/settings', { 
-            title: 'Profile Settings',
-            error: null,
-            user,
-            userRecords
-        });
-    } catch (err) {
-        res.redirect('/records');
+    res.render('records/settings', { 
+        title: 'Profile Settings',
+        error: null,
+        user,
+        userRecords
+    });
+}));
+
+router.post('/settings/top8', asyncHandler(async (req, res) => {
+    let recordIds = req.body.recordIds;
+    
+    // Handle single ID or array of IDs
+    if (!Array.isArray(recordIds)) {
+        recordIds = recordIds ? [recordIds] : [];
     }
-});
-
-// Update user settings
-router.post('/settings', async (req, res) => {
-    try {
-        const updateData = {
-            isPublic: !!req.body.isPublic,
-            profile: {
-                name: req.body.name,
-                bio: req.body.bio,
-                location: req.body.location,
-                favoriteGenres: req.body.favoriteGenres?.split(',').map(genre => genre.trim()) || [],
-                avatarUrl: req.body.avatarUrl,
-                bannerUrl: req.body.bannerUrl,
-                socialLinks: {
-                    discogs: req.body.discogsLink,
-                    instagram: req.body.instagramLink,
-                    twitter: req.body.twitterLink
-                },
-                showStats: !!req.body.showStats
-            }
-        };
-
-        await User.findByIdAndUpdate(req.user._id, updateData);
-        
-        req.session.message = { type: 'success', text: 'Profile updated successfully!' };
-        res.redirect('/records/settings');
-    } catch (err) {
-        res.render('records/settings', {
-            title: 'Profile Settings',
-            error: 'Error updating settings',
-            user: req.user
-        });
+    
+    // Validate record IDs (max 8)
+    if (recordIds.length > 8) {
+        return res.status(400).json({ error: 'You can only select up to 8 records' });
     }
-});
 
-router.post('/settings/top8', async (req, res) => {
-    try {
-        let recordIds = req.body.recordIds;
-        
-        // Handle single ID or array of IDs
-        if (!Array.isArray(recordIds)) {
-            recordIds = recordIds ? [recordIds] : [];
-        }
-        
-        // Validate record IDs (max 8)
-        if (recordIds.length > 8) {
-            return res.status(400).json({ error: 'You can only select up to 8 records' });
-        }
+    // Update user's top 8
+    const updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        { 'profile.top8Records': recordIds },
+        { new: true }
+    ).populate('profile.top8Records');
 
-        // Update user's top 8
-        const updatedUser = await User.findByIdAndUpdate(
-            req.user._id,
-            { 'profile.top8Records': recordIds },
-            { new: true }
-        ).populate('profile.top8Records');
-
-        res.json({ 
-            success: true, 
-            top8Records: updatedUser.profile.top8Records 
-        });
-    } catch (err) {
-        console.error('Error updating top 8:', err);
-        res.status(500).json({ error: 'Error updating top 8' });
-    }
-});
+    res.json({ 
+        success: true, 
+        top8Records: updatedUser.profile.top8Records 
+    });
+}));
 
 // Create new record
-router.post('/', async (req, res) => {
-    try {
-        // Add owner and process tags
-        req.body.owner = req.user._id;
-        req.body.tags = req.body.tags
-            ? req.body.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
-            : [];
+router.post('/', asyncHandler(async (req, res) => {
+    // Add owner and process tags
+    req.body.owner = req.user._id;
+    req.body.tags = req.body.tags
+        ? req.body.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        : [];
 
-        await Record.create(req.body);
-        res.redirect('/records');
-    } catch (err) {
-        res.redirect('/records/new');
-    }
-});
+    await Record.create(req.body);
+    res.redirect('/records');
+}));
 
 // Add record from Discogs
-router.get('/add-from-discogs/:id', async (req, res) => {
-    try {
-        const recordDetails = await discogs.getRecordDetails(req.params.id);
-        if (!recordDetails) {
-            throw new Error('Could not fetch record details');
-        }
-        
-        res.render('records/new', {
-            title: 'Add Record',
-            formats: Record.schema.path('format').enumValues,
-            prefilledData: recordDetails
-        });
-    } catch (err) {
-        res.redirect('/records/search');
+router.get('/add-from-discogs/:id', asyncHandler(async (req, res) => {
+    const recordDetails = await discogs.getRecordDetails(req.params.id);
+    if (!recordDetails) {
+        return res.redirect('/records/search');
     }
-});
+    
+    res.render('records/new', {
+        title: 'Add Record',
+        formats: Record.schema.path('format').enumValues,
+        prefilledData: recordDetails
+    });
+}));
 
 // Show single record
-router.get('/:id', async (req, res) => {
-    try {
-        const record = await Record.findById(req.params.id);
-        if (!record) return res.redirect('/records');
-        
-        res.render('records/show', {
-            title: `${record.title} by ${record.artist}`,
-            record
-        });
-    } catch (err) {
-        res.redirect('/records');
-    }
-});
+router.get('/:id', asyncHandler(async (req, res) => {
+    const record = await Record.findById(req.params.id);
+    if (!record) return res.redirect('/records');
+    
+    res.render('records/show', {
+        title: `${record.title} by ${record.artist}`,
+        record
+    });
+}));
 
 // Show edit form
-router.get('/:id/edit', async (req, res) => {
-    try {
-        const record = await Record.findById(req.params.id);
-        if (!record) return res.redirect('/records');
-        
-        res.render('records/edit', {
-            title: 'Edit Record',
-            record,
-            formats: Record.schema.path('format').enumValues
-        });
-    } catch (err) {
-        res.redirect('/records');
-    }
-});
+router.get('/:id/edit', asyncHandler(async (req, res) => {
+    const record = await validateOwnership(req.params.id, req.user._id);
+    
+    res.render('records/edit', {
+        title: 'Edit Record',
+        record,
+        formats: Record.schema.path('format').enumValues
+    });
+}));
 
 // Track record play
-router.post('/:id/play', async (req, res) => {
-    try {
-        const record = await Record.findById(req.params.id);
-        if (!record) return res.redirect('/records');
-        
-        // Increment plays and update last played date
-        record.plays += 1;
-        record.lastPlayed = new Date();
-        await record.save();
+router.post('/:id/play', asyncHandler(async (req, res) => {
+    const record = await validateOwnership(req.params.id, req.user._id);
+    
+    // Increment plays and update last played date
+    record.plays += 1;
+    record.lastPlayed = new Date();
+    await record.save();
 
-        res.redirect(`/records/${record._id}`);
-    } catch (err) {
-        res.redirect('/records');
-    }
-});
+    // Create activity for play
+    await Activity.create({
+        user: req.user._id,
+        record: record._id,
+        activityType: 'play_record'
+    });
+
+    res.redirect(`/records/${record._id}`);
+}));
 
 // Update record
-router.put('/:id', async (req, res) => {
-    try {
-        // Process tags if provided
-        if (req.body.tags) {
-            req.body.tags = req.body.tags.split(',')
-                .map(tag => tag.trim())
-                .filter(tag => tag);
-        }
+router.put('/:id', asyncHandler(async (req, res) => {
+    await validateOwnership(req.params.id, req.user._id);
 
-        await Record.findByIdAndUpdate(req.params.id, req.body);
-        res.redirect(`/records/${req.params.id}`);
-    } catch (err) {
-        res.redirect('/records');
+    // Process tags if provided
+    if (req.body.tags) {
+        req.body.tags = req.body.tags.split(',')
+            .map(tag => tag.trim())
+            .filter(tag => tag);
     }
-});
+
+    const updatedRecord = await Record.findByIdAndUpdate(
+        req.params.id, 
+        { ...req.body, owner: req.user._id },
+        { new: true, runValidators: true }
+    );
+
+    // Create activity for update
+    await Activity.create({
+        user: req.user._id,
+        record: updatedRecord._id,
+        activityType: 'update'
+    });
+
+    res.redirect(`/records/${req.params.id}`);
+}));
 
 // Delete record
-router.delete('/:id', async (req, res) => {
-    try {
-        await Record.findByIdAndDelete(req.params.id);
-        res.redirect('/records');
-    } catch (err) {
-        res.redirect('/records');
-    }
-});
+router.delete('/:id', asyncHandler(async (req, res) => {
+    const record = await validateOwnership(req.params.id, req.user._id);
+    
+    // Delete record and create activity
+    await Promise.all([
+        Record.findByIdAndDelete(req.params.id),
+        Activity.create({
+            user: req.user._id,
+            activityType: 'delete',
+            metadata: { 
+                recordTitle: record.title,
+                recordArtist: record.artist
+            }
+        })
+    ]);
+
+    res.redirect('/records');
+}));
 
 module.exports = router;

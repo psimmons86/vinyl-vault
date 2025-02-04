@@ -1,0 +1,102 @@
+<%- include('../partials/header') %>
+
+<div class="container section">
+    <% if (store) { %>
+        <div class="row">
+            <div class="col s12 m8">
+                <h3><%= store.name %></h3>
+                <div class="card">
+                    <div class="card-content">
+                <div class="row">
+                    <div class="col s12 m6">
+                        <div>
+                            <p>
+                                <i class="fas fa-map-marker-alt blue-text"></i> 
+                                <%= store.address %>
+                            </p>
+                            <% if (store.rating) { %>
+                                <p class="mb-2">
+                                    <i class="fas fa-star yellow-text"></i>
+                                    <%= store.rating.toFixed(1) %> rating
+                                </p>
+                            <% } %>
+                            <% if (store.openNow !== undefined) { %>
+                                <p class="mb-2">
+                                    <i class="fas fa-clock"></i>
+                                    <% if (store.openNow) { %>
+                                        <span class="green-text">Open now</span>
+                                    <% } else { %>
+                                        <span class="red-text">Closed</span>
+                                    <% } %>
+                                </p>
+                            <% } %>
+                            <% if (store.distance) { %>
+                                <p class="mb-2">
+                                    <i class="fas fa-route"></i>
+                                    <%= (store.distance / 1000).toFixed(1) %> km away
+                                </p>
+                            <% } %>
+                        </div>
+                    </div>
+                    <div class="col s12 m6">
+                        <div id="map" 
+                             style="height: 200px;" 
+                             class="rounded"
+                             data-lat="<%= store.location.lat %>"
+                             data-lng="<%= store.location.lng %>"
+                             data-name="<%= store.name %>">
+                        </div>
+                    </div>
+                </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Record Details Modal -->
+            <div id="recordModal" class="modal">
+                <div class="modal-content">
+                    <h4>Record Details</h4>
+                    <div class="center-align">
+                        <img id="modalImage" src="" alt="" class="responsive-img">
+                    </div>
+                    <h5 id="modalTitle"></h5>
+                    <p id="modalArtist" class="grey-text"></p>
+                    <div id="modalDetails"></div>
+                </div>
+                <div class="modal-footer">
+                    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+                </div>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="card-panel red white-text">Store not found.</div>
+    <% } %>
+</div>
+
+
+<script>
+function initMap() {
+    const mapElement = document.getElementById('map');
+    if (!mapElement) return;
+
+    const storeLocation = {
+        lat: parseFloat(mapElement.dataset.lat),
+        lng: parseFloat(mapElement.dataset.lng)
+    };
+    
+    const map = new google.maps.Map(mapElement, {
+        center: storeLocation,
+        zoom: 15
+    });
+
+    new google.maps.Marker({
+        position: storeLocation,
+        map: map,
+        title: mapElement.dataset.name
+    });
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=<%= googleApiKey %>&callback=initMap" async defer></script>
+
+<%- include('../partials/footer') %>

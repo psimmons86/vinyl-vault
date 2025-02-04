@@ -3,103 +3,126 @@ const router = express.Router();
 const User = require('../models/user');
 const Activity = require('../models/activity');
 const bcrypt = require('bcrypt');
+const asyncHandler = require('../middleware/async-handler');
+const { validateSignUp, validateSignIn } = require('../middleware/validate');
 
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOGIN_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
-router.get('/sign-up', async (req, res) => {
+router.get('/sign-up', (req, res) => {
     res.render('auth/sign-up', { 
         title: 'Sign Up',
-        error: null 
+        error: null,
+        username: '' 
     });
 });
 
-router.post('/sign-up', async (req, res) => {
-    try {
-        if (req.body.password !== req.body.confirmPassword) {
-            return res.render('auth/sign-up', { 
-                title: 'Sign Up',
-                error: 'Passwords do not match'
-            });
-        }
-
-        const existingUser = await User.findOne({ username: req.body.username });
-        if (existingUser) {
-            return res.render('auth/sign-up', {
-                title: 'Sign Up',
-                error: 'Username already exists'
-            });
-        }
-
-        const hashedPassword = await bcrypt.hash(req.body.password, SALT_ROUNDS);
-        const user = await User.create({
-            username: req.body.username,
-            password: hashedPassword,
-            profile: {
-                name: req.body.username,  // Default display name to username
-                showStats: true          // Default to showing stats
-            }
-        });
-        
-        await Activity.create({
-            user: user._id,
-            activityType: 'signup'
-        });
-
-        req.session.user = user;
-        res.redirect('/records');
-        
-    } catch (err) {
-        res.render('auth/sign-up', {
+router.post('/sign-up', validateSignUp, asyncHandler(async (req, res) => {
+    const existingUser = await User.findOne({ username: req.body.username });
+    if (existingUser) {
+        return res.render('auth/sign-up', {
             title: 'Sign Up',
-            error: 'Error creating account'
+            error: 'Username already exists',
+            username: req.body.username
         });
     }
-});
 
-router.get('/sign-in', async (req, res) => {
+    const hashedPassword = await bcrypt.hash(req.body.password, SALT_ROUNDS);
+    const user = await User.create({
+        username: req.body.username,
+        password: hashedPassword,
+        profile: {
+            name: req.body.username,
+            showStats: true
+        },
+        loginAttempts: 0,
+        lastLoginAttempt: null
+    });
+    
+    await Activity.create({
+        user: user._id,
+        activityType: 'signup'
+    });
+
+    // Set session with limited user data
+    req.session.user = {
+        _id: user._id,
+        username: user.username
+    };
+    
+    res.redirect('/records');
+}));
+
+router.get('/sign-in', (req, res) => {
     res.render('auth/sign-in', { 
         title: 'Sign In',
         error: null
     });
 });
 
-router.post('/sign-in', async (req, res) => {
-    try {
-        const user = await User.findOne({ username: req.body.username });
-        
-        if (!user) {
-            return res.render('auth/sign-in', {
-                title: 'Sign In',
-                error: 'Invalid username or password'
-            });
-        }
-
-        const isValidPassword = await bcrypt.compare(req.body.password, user.password);
-        if (!isValidPassword) {
-            return res.render('auth/sign-in', {
-                title: 'Sign In',
-                error: 'Invalid username or password'
-            });
-        }
-
-        req.session.user = user;
-        res.redirect('/records');
-        
-    } catch (err) {
-        res.render('auth/sign-in', {
+router.post('/sign-in', validateSignIn, asyncHandler(async (req, res) => {
+    const user = await User.findOne({ username: req.body.username });
+    
+    if (!user) {
+        return res.render('auth/sign-in', {
             title: 'Sign In',
-            error: 'Error signing in'
+            error: 'Invalid username or password'
         });
     }
-});
 
-router.get('/sign-out', async (req, res) => {
-    try {
-        await new Promise((resolve) => req.session.destroy(resolve));
-        res.redirect('/');
-    } catch (err) {
-        res.redirect('/');
+    // Check for too many login attempts
+    if (user.loginAttempts >= MAX_LOGIN_ATTEMPTS && 
+        user.lastLoginAttempt && 
+        Date.now() - user.lastLoginAttempt < LOGIN_TIMEOUT) {
+        return res.render('auth/sign-in', {
+            title: 'Sign In',
+            error: 'Account temporarily locked. Please try again later.'
+        });
     }
-});
+
+    const isValidPassword = await bcrypt.compare(req.body.password, user.password);
+    
+    if (!isValidPassword) {
+        // Increment login attempts
+        await User.updateOne(
+            { _id: user._id },
+            {
+                $inc: { loginAttempts: 1 },
+                $set: { lastLoginAttempt: Date.now() }
+            }
+        );
+        
+        return res.render('auth/sign-in', {
+            title: 'Sign In',
+            error: 'Invalid username or password'
+        });
+    }
+
+    // Reset login attempts on successful login
+    await User.updateOne(
+        { _id: user._id },
+        {
+            $set: { 
+                loginAttempts: 0,
+                lastLoginAttempt: null
+            }
+        }
+    );
+
+    // Set session with limited user data
+    req.session.user = {
+        _id: user._id,
+        username: user.username
+    };
+    
+    res.redirect('/records');
+}));
+
+router.get('/sign-out', asyncHandler(async (req, res) => {
+    await new Promise((resolve) => req.session.destroy(resolve));
+    res.clearCookie('_sid'); // Clear session cookie
+    res.redirect('/');
+}));
 
 module.exports = router;

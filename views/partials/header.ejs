@@ -12,6 +12,7 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="/styles.css" />
     <style>
       .user-avatar {
@@ -31,15 +32,18 @@
     <script src="/javascripts/theme.js"></script>
     <nav class="main-nav">
       <div class="nav-content">
-        <a href="<%= user ? '/records' : '/' %>" class="nav-logo"
-          >Vinyl Vault</a
-        >
+        <a href="<%= user ? '/records' : '/' %>" class="nav-logo">Vinyl Vault</a>
+        <button class="mobile-menu-toggle hide-on-large-only">
+          <i class="material-icons">menu</i>
+        </button>
         <% if (user) { %>
         <div class="nav-links">
           <a href="/records">My Collection</a>
           <a href="/records/new">Add New Record</a>
           <a href="/records/search">Search Discogs</a>
           <a href="/records/stats">Stats</a>
+          <a href="/stores/nearby">Find Stores</a>
+          <a href="/stores/search">Search Store Inventory</a>
 
           <!-- User dropdown trigger -->
           <a class="dropdown-trigger" href="#" data-target="user-dropdown">
@@ -80,5 +84,35 @@
       </div>
     </nav>
     <main></main>
+    
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Initialize dropdowns
+        var dropdowns = document.querySelectorAll('.dropdown-trigger');
+        M.Dropdown.init(dropdowns);
+        
+        // Initialize collapsibles
+        var collapsibles = document.querySelectorAll('.collapsible');
+        M.Collapsible.init(collapsibles);
+
+        // Mobile menu toggle
+        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (mobileMenuToggle && navLinks) {
+          mobileMenuToggle.addEventListener('click', function() {
+            navLinks.classList.toggle('active');
+            const icon = this.querySelector('i');
+            if (navLinks.classList.contains('active')) {
+              icon.textContent = 'close';
+            } else {
+              icon.textContent = 'menu';
+            }
+          });
+        }
+      });
+    </script>
   </body>
 </html>

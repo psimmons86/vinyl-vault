@@ -17,8 +17,22 @@ const Activity = require('./models/activity');
 const app = express();
 const port = process.env.PORT || "3000";
 
-// Connect to MongoDB database
-mongoose.connect(process.env.MONGODB_URI, {});
+// Connect to MongoDB database with proper options
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+});
+
+// Handle MongoDB connection errors
+mongoose.connection.on("error", (err) => {
+    console.error("MongoDB connection error:", err);
+});
+
+mongoose.connection.on("disconnected", () => {
+    console.log("MongoDB disconnected. Attempting to reconnect...");
+});
 
 // Log when successfully connected to MongoDB
 mongoose.connection.on("connected", () => {
@@ -32,18 +46,22 @@ app.set('view engine', 'ejs');
 app.use(morgan('dev'));                             // Request logging
 app.use(express.static('public'));                  // Serve static files
 app.use(express.urlencoded({ extended: false }));   // Parse form data
+app.use(express.json());                           // Parse JSON requests
 app.use(methodOverride("_method"));                 // Support PUT/DELETE methods
 
-// Configure session management
+// Configure session management with enhanced security
 app.use(session({
-   secret: process.env.SESSION_SECRET,   // Secret for signing session ID
-   resave: false,                        // Don't save session if unmodified
-   saveUninitialized: false,             // Don't create session until something stored
-   cookie: {
-       secure: false,                    // Allow non-HTTPS (development)
-       maxAge: 24 * 60 * 60 * 1000      // Session expires in 24 hours
-   },
-   proxy: true                           // Trust the reverse proxy
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    name: '_sid', // Change cookie name from default 'connect.sid'
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: 'lax'
+    },
+    proxy: true
 }));
 
 // Add user data to all requests
@@ -125,6 +143,7 @@ app.get('/users/:username', async (req, res) => {
 app.use('/auth', require('./controllers/auth'));           // Authentication routes
 app.use(require('./middleware/ensure-signed-in'));         // Require login for routes below
 app.use('/records', require('./controllers/records'));     // Record routes
+app.use('/stores', require('./controllers/stores'));       // Store routes
 
 // 404 handler - for undefined routes
 app.use((req, res) => {
@@ -134,16 +153,41 @@ app.use((req, res) => {
    });
 });
 
-// Error handler - for all other errors
+// Error handler - for all other errors with improved logging
 app.use((err, req, res, next) => {
-   console.log(err);
-   res.status(500).render('shared/error', {
-       title: 'Error',
-       message: 'Something went wrong!'
-   });
+    // Log error details
+    console.error('Error details:', {
+        message: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+        url: req.url,
+        method: req.method,
+        timestamp: new Date().toISOString()
+    });
+
+    // Send appropriate response
+    res.status(err.status || 500).render('shared/error', {
+        title: 'Error',
+        message: process.env.NODE_ENV === 'production' 
+            ? 'Something went wrong!' 
+            : err.message
+    });
 });
 
-// Start server
-app.listen(port, () => {
-   console.log(`Express app is running on port ${port}`);
-});
+// Start server with port retry logic
+const startServer = (retryPort = port) => {
+    const server = app.listen(retryPort)
+        .on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                console.log(`Port ${retryPort} is busy, trying ${parseInt(retryPort) + 1}...`);
+                server.close();
+                startServer(parseInt(retryPort) + 1);
+            } else {
+                console.error('Server error:', err);
+            }
+        })
+        .on('listening', () => {
+            console.log(`Express app is running on port ${retryPort}`);
+        });
+};
+
+startServer();

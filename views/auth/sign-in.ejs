@@ -9,19 +9,36 @@
                     
                     <% if (error) { %>
                         <div class="card-panel red lighten-4 red-text text-darken-4">
+                            <i class="material-icons left">error</i>
                             <%= error %>
                         </div>
                     <% } %>
 
                     <form action="/auth/sign-in" method="POST">
                         <div class="input-field">
-                            <input type="text" id="username" name="username" required>
+                            <i class="material-icons prefix">person</i>
+                            <input type="text" 
+                                   id="username" 
+                                   name="username" 
+                                   pattern="[a-zA-Z0-9_\-]{3,20}"
+                                   value="<%= locals.username || '' %>"
+                                   required>
                             <label for="username">Username</label>
+                            <span class="helper-text">Enter your username</span>
                         </div>
 
                         <div class="input-field">
-                            <input type="password" id="password" name="password" required>
+                            <i class="material-icons prefix">lock</i>
+                            <input type="password" 
+                                   id="password" 
+                                   name="password" 
+                                   required>
                             <label for="password">Password</label>
+                            <span class="helper-text">
+                                <% if (locals.remainingAttempts) { %>
+                                    <%= remainingAttempts %> login attempts remaining
+                                <% } %>
+                            </span>
                         </div>
 
                         <div class="center-align">
@@ -29,6 +46,12 @@
                                 Sign In
                                 <i class="material-icons right">login</i>
                             </button>
+                        </div>
+
+                        <div class="center-align" style="margin-top: 1rem;">
+                            <small class="grey-text">
+                                For security, your account will be temporarily locked after 5 failed attempts
+                            </small>
                         </div>
                     </form>
                 </div>

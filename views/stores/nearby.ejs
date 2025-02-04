@@ -1,0 +1,160 @@
+<%- include('../partials/header') %>
+
+<div class="container section">
+    <h3><%= title %></h3>
+
+    <div class="row">
+        <div class="col s12 m6">
+            <form action="/stores/nearby" method="GET" class="location-form" id="locationForm">
+                <div class="input-field">
+                    <input type="text" 
+                           name="location" 
+                           id="locationInput"
+                           placeholder="Enter city, state, or country"
+                           value="<%= locals.searchLocation || '' %>"
+                           required>
+                    <button type="submit" class="btn waves-effect waves-light">
+                        <i class="fas fa-search"></i> Find Stores
+                    </button>
+                </div>
+                <div class="section">
+                    <small class="grey-text">
+                        Example: "San Francisco, CA" or "London, UK"
+                    </small>
+                    <button type="button" 
+                            class="btn-small waves-effect waves-light" 
+                            id="useLocationBtn">
+                        <i class="fas fa-location-arrow"></i> Use My Location
+                    </button>
+                </div>
+                <input type="hidden" name="latitude" id="latitudeInput">
+                <input type="hidden" name="longitude" id="longitudeInput">
+            </form>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Only run this code on the nearby stores page
+        const locationForm = document.getElementById('locationForm');
+        if (!locationForm) return; // Exit if we're not on the nearby stores page
+
+        const locationInput = document.getElementById('locationInput');
+        const latitudeInput = document.getElementById('latitudeInput');
+        const longitudeInput = document.getElementById('longitudeInput');
+        const useLocationBtn = document.getElementById('useLocationBtn');
+
+        if (useLocationBtn) {
+            useLocationBtn.addEventListener('click', function() {
+                if (!navigator.geolocation) {
+                    M.toast({html: 'Geolocation is not supported by your browser'});
+                    return;
+                }
+
+                useLocationBtn.disabled = true;
+                useLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting Location...';
+
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        latitudeInput.value = position.coords.latitude;
+                        longitudeInput.value = position.coords.longitude;
+                        locationInput.value = 'Current Location';
+                        locationForm.submit();
+                    },
+                    function(error) {
+                        useLocationBtn.disabled = false;
+                        useLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> Use My Location';
+                        
+                        let message = 'Error getting location: ';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                message += 'Location permission denied';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                message += 'Location information unavailable';
+                                break;
+                            case error.TIMEOUT:
+                                message += 'Location request timed out';
+                                break;
+                            default:
+                                message += 'Unknown error occurred';
+                        }
+                        M.toast({html: message});
+                    }
+                );
+            });
+        }
+
+        // Clear coordinates when typing location
+        if (locationInput) {
+            locationInput.addEventListener('input', function() {
+                latitudeInput.value = '';
+                longitudeInput.value = '';
+            });
+        }
+    });
+    </script>
+
+    <% if (error) { %>
+        <div class="card-panel red white-text"><%= error %></div>
+    <% } %>
+
+    <div class="row">
+        <% if (locals.stores && stores.length > 0) { %>
+            <% stores.forEach(store => { %>
+                <div class="col s12 m6">
+                    <div class="card">
+                        <div class="card-content">
+                            <span class="card-title">
+                                <a href="/stores/<%= store.id %>" class="black-text"><%= store.name %></a>
+                                <% if (store.rating) { %>
+                                    <span class="right">
+                                        <i class="fas fa-star yellow-text"></i>
+                                        <%= store.rating.toFixed(1) %>
+                                    </span>
+                                <% } %>
+                            </span>
+                            <p>
+                                <i class="fas fa-map-marker-alt blue-text"></i> <%= store.address %>
+                                <% if (store.distance) { %>
+                                    <span class="grey-text">
+                                        (<%= (store.distance / 1000).toFixed(1) %> km away)
+                                    </span>
+                                <% } %>
+                            </p>
+                            <% if (store.openNow !== undefined) { %>
+                                <p>
+                                    <i class="fas fa-clock"></i>
+                                    <% if (store.openNow) { %>
+                                        <span class="green-text">Open now</span>
+                                    <% } else { %>
+                                        <span class="red-text">Closed</span>
+                                    <% } %>
+                                </p>
+                            <% } %>
+                            <div class="section">
+                                <a href="/stores/<%= store.id %>" class="btn-small waves-effect waves-light">
+                                    <i class="fas fa-store"></i> View Store
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else if (locals.currentLocation) { %>
+            <div class="col s12">
+                <div class="card-panel blue-text">
+                    No record stores found within the specified distance.
+                </div>
+            </div>
+        <% } else { %>
+            <div class="col s12">
+                <div class="card-panel blue-text">
+                    Use the form above to find record stores near you.
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -82,8 +82,99 @@ async function getRecordDetails(releaseId) {
    }
 }
 
-// Export functions for use in other files
+/**
+ * Search for record stores
+ * @param {string} location - Location to search for (city, state, etc.)
+ * @returns {Array} Array of stores
+ */
+async function findStores(location) {
+    try {
+        const searchResults = await db.search({
+            query: location,
+            type: 'label',    // Search for labels (stores)
+            per_page: 20
+        });
+
+        return searchResults.results.map(result => ({
+            name: result.title,
+            location: result.location || 'Location not specified',
+            thumb: result.thumb || '/images/default-album.png',
+            url: `https://www.discogs.com/label/${result.id}`,
+            resource_url: result.resource_url
+        }));
+    } catch (error) {
+        if (error.statusCode === 429) {
+            await sleep(2000);
+            return findStores(location);
+        }
+        throw error;
+    }
+}
+
+/**
+ * Search for records at a specific store/label
+ * @param {string} query - Search query
+ * @param {string} labelId - Discogs label ID
+ * @returns {Array} Array of records
+ */
+async function searchStoreInventory(query, labelId) {
+    try {
+        const searchResults = await db.search({
+            query: query,
+            type: 'release',
+            label: labelId,
+            format: 'Vinyl',
+            per_page: 30
+        });
+
+        return searchResults.results.map(result => ({
+            id: result.id,
+            title: result.title.split(' - ')[1]?.trim() || result.title.trim(),
+            artist: result.title.split(' - ')[0]?.trim() || 'Unknown Artist',
+            year: result.year,
+            thumb: result.thumb || '/images/default-album.png',
+            format: Array.isArray(result.format) ? result.format[0] : 'LP',
+            url: `https://www.discogs.com/release/${result.id}`
+        }));
+    } catch (error) {
+        if (error.statusCode === 429) {
+            await sleep(2000);
+            return searchStoreInventory(query, labelId);
+        }
+        throw error;
+    }
+}
+
+/**
+ * Get detailed information about a store/label
+ * @param {string} labelId - Discogs label ID
+ * @returns {Object} Formatted store details
+ */
+async function getStoreDetails(labelId) {
+    try {
+        const label = await db.getLabel(labelId);
+        
+        return {
+            id: label.id,
+            name: label.name,
+            location: label.profile?.match(/Location:\s*([^\n]+)/)?.[1] || 'Location not specified',
+            profile: label.profile,
+            url: `https://www.discogs.com/label/${label.id}`,
+            thumb: label.images?.[0]?.resource_url || '/images/default-banner.jpg'
+        };
+    } catch (error) {
+        if (error.statusCode === 429) {
+            await sleep(2000);
+            return getStoreDetails(labelId);
+        }
+        throw error;
+    }
+}
+
 module.exports = {
-   searchRecords,
-   getRecordDetails
+    searchRecords,
+    getRecordDetails,
+    findStores,
+    searchStoreInventory,
+    getStoreDetails
 };
