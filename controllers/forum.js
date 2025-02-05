@@ -4,6 +4,7 @@ const ForumCategory = require('../models/forum-category');
 const ForumTopic = require('../models/forum-topic');
 const ForumPost = require('../models/forum-post');
 const asyncHandler = require('../middleware/async-handler');
+const { use_mcp_tool } = require('../services/mcp');
 const ensureSignedIn = require('../middleware/ensure-signed-in');
 const slugify = require('slugify');
 
@@ -140,9 +141,21 @@ router.get('/new-topic/:categorySlug', ensureSignedIn, asyncHandler(async (req, 
         return res.status(404).render('shared/404');
     }
 
+    // Get AI-generated topic suggestions
+    let suggestedTopics = [];
+    try {
+        const result = await use_mcp_tool('vinyl-insights', 'generate_forum_topics', {
+            category: category.name
+        });
+        suggestedTopics = result.content[0].text;
+    } catch (error) {
+        console.error('Error getting topic suggestions:', error);
+    }
+
     res.render('forum/new-topic', {
         title: 'New Topic',
-        category
+        category,
+        suggestedTopics
     });
 }));
 

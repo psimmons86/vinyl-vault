@@ -4,6 +4,7 @@ require("dotenv").config();
 // Import required packages
 const express = require("express");             // Web framework
 const morgan = require("morgan");               // HTTP request logger
+const flash = require('connect-flash');
 const methodOverride = require("method-override");  // Enable PUT/DELETE in forms
 const mongoose = require("mongoose");           // MongoDB ODM
 const session = require('express-session');     // Session management
@@ -65,6 +66,15 @@ app.use(session({
     },
     proxy: true
 }));
+
+// Set up flash messages
+app.use(flash());
+
+// Configure flash messages middleware
+app.use((req, res, next) => {
+    res.locals.messages = req.flash();
+    next();
+});
 
 // Add user data and notifications to all requests
 app.use(require('./middleware/add-user-to-locals-and-req'));

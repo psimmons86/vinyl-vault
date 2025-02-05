@@ -167,17 +167,28 @@ router.put('/:slug', upload.single('coverImage'), asyncHandler(async (req, res) 
 }));
 
 // Delete post
-router.delete('/:slug', asyncHandler(async (req, res) => {
-    const post = await Post.findOne({
-        slug: req.params.slug,
-        author: req.user._id
-    });
-
+router.delete('/:slug', ensureAdmin, asyncHandler(async (req, res) => {
+    // Find the post by slug instead of id
+    const post = await Post.findOne({ slug: req.params.slug });
     if (!post) {
-        return res.status(404).json({ error: 'Post not found' });
+        req.flash('error', 'Post not found');
+        return res.redirect('/blog');
     }
 
-    await post.remove();
+    // Delete the associated image if it exists
+    if (post.coverImage) {
+        const imagePath = path.join(__dirname, '../public', post.coverImage);
+        try {
+            await fs.unlink(imagePath);
+        } catch (err) {
+            console.error('Error deleting image:', err);
+            // Continue with post deletion even if image deletion fails
+        }
+    }
+
+    // Delete the post
+    await Post.findByIdAndDelete(post._id);
+
     req.flash('success', 'Post deleted successfully');
     res.redirect('/blog');
 }));
