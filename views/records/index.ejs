@@ -1,4 +1,5 @@
 <%- include('../partials/header.ejs') %>
+<link rel="stylesheet" href="/stylesheets/records.css">
 
 <div class="container dashboard">
     <div class="dashboard-header">
@@ -53,10 +54,10 @@
                         <i class="material-icons">access_time</i>
                         <span>Recent</span>
                     </a>
-                    <a href="/records?view=grid" class="control-btn view-toggle">
+                    <a href="/records?view=grid" class="control-btn view-toggle <%= view === 'grid' || !view ? 'active' : '' %>">
                         <i class="material-icons">grid_view</i>
                     </a>
-                    <a href="/records?view=list" class="control-btn view-toggle">
+                    <a href="/records?view=list" class="control-btn view-toggle <%= view === 'list' ? 'active' : '' %>">
                         <i class="material-icons">view_list</i>
                     </a>
                 </div>
@@ -65,7 +66,7 @@
     </div>
 
     <div class="records-container">
-        <div class="row" id="records-grid">
+        <div class="row" id="records-grid" style="display: <%= view === 'list' ? 'none' : 'block' %>">
             <% if (records && records.length > 0) { %>
                 <% records.forEach(function(record) { %>
                     <div class="col s12 m6 l3 record-item" 
@@ -122,6 +123,45 @@
             <% } %>
         </div>
 
+        <div id="records-list" style="display: <%= view === 'list' ? 'block' : 'none' %>">
+            <% if (records && records.length > 0) { %>
+                <div class="collection">
+                    <% records.forEach(function(record) { %>
+                        <div class="collection-item record-item avatar" 
+                             data-title="<%= record.title.toLowerCase() %>" 
+                             data-artist="<%= record.artist.toLowerCase() %>"
+                             data-tags="<%= record.tags ? record.tags.join(' ').toLowerCase() : '' %>">
+                            <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
+                                 alt="Album art" 
+                                 class="circle">
+                            <div class="record-list-content">
+                                <span class="title"><%= record.title %></span>
+                                <p>
+                                    <%= record.artist %><br>
+                                    <small class="grey-text">
+                                        <i class="tiny material-icons">play_circle_filled</i> <%= record.plays || 0 %> plays
+                                        <% if (record.lastPlayed) { %>
+                                            • Last played <%= new Date(record.lastPlayed).toLocaleDateString() %>
+                                        <% } %>
+                                    </small>
+                                </p>
+                            </div>
+                            <div class="secondary-content">
+                                <form action="/records/<%= record._id %>/play" method="POST" class="quick-play-form">
+                                    <button type="submit" class="btn-floating btn-small waves-effect waves-light green">
+                                        <i class="material-icons">play_arrow</i>
+                                    </button>
+                                </form>
+                                <a href="/records/<%= record._id %>/edit" class="btn-floating btn-small waves-effect waves-light blue">
+                                    <i class="material-icons">edit</i>
+                                </a>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } %>
+        </div>
+
         <div id="no-results-message" class="center-align" style="display: none;">
             <i class="material-icons medium grey-text">search_off</i>
             <p class="grey-text">No records found matching your search.</p>
@@ -135,250 +175,6 @@
     </div>
 </div>
 
-<style>
-.dashboard {
-    padding-top: 2rem;
-}
-
-.dashboard-header {
-    margin-bottom: 2rem;
-}
-
-.dashboard-title {
-    font-size: 2rem;
-    margin: 0;
-    color: var(--text);
-}
-
-.quick-stats {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-}
-
-.stat-card {
-    background: white;
-    padding: 1rem;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    box-shadow: var(--shadow);
-    min-width: 150px;
-}
-
-.stat-card i {
-    color: var(--primary);
-    font-size: 2rem;
-}
-
-.stat-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.stat-value {
-    font-size: 1.5rem;
-    font-weight: 500;
-    line-height: 1;
-}
-
-.stat-label {
-    font-size: 0.875rem;
-    color: #666;
-}
-
-.controls-section {
-    margin-bottom: 2rem;
-}
-
-.search-container {
-    background: white;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-}
-
-.view-controls {
-    background: white;
-    padding: 0.5rem;
-    border-radius: 8px;
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-end;
-}
-
-.control-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    color: #666;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-.control-btn:hover {
-    background: #f5f5f5;
-}
-
-.control-btn.active {
-    background: var(--primary);
-    color: white;
-}
-
-.record-card {
-    position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    margin: 0.5rem 0;
-    background: white;
-}
-
-.record-artwork {
-    position: relative;
-    aspect-ratio: 1;
-    cursor: pointer;
-}
-
-.record-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.record-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 1.5rem;
-}
-
-.record-card:hover .record-overlay {
-    opacity: 1;
-}
-
-.record-card:hover .record-img {
-    transform: scale(1.05);
-}
-
-.record-info {
-    text-align: center;
-}
-
-.record-title {
-    font-size: 1.125rem;
-    margin: 0 0 0.5rem 0;
-    color: white;
-}
-
-.record-artist {
-    font-size: 0.875rem;
-    margin: 0 0 1rem 0;
-    opacity: 0.9;
-}
-
-.record-meta {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    font-size: 0.75rem;
-    opacity: 0.7;
-}
-
-.record-meta span {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.record-actions {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 56px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 0.75rem;
-    z-index: 3;
-    pointer-events: none;
-}
-
-.record-actions .edit-btn,
-.record-actions .play-btn {
-    pointer-events: auto;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.record-actions .edit-btn {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    background-color: rgba(33, 150, 243, 0.9) !important;
-}
-
-.record-actions .play-btn {
-    position: absolute;
-    bottom: 0.75rem;
-    right: 0.75rem;
-    background-color: rgba(76, 175, 80, 0.9) !important;
-}
-
-.record-card:hover .edit-btn,
-.record-card:hover .play-btn {
-    opacity: 1;
-}
-
-.empty-state {
-    padding: 4rem 0;
-}
-
-.empty-state i {
-    color: #ddd;
-    margin-bottom: 1rem;
-}
-
-@media (max-width: 992px) {
-    .quick-stats {
-        justify-content: flex-start;
-        margin-top: 1rem;
-    }
-
-    .view-controls {
-        justify-content: center;
-        margin-top: 1rem;
-    }
-
-    .record-overlay {
-        opacity: 1;
-        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-        justify-content: flex-end;
-    }
-
-    .record-actions .edit-btn,
-    .record-actions .play-btn {
-        opacity: 0.9;
-    }
-
-    .record-info {
-        text-align: left;
-    }
-
-    .record-meta {
-        justify-content: flex-start;
-    }
-}
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

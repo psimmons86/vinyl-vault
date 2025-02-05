@@ -2,10 +2,16 @@
 const Discogs = require('disconnect').Client;
 
 // Create database connection with API credentials
-const db = new Discogs({
-   consumerKey: process.env.DISCOGS_CONSUMER_KEY,
-   consumerSecret: process.env.DISCOGS_CONSUMER_SECRET,
-}).database();
+const discogs = new Discogs({
+   consumerKey: process.env.DISCOGS_KEY,
+   consumerSecret: process.env.DISCOGS_SECRET,
+});
+
+// Get database instance
+const db = discogs.database();
+
+// Get user instance for collection access
+const user = discogs.user();
 
 // Helper function to pause execution (used for rate limiting)
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -171,10 +177,48 @@ async function getStoreDetails(labelId) {
     }
 }
 
+/**
+ * Get a user's Discogs collection
+ * @param {string} username - Discogs username
+ * @param {number} page - Page number for pagination
+ * @returns {Promise<Array>} Array of collection items
+ */
+async function getUserCollection(username, page = 1) {
+    try {
+        const collection = await user.collection().getReleases(username, 0, {
+            page: page,
+            per_page: 100,
+            sort: 'artist',
+            sort_order: 'asc'
+        });
+
+        // Map collection items to our format
+        return collection.releases.map(item => ({
+            id: item.id,
+            title: item.basic_information.title,
+            artist: item.basic_information.artists[0].name,
+            year: item.basic_information.year,
+            imageUrl: item.basic_information.cover_image || '/images/default-album.png',
+            format: item.basic_information.formats[0].name || 'LP',
+            tags: [
+                ...(item.basic_information.genres || []),
+                ...(item.basic_information.styles || [])
+            ].join(',')
+        }));
+    } catch (error) {
+        if (error.statusCode === 429) {
+            await sleep(2000);
+            return getUserCollection(username, page);
+        }
+        throw error;
+    }
+}
+
 module.exports = {
     searchRecords,
     getRecordDetails,
     findStores,
     searchStoreInventory,
-    getStoreDetails
+    getStoreDetails,
+    getUserCollection
 };

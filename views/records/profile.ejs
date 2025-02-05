@@ -1,20 +1,14 @@
 <%- include('../partials/header.ejs') %>
 
-<!-- Profile Banner -->
-<div 
-  class="profile-banner"
-  data-banner-url="<%= encodeURI((user.profile?.bannerUrl || '/images/default-banner.jpg').replace(/\\/g, '/')) %>"
->
-  <div class="banner-overlay"></div>
-</div>
-
 <div class="container">
-  <!-- Profile Header -->
-  <div class="row profile-header-row">
-    <div class="col s12">
-      <div class="card z-depth-0 profile-card">
-        <div class="card-content">
-          <div class="row valign-wrapper">
+  <!-- Profile Banner with Overlay Content -->
+  <div 
+    class="profile-banner"
+    data-banner-url="<%= encodeURI((user.profile?.bannerUrl || '/images/default-banner.jpg').replace(/\\/g, '/')) %>"
+  >
+    <div class="banner-overlay"></div>
+    <div class="banner-content">
+      <div class="row valign-wrapper">
             <!-- Profile Avatar -->
             <div class="col s12 m4 center-align">
               <img
@@ -138,7 +132,6 @@
               </div>
             </div>
           </div>
-        </div>
       </div>
     </div>
   </div>

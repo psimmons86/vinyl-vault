@@ -14,11 +14,18 @@ const asyncHandler = require('../middleware/async-handler');
 
 // Configure multer for album art uploads
 const albumArtStorage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/uploads/records')
+    destination: async function (req, file, cb) {
+        // Ensure directory exists
+        try {
+            await fs.access('public/uploads/records');
+        } catch {
+            await fs.mkdir('public/uploads/records', { recursive: true });
+        }
+        cb(null, 'public/uploads/records');
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname))
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'album-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 
@@ -92,7 +99,8 @@ router.get('/', asyncHandler(async (req, res) => {
         title: 'My Records',
         currentSort: req.query.sort,
         currentTag: req.query.tag,
-        tags
+        tags,
+        view: req.query.view || 'grid'  // Default to grid view if not specified
     });
 }));
 
@@ -197,7 +205,7 @@ router.post('/settings', upload.fields([
                 instagram: req.body.instagramLink,
                 twitter: req.body.twitterLink
             },
-            theme: req.body.darkMode ? 'dark' : 'light',
+            theme: req.body.darkMode === 'on' ? 'dark' : 'light',
             showStats: !!req.body.showStats
         }
     };
@@ -205,7 +213,7 @@ router.post('/settings', upload.fields([
     // Handle file uploads
     if (req.files) {
         if (req.files.profilePicture && req.files.profilePicture[0]) {
-            updateData.profile.avatarUrl = '/uploads/' + req.files.profilePicture[0].filename;
+            updateData.profile.avatarUrl = '/uploads/profile/' + req.files.profilePicture[0].filename;
             // Delete old profile picture if it exists
             if (currentUser.profile?.avatarUrl && !currentUser.profile.avatarUrl.includes('default-avatar')) {
                 const oldPath = 'public' + currentUser.profile.avatarUrl;
@@ -217,7 +225,7 @@ router.post('/settings', upload.fields([
             }
         }
         if (req.files.bannerImage && req.files.bannerImage[0]) {
-            updateData.profile.bannerUrl = '/uploads/' + req.files.bannerImage[0].filename;
+            updateData.profile.bannerUrl = '/uploads/banner/' + req.files.bannerImage[0].filename;
             // Delete old banner if it exists
             if (currentUser.profile?.bannerUrl && !currentUser.profile.bannerUrl.includes('default-banner')) {
                 const oldPath = 'public' + currentUser.profile.bannerUrl;
@@ -230,7 +238,27 @@ router.post('/settings', upload.fields([
         }
     }
 
-    await User.findByIdAndUpdate(req.user._id, updateData, { new: true });
+    // Preserve existing profile data that wasn't included in the form
+    const updatedUser = await User.findByIdAndUpdate(
+        req.user._id, 
+        { 
+            $set: {
+                isPublic: !!req.body.isPublic,
+                'profile.name': req.body.name,
+                'profile.bio': req.body.bio,
+                'profile.location': req.body.location,
+                'profile.favoriteGenres': req.body.favoriteGenres?.split(',').map(genre => genre.trim()) || [],
+                'profile.socialLinks.discogs': req.body.discogsLink,
+                'profile.socialLinks.instagram': req.body.instagramLink,
+                'profile.socialLinks.twitter': req.body.twitterLink,
+                'profile.theme': req.body.darkMode === 'on' ? 'dark' : 'light',
+                'profile.showStats': !!req.body.showStats
+            },
+            ...req.files?.profilePicture ? { 'profile.avatarUrl': updateData.profile.avatarUrl } : {},
+            ...req.files?.bannerImage ? { 'profile.bannerUrl': updateData.profile.bannerUrl } : {}
+        },
+        { new: true }
+    );
     
     req.session.message = { type: 'success', text: 'Profile updated successfully!' };
     res.redirect('/records/settings');
@@ -286,6 +314,51 @@ router.get('/comments/:target', asyncHandler(async (req, res) => {
         .populate('user', 'username profile.name profile.avatarUrl')
         .sort('-createdAt');
     res.json(comments);
+}));
+
+// Import Discogs collection
+router.post('/import-discogs', asyncHandler(async (req, res) => {
+    const { username } = req.body;
+    if (!username) {
+        req.session.message = { type: 'error', text: 'Discogs username is required' };
+        return res.redirect('/records/settings');
+    }
+
+    try {
+        // Get first page of collection
+        const records = await discogs.getUserCollection(username);
+        
+        // Create all records
+        const createdRecords = await Promise.all(
+            records.map(record => Record.create({
+                ...record,
+                owner: req.user._id
+            }))
+        );
+
+        // Create activity for import
+        await Activity.create({
+            user: req.user._id,
+            activityType: 'import',
+            metadata: { 
+                source: 'Discogs',
+                count: createdRecords.length
+            }
+        });
+
+        req.session.message = { 
+            type: 'success', 
+            text: `Successfully imported ${createdRecords.length} records from your Discogs collection!` 
+        };
+    } catch (error) {
+        console.error('Discogs import error:', error);
+        req.session.message = { 
+            type: 'error', 
+            text: 'Failed to import collection. Please check your Discogs username and try again.' 
+        };
+    }
+    
+    res.redirect('/records/settings');
 }));
 
 // Get collection statistics
@@ -533,7 +606,7 @@ router.put('/:id', albumArtUpload.single('albumArt'), asyncHandler(async (req, r
     // Handle image upload or URL
     if (req.file) {
         // If there's an uploaded file, use that
-        req.body.imageUrl = '/uploads/records/' + req.file.filename;
+        req.body.imageUrl = '/uploads/records/' + path.basename(req.file.filename);
         
         // Delete old image if it exists and isn't the default
         if (record.imageUrl && 

@@ -1,10 +1,49 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs').promises;
 
-// Configure storage
+// Ensure upload directories exist
+async function ensureDirectories() {
+    const dirs = [
+        'public/uploads',
+        'public/uploads/profile',
+        'public/uploads/banner',
+        'public/uploads/records'
+    ];
+    
+    for (const dir of dirs) {
+        try {
+            await fs.access(dir);
+        } catch {
+            await fs.mkdir(dir, { recursive: true });
+        }
+    }
+}
+
+// Create upload directories
+ensureDirectories().catch(console.error);
+
+// Configure storage based on file type
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/uploads/');
+        let uploadPath = 'public/uploads/';
+        
+        // Determine appropriate subdirectory based on field name
+        switch (file.fieldname) {
+            case 'profilePicture':
+                uploadPath += 'profile/';
+                break;
+            case 'bannerImage':
+                uploadPath += 'banner/';
+                break;
+            case 'albumArt':
+                uploadPath += 'records/';
+                break;
+            default:
+                uploadPath += 'misc/';
+        }
+        
+        cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
         // Create unique filename

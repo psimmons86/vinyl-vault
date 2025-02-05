@@ -33,11 +33,9 @@
           <a href="/records/stats">
             <i class="material-icons">bar_chart</i>Stats
           </a>
-          <a href="/records/new">
-            <i class="material-icons">add</i>Add
-          </a>
-          <a href="/records/search">
-            <i class="material-icons">search</i>Discogs
+          <!-- Add Record Dropdown -->
+          <a class="dropdown-trigger" href="#" data-target="add-record-dropdown">
+            <i class="material-icons">add</i>Add Record<i class="material-icons right">arrow_drop_down</i>
           </a>
           <a href="/stores/nearby">
             <i class="material-icons">store</i>Stores
@@ -86,11 +84,12 @@
             <a href="/records/stats">
               <i class="material-icons">bar_chart</i>Stats
             </a>
+            <!-- Add Record Options -->
             <a href="/records/new">
-              <i class="material-icons">add</i>Add Record
+              <i class="material-icons">add_circle</i>Add Manually
             </a>
             <a href="/records/search">
-              <i class="material-icons">search</i>Search Discogs
+              <i class="material-icons">album</i>Import from Discogs
             </a>
             <a href="/stores/nearby">
               <i class="material-icons">store</i>Find Stores
@@ -121,6 +120,20 @@
             </a>
           </div>
         </div>
+
+        <!-- Add Record dropdown structure -->
+        <ul id="add-record-dropdown" class="dropdown-content">
+          <li>
+            <a href="/records/new">
+              <i class="material-icons">add_circle</i>Add Manually
+            </a>
+          </li>
+          <li>
+            <a href="/records/search">
+              <i class="material-icons">album</i>Import from Discogs
+            </a>
+          </li>
+        </ul>
 
         <!-- User dropdown structure -->
         <ul id="user-dropdown" class="dropdown-content user-dropdown">

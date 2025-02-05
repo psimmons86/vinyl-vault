@@ -1,10 +1,13 @@
 /* Profile Banner */
 .profile-banner {
-  height: 200px;
+  height: 400px;
   background-size: cover;
   background-position: center;
   position: relative;
-  margin-bottom: -50px;
+  border-radius: 16px;
+  margin: 20px 0 40px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .banner-overlay {
@@ -13,18 +16,64 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+  background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8));
 }
 
-/* Profile Card */
-.profile-card {
-  margin-top: 0;
-  background: var(--surface-color);
+.banner-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 40px;
+  color: white;
+  z-index: 2;
 }
 
-.profile-header-row {
-  position: relative;
-  z-index: 1;
+/* Profile Info */
+.profile-name {
+  color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  margin-bottom: 10px;
+}
+
+.profile-location {
+  color: rgba(255,255,255,0.9) !important;
+  margin: 10px 0;
+}
+
+.profile-bio {
+  color: rgba(255,255,255,0.9);
+  margin: 15px 0;
+  font-size: 1.1em;
+  line-height: 1.5;
+}
+
+.profile-avatar {
+  border: 4px solid white !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+}
+
+.profile-actions {
+  background: rgba(0,0,0,0.3);
+  padding: 8px;
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+}
+
+.btn-floating {
+  background-color: rgba(255,255,255,0.2) !important;
+}
+
+.btn-floating:hover {
+  background-color: rgba(255,255,255,0.3) !important;
+}
+
+.social-links {
+  margin-top: 20px;
+}
+
+.social-links .btn-floating {
+  background-color: rgba(0,0,0,0.3) !important;
 }
 
 .profile-avatar {
