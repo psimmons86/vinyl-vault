@@ -1,67 +1,77 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="container">
-    <div class="row">
-        <div class="col s12 m8 offset-m2 l6 offset-l3">
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title center-align">Sign In</span>
-                    
-                    <% if (error) { %>
-                        <div class="card-panel red lighten-4 red-text text-darken-4">
-                            <i class="material-icons left">error</i>
-                            <%= error %>
+<div class="landing-container landing-page">
+    <!-- Authentication Section -->
+    <div class="auth-section">
+        <!-- Sign In Card -->
+        <div class="auth-card">
+            <p class="auth-intro">Welcome back!</p>
+            
+            <% if (error) { %>
+                <div class="error-message">
+                    <i class="material-icons">error</i>
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <form action="/auth/sign-in" method="POST" class="signin-form">
+                <div class="input-field">
+                    <input type="text" 
+                           id="username" 
+                           name="username" 
+                           pattern="[a-zA-Z0-9_\-]{3,20}"
+                           value="<%= locals.username || '' %>"
+                           required>
+                    <label for="username">Username</label>
+                </div>
+
+                <div class="input-field">
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           required>
+                    <label for="password">Password</label>
+                    <% if (locals.remainingAttempts) { %>
+                        <div class="attempts-message">
+                            <%= remainingAttempts %> login attempts remaining
                         </div>
                     <% } %>
+                </div>
 
-                    <form action="/auth/sign-in" method="POST">
-                        <div class="input-field">
-                            <i class="material-icons prefix">person</i>
-                            <input type="text" 
-                                   id="username" 
-                                   name="username" 
-                                   pattern="[a-zA-Z0-9_\-]{3,20}"
-                                   value="<%= locals.username || '' %>"
-                                   required>
-                            <label for="username">Username</label>
-                            <span class="helper-text">Enter your username</span>
-                        </div>
+                <button type="submit" class="btn btn-large full-width waves-effect">
+                    Sign In
+                </button>
 
-                        <div class="input-field">
-                            <i class="material-icons prefix">lock</i>
-                            <input type="password" 
-                                   id="password" 
-                                   name="password" 
-                                   required>
-                            <label for="password">Password</label>
-                            <span class="helper-text">
-                                <% if (locals.remainingAttempts) { %>
-                                    <%= remainingAttempts %> login attempts remaining
-                                <% } %>
-                            </span>
-                        </div>
+                <div class="security-note">
+                    For security, your account will be temporarily locked after 5 failed attempts
+                </div>
 
-                        <div class="center-align">
-                            <button type="submit" class="btn waves-effect waves-light">
-                                Sign In
-                                <i class="material-icons right">login</i>
-                            </button>
-                        </div>
-
-                        <div class="center-align" style="margin-top: 1rem;">
-                            <small class="grey-text">
-                                For security, your account will be temporarily locked after 5 failed attempts
-                            </small>
-                        </div>
-                    </form>
+                <div class="auth-separator">
+                    <span>Need an account?</span>
                 </div>
                 
-                <div class="card-action center-align">
-                    <p>Don't have an account? <a href="/auth/sign-up">Sign Up</a></p>
-                </div>
-            </div>
+                <a href="/auth/sign-up" class="btn-flat full-width waves-effect">
+                    Create Account
+                </a>
+            </form>
         </div>
     </div>
+
+    <!-- Recent Records Floating Grid -->
+    <% if (recentRecords?.length > 0) { %>
+    <div class="floating-records">
+        <% recentRecords.forEach((record, index) => { %>
+            <div class="floating-record" style="--delay: <%= index * 0.2 %>s">
+                <img
+                    src="<%= record.imageUrl || '/images/default-album.png' %>"
+                    alt="Album artwork for <%= record.title %>"
+                    loading="lazy"
+                    title="<%= record.title %> by <%= record.artist %>"
+                >
+            </div>
+        <% }) %>
+    </div>
+    <% } %>
 </div>
 
 <%- include('../partials/footer.ejs') %>

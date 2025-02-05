@@ -1,75 +1,76 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="container">
-    <div class="row">
-        <div class="col s12 m8 offset-m2 l6 offset-l3">
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title center-align">Create Account</span>
-                    
-                    <% if (error) { %>
-                        <div class="card-panel red lighten-4 red-text text-darken-4">
-                            <%= error %>
-                        </div>
-                    <% } %>
+<div class="landing-container landing-page">
+    <!-- Authentication Section -->
+    <div class="auth-section">
+        <!-- Sign Up Card -->
+        <div class="auth-card">
+            <p class="auth-intro">Start tracking your vinyl collection today</p>
+            
+            <% if (error) { %>
+                <div class="error-message">
+                    <i class="material-icons">error</i>
+                    <%= error %>
+                </div>
+            <% } %>
 
-                    <form action="/auth/sign-up" method="POST">
-                        <div class="input-field">
-                            <input type="text" 
-                                   id="username" 
-                                   name="username" 
-                                   value="<%= locals.username || '' %>"
-                                   pattern="[a-zA-Z0-9_\-]{3,20}"
-                                   maxlength="20"
-                                   required>
-                            <label for="username">Username</label>
-                            <span class="helper-text">3-20 characters, letters, numbers, underscore, hyphen only</span>
-                        </div>
+            <form action="/auth/sign-up" method="POST" class="signup-form">
+                <div class="input-field">
+                    <input type="text" 
+                           id="username" 
+                           name="username" 
+                           pattern="[a-zA-Z0-9_\-]{3,20}"
+                           value="<%= locals.username || '' %>"
+                           required>
+                    <label for="username">Username</label>
+                </div>
 
-                        <div class="input-field">
-                            <input type="password" 
-                                   id="password" 
-                                   name="password"
-                                   minlength="8"
-                                   maxlength="128"
-                                   required>
-                            <label for="password">Password</label>
-                            <span class="helper-text">
-                                Must contain at least:
-                                <ul>
-                                    <li>8 characters</li>
-                                    <li>One uppercase letter</li>
-                                    <li>One lowercase letter</li>
-                                    <li>One number</li>
-                                    <li>One special character (!@#$%^&*)</li>
-                                </ul>
-                            </span>
-                        </div>
+                <div class="input-field">
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           required>
+                    <label for="password">Password</label>
+                </div>
 
-                        <div class="input-field">
-                            <input type="password" 
-                                   id="confirmPassword" 
-                                   name="confirmPassword" 
-                                   required>
-                            <label for="confirmPassword">Confirm Password</label>
-                            <span class="helper-text">Re-enter your password</span>
-                        </div>
+                <div class="input-field">
+                    <input type="password" 
+                           id="confirmPassword" 
+                           name="confirmPassword" 
+                           required>
+                    <label for="confirmPassword">Confirm Password</label>
+                </div>
 
-                        <div class="center-align">
-                            <button type="submit" class="btn waves-effect waves-light">
-                                Create Account
-                                <i class="material-icons right">person_add</i>
-                            </button>
-                        </div>
-                    </form>
+                <button type="submit" class="btn btn-large full-width waves-effect">
+                    Create Account
+                </button>
+
+                <div class="auth-separator">
+                    <span>Already have an account?</span>
                 </div>
                 
-                <div class="card-action center-align">
-                    <p>Already have an account? <a href="/auth/sign-in">Sign In</a></p>
-                </div>
-            </div>
+                <a href="/auth/sign-in" class="btn-flat full-width waves-effect">
+                    Sign In
+                </a>
+            </form>
         </div>
     </div>
+
+    <!-- Recent Records Floating Grid -->
+    <% if (recentRecords?.length > 0) { %>
+    <div class="floating-records">
+        <% recentRecords.forEach((record, index) => { %>
+            <div class="floating-record" style="--delay: <%= index * 0.2 %>s">
+                <img
+                    src="<%= record.imageUrl || '/images/default-album.png' %>"
+                    alt="Album artwork for <%= record.title %>"
+                    loading="lazy"
+                    title="<%= record.title %> by <%= record.artist %>"
+                >
+            </div>
+        <% }) %>
+    </div>
+    <% } %>
 </div>
 
 <%- include('../partials/footer.ejs') %>

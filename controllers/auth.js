@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const Activity = require('../models/activity');
+const Record = require('../models/record');
 const bcrypt = require('bcrypt');
 const asyncHandler = require('../middleware/async-handler');
 const { validateSignUp, validateSignIn } = require('../middleware/validate');
@@ -10,21 +11,32 @@ const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
-router.get('/sign-up', (req, res) => {
+router.get('/sign-up', asyncHandler(async (req, res) => {
+    const recentRecords = await Record.find()
+        .sort({ createdAt: -1 })
+        .limit(8)
+        .populate('owner', 'username');
+
     res.render('auth/sign-up', { 
         title: 'Sign Up',
         error: null,
-        username: '' 
+        username: '',
+        recentRecords
     });
-});
+}));
 
 router.post('/sign-up', validateSignUp, asyncHandler(async (req, res) => {
-    const existingUser = await User.findOne({ username: req.body.username });
+    const [existingUser, recentRecords] = await Promise.all([
+        User.findOne({ username: req.body.username }),
+        Record.find().sort({ createdAt: -1 }).limit(8).populate('owner', 'username')
+    ]);
+
     if (existingUser) {
         return res.render('auth/sign-up', {
             title: 'Sign Up',
             error: 'Username already exists',
-            username: req.body.username
+            username: req.body.username,
+            recentRecords
         });
     }
 
@@ -54,20 +66,30 @@ router.post('/sign-up', validateSignUp, asyncHandler(async (req, res) => {
     res.redirect('/records');
 }));
 
-router.get('/sign-in', (req, res) => {
+router.get('/sign-in', asyncHandler(async (req, res) => {
+    const recentRecords = await Record.find()
+        .sort({ createdAt: -1 })
+        .limit(8)
+        .populate('owner', 'username');
+
     res.render('auth/sign-in', { 
         title: 'Sign In',
-        error: null
+        error: null,
+        recentRecords
     });
-});
+}));
 
 router.post('/sign-in', validateSignIn, asyncHandler(async (req, res) => {
-    const user = await User.findOne({ username: req.body.username });
+    const [user, recentRecords] = await Promise.all([
+        User.findOne({ username: req.body.username }),
+        Record.find().sort({ createdAt: -1 }).limit(8).populate('owner', 'username')
+    ]);
     
     if (!user) {
         return res.render('auth/sign-in', {
             title: 'Sign In',
-            error: 'Invalid username or password'
+            error: 'Invalid username or password',
+            recentRecords
         });
     }
 
@@ -77,7 +99,8 @@ router.post('/sign-in', validateSignIn, asyncHandler(async (req, res) => {
         Date.now() - user.lastLoginAttempt < LOGIN_TIMEOUT) {
         return res.render('auth/sign-in', {
             title: 'Sign In',
-            error: 'Account temporarily locked. Please try again later.'
+            error: 'Account temporarily locked. Please try again later.',
+            recentRecords
         });
     }
 
@@ -95,7 +118,8 @@ router.post('/sign-in', validateSignIn, asyncHandler(async (req, res) => {
         
         return res.render('auth/sign-in', {
             title: 'Sign In',
-            error: 'Invalid username or password'
+            error: 'Invalid username or password',
+            recentRecords
         });
     }
 

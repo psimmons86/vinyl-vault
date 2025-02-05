@@ -1,8 +1,206 @@
-/*
-===============================
-Root Variables & Base Styles
-===============================
-*/
+/* Landing page styles */
+.landing-container {
+  padding: 2rem 1rem;
+  min-height: calc(100vh - 64px);
+  background: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-section {
+  max-width: 400px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.auth-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-intro {
+  font-size: 1.25rem;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Sign In specific styles */
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.error-message i {
+  font-size: 1.25rem;
+}
+
+.attempts-message {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+.security-note {
+  font-size: 0.75rem;
+  color: #666;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .error-message {
+  background: rgba(198, 40, 40, 0.1);
+  color: #ef5350;
+}
+
+[data-theme="dark"] .attempts-message,
+[data-theme="dark"] .security-note {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.auth-separator {
+  margin: 1.5rem 0;
+  text-align: center;
+  position: relative;
+}
+
+.auth-separator::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-separator span {
+  background: white;
+  padding: 0 1rem;
+  color: #666;
+  position: relative;
+  font-size: 0.875rem;
+}
+
+/* Floating Records Animation */
+.floating-records {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.floating-record {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  animation: float 30s linear infinite;
+  animation-delay: var(--delay);
+  opacity: 0.25;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.floating-record:hover {
+  opacity: 0.6;
+  transform: scale(1.1);
+}
+
+.floating-record img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+}
+
+.floating-record:nth-child(4n + 1) {
+  left: 15%;
+  animation-duration: 32s;
+}
+
+.floating-record:nth-child(4n + 2) {
+  left: 35%;
+  animation-duration: 28s;
+}
+
+.floating-record:nth-child(4n + 3) {
+  right: 35%;
+  animation-duration: 34s;
+}
+
+.floating-record:nth-child(4n + 4) {
+  right: 15%;
+  animation-duration: 36s;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-100vh) rotate(360deg);
+  }
+}
+
+/* Dark mode support */
+[data-theme="dark"] {
+  background-color: #121212;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+[data-theme="dark"] .auth-card {
+  background-color: #1e1e1e;
+}
+
+[data-theme="dark"] .auth-separator span {
+  background-color: #1e1e1e;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="dark"] .floating-record {
+  opacity: 0.2;
+}
+
+[data-theme="dark"] .floating-record:hover {
+  opacity: 0.5;
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+  .landing-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .auth-section {
+    margin: 1rem auto;
+  }
+
+  .auth-card {
+    padding: 1.5rem;
+  }
+
+  .floating-record {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* Base styles */
 :root {
   --primary: #2B5329;
   --text: #1f2937;
@@ -18,808 +216,4 @@ body {
   color: var(--text);
 }
 
-/*
-===============================
-Navigation & Header
-===============================
-*/
-.main-nav {
-  border-bottom: 1px solid var(--border);
-  background: white;
-  padding: 0;
-  box-shadow: var(--shadow);
-}
-
-.nav-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 64px;
-}
-
-.nav-logo {
-  color: var(--primary);
-  font-size: 1.25rem;
-  text-decoration: none;
-  font-weight: 500;
-  padding: 0 15px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  height: 100%;
-  margin: 0;
-}
-
-.nav-links a {
-  color: #333;
-  text-decoration: none;
-  font-size: 0.9375rem;
-  padding: 0 15px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  transition: background-color 0.3s;
-}
-
-.nav-links a:hover {
-  background-color: rgba(0,0,0,0.1);
-}
-
-/* Dropdown specific styles */
-.nav-links .dropdown-trigger {
-  display: flex;
-  align-items: center;
-  padding-right: 25px;
-}
-
-.nav-links .dropdown-trigger i {
-  margin-left: 5px;
-}
-
-/* Mobile menu toggle */
-.mobile-menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: var(--primary);
-  padding: 12px 16px;
-  cursor: pointer;
-  margin-left: auto;
-  transition: background-color 0.3s;
-  border-radius: 4px;
-}
-
-.mobile-menu-toggle:hover {
-  background-color: rgba(0,0,0,0.05);
-}
-
-.mobile-menu-toggle i {
-  font-size: 28px;
-  display: block;
-}
-
-@media (max-width: 992px) {
-  .mobile-menu-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-/*
-===============================
-Collection Header & Search
-===============================
-*/
-.collection-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 2rem 0;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.collection-title {
-  font-size: 2rem;
-  margin: 0;
-  color: var(--text);
-  flex: 1;
-}
-
-.collection-controls {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  width: 100%;
-  justify-content: center;
-}
-
-/* Search Container */
-.search-container {
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.search-form {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  width: 100%;
-}
-
-.search-form .input-field {
-  flex: 1;
-  margin: 0;
-}
-
-.collection-search-input {
-  background-color: white !important;
-  border-radius: 4px !important;
-  margin: 0 !important;
-  height: 45px !important;
-  padding: 0 1rem 0 3rem !important;
-  border: 1px solid var(--border) !important;
-  box-shadow: var(--shadow) !important;
-}
-
-.collection-search-input:focus {
-  border-color: var(--primary) !important;
-  box-shadow: var(--shadow), 0 0 0 1px var(--primary) !important;
-}
-
-.search-container .material-icons.prefix {
-  color: #666;
-  top: 10px;
-}
-
-.search-btn {
-  height: 45px;
-  width: 45px;
-  padding: 0 !important;
-  margin: 0 !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.search-btn i {
-  margin: 0;
-}
-
-/* View Controls */
-.view-controls {
-  display: flex;
-  gap: 0.5rem;
-  margin-left: auto;
-}
-
-.view-controls a {
-  padding: 0.5rem 1.25rem;
-  background: #f0f0f0;
-  border-radius: 999px;
-  color: #333;
-  text-decoration: none;
-  font-size: 0.875rem;
-}
-
-.view-controls a.active {
-  background: var(--primary);
-  color: white;
-}
-
-/*
-===============================
-Record Cards
-===============================
-*/
-.record-card {
-  display: block;
-  position: relative;
-  aspect-ratio: 1;
-  margin: 0.5rem 0;
-  border-radius: 4px;
-  overflow: hidden;
-  text-decoration: none;
-}
-
-.record-artwork {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.record-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.record-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.5rem;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
-  color: white;
-}
-
-.record-title {
-  font-size: 1.125rem;
-  margin: 0 0 0.25rem 0;
-  color: white;
-}
-
-.record-artist {
-  font-size: 0.875rem;
-  margin: 0 0 0.25rem 0;
-  opacity: 0.9;
-}
-
-.record-plays {
-  font-size: 0.75rem;
-  opacity: 0.7;
-  margin: 0;
-}
-
-/*
-===============================
-Record Details Page
-===============================
-*/
-.record-detail-container {
-  padding: 2rem 0;
-}
-
-.record-detail-card {
-  background: white;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: var(--shadow);
-  margin: 1rem 0;
-}
-
-.record-detail-image {
-  margin-bottom: 1.5rem;
-}
-
-.record-detail-image img {
-  width: 100%;
-  border-radius: 4px;
-  box-shadow: var(--shadow);
-}
-
-.record-info {
-  padding: 0 1rem;
-}
-
-.record-info .record-title {
-  font-size: 2rem;
-  margin: 0 0 0.5rem 0;
-  color: var(--text);
-}
-
-.record-info .record-artist {
-  font-size: 1.25rem;
-  color: #666;
-  margin-bottom: 1.5rem;
-}
-
-.record-info .record-format,
-.record-info .record-plays,
-.record-info .record-last-played {
-  margin: 0.5rem 0;
-  color: #666;
-}
-
-.record-card {
-  display: block;
-  position: relative;
-  aspect-ratio: 1;
-  margin: 0.5rem 0;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.record-link {
-  text-decoration: none;
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.quick-play-form {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  z-index: 2;
-}
-
-.quick-play-form .btn-floating {
-  background-color: var(--primary) !important;
-  opacity: 0.9;
-  transition: opacity 0.2s;
-}
-
-.quick-play-form .btn-floating:hover {
-  opacity: 1;
-}
-
-.record-card:hover .quick-play-form .btn-floating {
-  transform: scale(1.1);
-}
-
-/* Tags */
-.record-tags {
-  margin: 1.5rem 0;
-}
-
-.tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tag-link {
-  background: #f0f0f0;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  color: #666;
-  text-decoration: none;
-  font-size: 0.875rem;
-  transition: background-color 0.2s;
-}
-
-.tag-link:hover {
-  background: #e0e0e0;
-}
-
-/* Action Buttons */
-.record-actions {
-  margin-top: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.play-form {
-  margin-bottom: 1rem;
-}
-
-.play-btn {
-  width: 100%;
-  padding: 0 2rem;
-  height: 3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.management-buttons {
-  display: flex;
-  gap: 1rem;
-}
-
-.management-buttons .btn {
-  flex: 1;
-}
-
-/*
-===============================
-Forms & Inputs
-===============================
-*/
-.form-container {
-  max-width: 600px;
-  margin: 2rem auto;
-  padding: 2rem;
-}
-
-.input-field input {
-  border-bottom: 1px solid #ddd !important;
-}
-
-.input-field input:focus {
-  border-bottom: 1px solid var(--primary) !important;
-  box-shadow: 0 1px 0 0 var(--primary) !important;
-}
-
-.input-field input:focus + label {
-  color: var(--primary) !important;
-}
-
-/*
-===============================
-Utility Classes
-===============================
-*/
-.container {
-  max-width: 1400px !important;
-  width: 95% !important;
-}
-
-.full-width {
-  width: 100%;
-}
-
-.hidden {
-  display: none;
-}
-
-.btn {
-  background-color: var(--primary) !important;
-}
-
-.btn:hover {
-  background-color: var(--primary) !important;
-  opacity: 0.9;
-}
-
-/* Fixed Add Button */
-.add-record-btn {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  background: white;
-  color: #333;
-  padding: 0.75rem 1rem;
-  border-radius: 4px;
-  text-decoration: none;
-  font-size: 0.875rem;
-  box-shadow: var(--shadow);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* Profile Settings Styles */
-.profile-avatar {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.section {
-  padding: 20px 0;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.section:last-child {
-  border-bottom: none;
-}
-
-/* Avatar in navbar */
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  vertical-align: middle;
-  margin-right: 8px;
-}
-
-/* Dropdown menu */
-.dropdown-content {
-  min-width: 200px !important;
-}
-
-.dropdown-content li > a {
-  color: rgba(0,0,0,0.87);
-  padding: 14px 16px;
-}
-
-.dropdown-content .divider {
-  margin: 8px 0;
-}
-
-.profile-avatar {
-  width: 200px;
-  height: 200px;
-  object-fit: cover;
-  border: 3px solid #fff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.profile-name {
-  font-size: 2rem;
-  margin: 0 0 10px 0;
-}
-
-.profile-bio {
-  margin: 15px 0;
-  font-size: 1.1rem;
-  color: #666;
-}
-
-.social-links {
-  margin: 15px 0;
-}
-
-.social-links .btn-floating {
-  margin-right: 10px;
-}
-
-.favorite-genres {
-  margin-top: 20px;
-}
-
-.favorite-genres .chip {
-  margin: 5px;
-}
-
-.collection .collection-item.avatar {
-  min-height: 64px;
-}
-
-/* Dropdown icon alignment */
-.dropdown-content li > a > i {
-  margin: 0 16px 0 0;
-}
-
-
-[data-theme="dark"] {
-  background-color: #121212;
-  color: rgba(255, 255, 255, 0.87);
-}
-
-[data-theme="dark"] .card,
-[data-theme="dark"] .record-detail-card,
-[data-theme="dark"] .mobile-nav,
-[data-theme="dark"] .dropdown-content {
-  background-color: #1e1e1e !important;
-}
-
-[data-theme="dark"] .card-content,
-[data-theme="dark"] .record-info,
-[data-theme="dark"] .mobile-nav-links a,
-[data-theme="dark"] .dropdown-content li > a {
-  color: rgba(255, 255, 255, 0.87) !important;
-}
-
-[data-theme="dark"] .collection {
-  border-color: #333;
-}
-
-[data-theme="dark"] .collection .collection-item {
-  background-color: #1e1e1e;
-  border-color: #333;
-}
-
-[data-theme="dark"] .mobile-nav-links .divider {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-[data-theme="dark"] .mobile-nav-links a:hover,
-[data-theme="dark"] .dropdown-content li > a:hover {
-  background-color: rgba(255, 255, 255, 0.05) !important;
-}
-
-[data-theme="dark"] .tag-link {
-  background: #2a2a2a;
-  color: rgba(255, 255, 255, 0.87);
-}
-
-[data-theme="dark"] .tag-link:hover {
-  background: #333;
-}
-
-[data-theme="dark"] .record-info .record-artist,
-[data-theme="dark"] .record-info .record-format,
-[data-theme="dark"] .record-info .record-plays,
-[data-theme="dark"] .record-info .record-last-played {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-[data-theme="dark"] .collection-search-input {
-  background-color: #1e1e1e !important;
-  border-color: #333 !important;
-  color: rgba(255, 255, 255, 0.87) !important;
-}
-
-[data-theme="dark"] .collection-search-input:focus {
-  border-color: var(--primary) !important;
-  box-shadow: var(--shadow), 0 0 0 1px var(--primary) !important;
-}
-
-[data-theme="dark"] .search-container .material-icons.prefix {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-[data-theme="dark"] .add-record-btn {
-  background: #1e1e1e;
-  color: rgba(255, 255, 255, 0.87);
-}
-
-/*
-===============================
-Responsive Design
-===============================
-*/
-@media (max-width: 992px) {
-  .nav-content {
-    padding: 0;
-  }
-
-  .nav-links {
-    position: fixed;
-    top: 64px;
-    left: 0;
-    right: 0;
-    background: white;
-    flex-direction: column;
-    height: auto;
-    display: none;
-    box-shadow: var(--shadow);
-  }
-
-  .nav-links.active {
-    display: flex;
-  }
-
-  .nav-links a {
-    width: 100%;
-    padding: 16px 24px;
-    height: auto;
-    border-bottom: 1px solid var(--border);
-    justify-content: flex-start;
-  }
-
-  .nav-links a:hover {
-    background-color: rgba(0,0,0,0.05);
-  }
-
-  .nav-links .dropdown-trigger {
-    padding: 16px 24px;
-    justify-content: space-between;
-  }
-
-  .nav-links .dropdown-trigger i {
-    margin-left: auto;
-  }
-
-  .dropdown-content {
-    width: 100% !important;
-    top: auto !important;
-    position: relative !important;
-    box-shadow: none !important;
-    border-top: 1px solid var(--border);
-  }
-
-  .collection-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .collection-controls {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .view-controls {
-    margin: 0 auto;
-  }
-}
-
-@media (max-width: 600px) {
-  /* Improved card spacing */
-  .record-detail-card {
-    padding: 1.5rem;
-    margin: 0.5rem 0;
-  }
-  
-  /* Better button layout */
-  .management-buttons {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  
-  .management-buttons .btn {
-    height: 3rem;
-    line-height: 3rem;
-    font-size: 1rem;
-  }
-  
-  /* Improved text readability */
-  .record-info {
-    padding: 0.5rem;
-  }
-
-  .record-info .record-title {
-    font-size: 1.5rem;
-    line-height: 1.3;
-    margin-bottom: 0.75rem;
-  }
-
-  .record-info .record-artist {
-    font-size: 1.125rem;
-    margin-bottom: 1rem;
-  }
-
-  /* Record card improvements */
-  .record-card .record-title {
-    font-size: 1.125rem;
-    line-height: 1.3;
-    margin-bottom: 0.5rem;
-  }
-
-  .record-card .record-artist {
-    font-size: 1rem;
-    line-height: 1.4;
-  }
-
-  .record-card .record-overlay {
-    padding: 1.25rem;
-  }
-
-  /* Better form spacing */
-  .form-container {
-    padding: 1.5rem;
-  }
-
-  .input-field {
-    margin-bottom: 1.5rem;
-  }
-
-  /* Improved floating action button */
-  .add-record-btn {
-    bottom: 1.25rem;
-    right: 1.25rem;
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    box-shadow: var(--shadow-lg);
-  }
-
-  /* Collection header improvements */
-  .collection-title {
-    font-size: 1.75rem;
-    text-align: center;
-    margin-bottom: 1rem;
-  }
-
-  .collection-controls {
-    padding: 0 0.5rem;
-  }
-
-  .search-container {
-    padding: 0 0.5rem;
-  }
-
-  /* Better tag display */
-  .tags-container {
-    padding: 0.5rem;
-  }
-
-  .tag-link {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-  }
-}
-
-/* Additional improvements for very small screens */
-@media (max-width: 380px) {
-  .record-info .record-title {
-    font-size: 1.25rem;
-  }
-
-  .record-info .record-artist {
-    font-size: 1rem;
-  }
-
-  .collection-title {
-    font-size: 1.5rem;
-  }
-
-  .record-card .record-overlay {
-    padding: 1rem;
-  }
-}
+/* Keep all existing styles below this line */
