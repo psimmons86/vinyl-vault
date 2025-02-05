@@ -183,13 +183,54 @@
     display: block;
     background: none;
     border: none;
-    padding: 0.5rem;
+    padding: 0.75rem;
     cursor: pointer;
     margin-left: auto;
+    min-width: 48px;
+    min-height: 48px;
   }
 
   .nav-links.hide-on-med-and-down {
     display: none;
+  }
+
+  .mobile-nav-links {
+    padding: 0.75rem 0;
+  }
+
+  .mobile-nav-links a {
+    padding: 1rem 1.25rem;
+    font-size: 1.1rem;
+    min-height: 48px;
+  }
+
+  .mobile-nav-links a i {
+    font-size: 1.5rem;
+  }
+
+  .mobile-user-info {
+    padding: 1.25rem;
+    gap: 1rem;
+  }
+
+  .mobile-user-info .user-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .mobile-user-info span {
+    font-size: 1.2rem;
+  }
+
+  .dropdown-content li > a {
+    padding: 1rem 1.25rem !important;
+    min-height: 48px !important;
+    font-size: 1.1rem !important;
+  }
+
+  .nav-logo {
+    font-size: 1.3rem;
+    padding: 0 1rem;
   }
 }
 
