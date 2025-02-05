@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="/styles.css" />
     <link rel="stylesheet" href="/stylesheets/nav.css" />
+    <link rel="stylesheet" href="/stylesheets/notifications.css" />
   </head>
   <body>
     <script src="/javascripts/theme.js"></script>
@@ -49,6 +50,49 @@
           <a href="/forum">
             <i class="material-icons">forum</i>Forum
           </a>
+          <!-- Notifications Dropdown -->
+          <div class="notifications-nav">
+            <a href="#" class="dropdown-trigger notifications-trigger" data-target="notifications-dropdown">
+              <i class="material-icons">notifications</i>
+              <% if (locals.unreadNotifications > 0) { %>
+                <span class="notification-badge"><%= locals.unreadNotifications %></span>
+              <% } %>
+            </a>
+            <ul id="notifications-dropdown" class="dropdown-content notifications-dropdown">
+              <li class="notifications-header">
+                <span>Notifications</span>
+                <a href="/notifications" class="view-all">View All</a>
+              </li>
+              <% if (locals.recentNotifications?.length > 0) { %>
+                <% locals.recentNotifications.forEach(notification => { %>
+                  <li>
+                    <a href="<%= notification.link %>" class="notification-item <%= notification.read ? '' : 'unread' %>">
+                      <% if (notification.sender) { %>
+                        <img src="<%= notification.sender.profile?.avatarUrl || '/images/default-avatar.png' %>" 
+                             alt="Avatar" class="notification-avatar">
+                      <% } else { %>
+                        <i class="material-icons notification-icon">
+                          <%= notification.type === 'price_alert' ? 'trending_up' : 
+                              notification.type === 'milestone' ? 'emoji_events' : 'notifications' %>
+                        </i>
+                      <% } %>
+                      <div class="notification-content">
+                        <div class="notification-message"><%= notification.message %></div>
+                        <time class="timeago" datetime="<%= notification.createdAt.toISOString() %>">
+                          <%= notification.createdAt.toLocaleDateString() %>
+                        </time>
+                      </div>
+                    </a>
+                  </li>
+                <% }); %>
+              <% } else { %>
+                <li class="no-notifications">
+                  <i class="material-icons">notifications_none</i>
+                  <span>No new notifications</span>
+                </li>
+              <% } %>
+            </ul>
+          </div>
           <% if (user.isAdmin) { %>
             <a href="/blog/admin/featured">
               <i class="material-icons">featured_play_list</i>Featured
@@ -102,6 +146,12 @@
             </a>
             <a href="/forum">
               <i class="material-icons">forum</i>Forum
+            </a>
+            <a href="/notifications">
+              <i class="material-icons">notifications</i>Notifications
+              <% if (locals.unreadNotifications > 0) { %>
+                <span class="mobile-notification-badge"><%= locals.unreadNotifications %></span>
+              <% } %>
             </a>
             <% if (user.isAdmin) { %>
               <a href="/blog/admin/featured">

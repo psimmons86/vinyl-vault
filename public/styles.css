@@ -201,6 +201,41 @@
 }
 
 /* Base styles */
+@media (max-width: 600px) {
+  .container {
+    width: 100%;
+    padding: 0;
+  }
+
+  .card {
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .collection {
+    border: none;
+    margin: 0;
+  }
+
+  .collection .collection-item {
+    border-left: none;
+    border-right: none;
+  }
+
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.5rem; }
+  h4 { font-size: 1.25rem; }
+  h5 { font-size: 1.15rem; }
+  h6 { font-size: 1rem; }
+}
+
 :root {
   --primary: #2B5329;
   --text: #1f2937;

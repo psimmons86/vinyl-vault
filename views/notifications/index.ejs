@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+
+<div class="notifications-page">
+  <h4>Notifications</h4>
+  
+  <div class="notifications-list">
+    <% if (notifications?.length > 0) { %>
+      <% notifications.forEach(notification => { %>
+        <a href="<%= notification.link %>" class="notification-item <%= notification.read ? '' : 'unread' %>">
+          <% if (notification.sender) { %>
+            <img src="<%= notification.sender.profile?.avatarUrl || '/images/default-avatar.png' %>" 
+                 alt="Avatar" class="notification-avatar">
+          <% } else { %>
+            <i class="material-icons notification-icon">
+              <%= notification.type === 'price_alert' ? 'trending_up' : 
+                  notification.type === 'milestone' ? 'emoji_events' : 'notifications' %>
+            </i>
+          <% } %>
+          <div class="notification-content">
+            <div class="notification-message"><%= notification.message %></div>
+            <time class="notification-time timeago" datetime="<%= notification.createdAt.toISOString() %>">
+              <%= notification.createdAt.toLocaleDateString() %>
+            </time>
+          </div>
+        </a>
+      <% }); %>
+    <% } else { %>
+      <div class="no-notifications">
+        <i class="material-icons">notifications_none</i>
+        <span>No notifications yet</span>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

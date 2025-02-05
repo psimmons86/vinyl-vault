@@ -66,8 +66,9 @@ app.use(session({
     proxy: true
 }));
 
-// Add user data to all requests
+// Add user data and notifications to all requests
 app.use(require('./middleware/add-user-to-locals-and-req'));
+app.use(require('./middleware/add-notifications-to-locals'));
 
 // Home page route
 app.get('/', async (req, res) => {
@@ -143,6 +144,7 @@ app.get('/users/:username', async (req, res) => {
 
 // Mount route handlers
 app.use('/auth', require('./controllers/auth'));           // Authentication routes
+app.use('/notifications', require('./controllers/notifications')); // Notification routes
 app.use(require('./middleware/ensure-signed-in'));         // Require login for routes below
 app.use('/records', require('./controllers/records'));     // Record routes
 app.use('/stores', require('./controllers/stores'));       // Store routes
