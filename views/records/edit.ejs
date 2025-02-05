@@ -3,7 +3,7 @@
 <div class="form-container">
     <h2>Edit Record</h2>
 
-    <form action="/records/<%= record._id %>?_method=PUT" method="POST" class="record-form">
+    <form action="/records/<%= record._id %>?_method=PUT" method="POST" class="record-form" enctype="multipart/form-data">
         <div class="form-grid">
             <div class="form-group">
                 <label for="title">Title</label>
@@ -32,7 +32,9 @@
             </div>
 
             <div class="form-group full-width">
-                <label for="imageUrl">Album Art URL</label>
+                <label for="albumArt">Album Art</label>
+                <input type="file" name="albumArt" id="albumArt" accept="image/*">
+                <p class="help-text">Or provide a URL:</p>
                 <input type="url" name="imageUrl" id="imageUrl" value="<%= record.imageUrl %>">
                 <div id="imagePreview" class="image-preview">
                     <img src="<%= record.imageUrl || '/images/default-album.png' %>" alt="Album preview">
@@ -59,11 +61,23 @@
 
 <script>
 const imageUrl = document.getElementById('imageUrl');
+const albumArt = document.getElementById('albumArt');
 const imagePreview = document.querySelector('#imagePreview img');
 
 imageUrl.addEventListener('input', function() {
     const url = this.value;
     imagePreview.src = url || '/images/default-album.png';
+});
+
+albumArt.addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imagePreview.src = e.target.result;
+            imageUrl.value = ''; // Clear URL when file is selected
+        };
+        reader.readAsDataURL(this.files[0]);
+    }
 });
 </script>
 

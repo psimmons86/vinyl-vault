@@ -1,0 +1,167 @@
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.user-dropdown {
+  min-width: 200px !important;
+  padding: 8px 0;
+  background-color: white !important;
+  z-index: 1000 !important;
+}
+
+.nav-content {
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.nav-links > a {
+  padding: 0 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 64px;
+  color: white;
+}
+
+.nav-links > a i {
+  margin: 0;
+}
+
+.nav-links > a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.user-menu {
+  margin-left: auto;
+}
+
+.main-nav {
+  background-color: var(--primary);
+  position: relative;
+  z-index: 1000;
+}
+
+.nav-logo {
+  color: white !important;
+  margin-right: 1rem;
+  font-size: 1.5rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.mobile-menu-toggle {
+  color: white;
+}
+
+/* Dropdown styles */
+.dropdown-content {
+  background-color: white !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+  z-index: 1001 !important;
+}
+
+.dropdown-content li > a {
+  color: var(--primary) !important;
+}
+
+.dropdown-content li > a:hover {
+  background-color: rgba(0,0,0,0.05) !important;
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: white;
+  flex-direction: column;
+  z-index: 999;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-nav.active {
+  display: flex;
+}
+
+.mobile-user-info {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--primary);
+  color: white;
+}
+
+.mobile-user-info .user-avatar {
+  width: 40px;
+  height: 40px;
+}
+
+.mobile-user-info span {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.mobile-nav-links {
+  padding: 0.5rem 0;
+}
+
+.mobile-nav-links a {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: var(--primary-text);
+  gap: 1rem;
+  transition: background-color 0.2s;
+}
+
+.mobile-nav-links a:hover {
+  background-color: rgba(0,0,0,0.05);
+}
+
+.mobile-nav-links a i {
+  color: var(--primary);
+  margin: 0;
+}
+
+.mobile-nav-links .divider {
+  margin: 0.5rem 0;
+  height: 1px;
+  background-color: rgba(0,0,0,0.1);
+}
+
+@media (max-width: 992px) {
+  .mobile-menu-toggle {
+    display: block;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    margin-left: auto;
+  }
+
+  .nav-links.hide-on-med-and-down {
+    display: none;
+  }
+}
+
+/* Fix for iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .mobile-nav {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

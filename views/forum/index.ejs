@@ -1,0 +1,150 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+    <div class="row">
+        <div class="col s12">
+            <div class="forum-header">
+                <h1 class="page-title">Forum</h1>
+                <div class="forum-actions">
+                    <% if (user) { %>
+                        <a href="/forum/subscriptions" class="btn-floating waves-effect waves-light" title="My Subscriptions">
+                            <i class="material-icons">notifications</i>
+                        </a>
+                        <a href="/forum/bookmarks" class="btn-floating waves-effect waves-light" title="My Bookmarks">
+                            <i class="material-icons">bookmark</i>
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="categories-section">
+                <% categories.forEach(category => { %>
+                    <div class="card forum-category hoverable">
+                        <div class="card-content">
+                            <div class="category-header">
+                                <div class="category-icon">
+                                    <i class="material-icons"><%= category.icon %></i>
+                                </div>
+                                <div class="category-info">
+                                    <a href="/forum/category/<%= category.slug %>" class="category-title">
+                                        <%= category.name %>
+                                    </a>
+                                    <p class="category-description grey-text">
+                                        <%= category.description %>
+                                    </p>
+                                </div>
+                                <div class="category-stats">
+                                    <div class="stat">
+                                        <span class="stat-number"><%= category.topicCount %></span>
+                                        <span class="stat-label">Topics</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-number"><%= category.postCount %></span>
+                                        <span class="stat-label">Posts</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <% if (category.lastPost?.topic) { %>
+                                <div class="category-last-post">
+                                    <div class="last-post-avatar">
+                                        <img 
+                                            src="<%= category.lastPost.user.profile?.avatarUrl || '/images/default-avatar.png' %>" 
+                                            alt="<%= category.lastPost.user.profile?.name || category.lastPost.user.username %>"
+                                            class="circle responsive-img"
+                                        >
+                                    </div>
+                                    <div class="last-post-info">
+                                        <a href="/forum/topic/<%= category.lastPost.topic.slug %>">
+                                            <%= category.lastPost.topic.title %>
+                                        </a>
+                                        <div class="last-post-meta grey-text">
+                                            by 
+                                            <a href="/records/profile/<%= category.lastPost.user.username %>">
+                                                <%= category.lastPost.user.profile?.name || category.lastPost.user.username %>
+                                            </a>
+                                            • <%= new Date(category.lastPost.createdAt).toLocaleDateString() %>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+
+                            <% if (category.moderators?.length > 0) { %>
+                                <div class="category-moderators">
+                                    <span class="grey-text">Moderators:</span>
+                                    <% category.moderators.forEach((mod, i) => { %>
+                                        <a href="/records/profile/<%= mod.username %>">
+                                            <%= mod.profile?.name || mod.username %>
+                                        </a>
+                                        <%= i < category.moderators.length - 1 ? ',' : '' %>
+                                    <% }); %>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="recent-activity-section">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Recent Topics</span>
+                        <div class="collection">
+                            <% recentTopics.forEach(topic => { %>
+                                <a href="/forum/topic/<%= topic.slug %>" class="collection-item avatar">
+                                    <img 
+                                        src="<%= topic.author.profile?.avatarUrl || '/images/default-avatar.png' %>" 
+                                        alt="<%= topic.author.profile?.name || topic.author.username %>"
+                                        class="circle"
+                                    >
+                                    <span class="title"><%= topic.title %></span>
+                                    <p>
+                                        in <span class="category-label"><%= topic.category.name %></span><br>
+                                        by <%= topic.author.profile?.name || topic.author.username %>
+                                        • <%= new Date(topic.createdAt).toLocaleDateString() %>
+                                    </p>
+                                    <span class="secondary-content">
+                                        <i class="material-icons">chevron_right</i>
+                                    </span>
+                                </a>
+                            <% }); %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forum Stats -->
+            <div class="forum-stats-section">
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Forum Statistics</span>
+                        <div class="stats-grid">
+                            <div class="stat">
+                                <i class="material-icons">forum</i>
+                                <span class="stat-number"><%= categories.reduce((sum, cat) => sum + cat.topicCount, 0) %></span>
+                                <span class="stat-label">Total Topics</span>
+                            </div>
+                            <div class="stat">
+                                <i class="material-icons">chat</i>
+                                <span class="stat-number"><%= categories.reduce((sum, cat) => sum + cat.postCount, 0) %></span>
+                                <span class="stat-label">Total Posts</span>
+                            </div>
+                            <div class="stat">
+                                <i class="material-icons">category</i>
+                                <span class="stat-number"><%= categories.length %></span>
+                                <span class="stat-label">Categories</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Forum Styles -->
+<link rel="stylesheet" href="/stylesheets/forum.css">
+
+<%- include('../partials/footer') %>

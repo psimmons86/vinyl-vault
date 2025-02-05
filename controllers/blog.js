@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const fs = require('fs/promises');
 const Post = require('../models/post');
 const FeaturedRecord = require('../models/featured');
 const ensureSignedIn = require('../middleware/ensure-signed-in');
@@ -7,6 +8,7 @@ const ensureAdmin = require('../middleware/ensure-admin');
 const asyncHandler = require('../middleware/async-handler');
 const multer = require('multer');
 const path = require('path');
+const { marked } = require('marked');
 
 // Configure multer for image uploads
 const storage = multer.diskStorage({
@@ -63,7 +65,8 @@ router.get('/', asyncHandler(async (req, res) => {
         posts,
         featured,
         currentPage: page,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(total / limit),
+        user: req.user
     });
 }));
 
@@ -112,7 +115,8 @@ router.get('/:slug', asyncHandler(async (req, res) => {
 
     res.render('blog/show', { 
         title: post.title,
-        post
+        post,
+        marked
     });
 }));
 
@@ -224,8 +228,39 @@ router.get('/admin/featured', ensureAdmin, asyncHandler(async (req, res) => {
 }));
 
 router.post('/admin/featured', ensureAdmin, upload.single('albumArt'), asyncHandler(async (req, res) => {
-    const { title, artist, description, link, order } = req.body;
+    const { title, artist, description, link, order, _method, recordId } = req.body;
     
+    // Handle PUT requests for editing
+    if (_method === 'PUT') {
+        const featured = await FeaturedRecord.findById(recordId);
+        if (!featured) {
+            throw new Error('Record not found');
+        }
+
+        featured.title = title;
+        featured.artist = artist;
+        featured.description = description;
+        featured.link = link;
+        featured.order = parseInt(order);
+
+        if (req.file) {
+            // Delete old image if it exists and isn't the default
+            if (featured.albumArt && !featured.albumArt.includes('default-')) {
+                try {
+                    await fs.unlink('public' + featured.albumArt);
+                } catch (err) {
+                    console.error('Error deleting old album art:', err);
+                }
+            }
+            featured.albumArt = '/uploads/blog/' + req.file.filename;
+        }
+
+        await featured.save();
+        req.flash('success', 'Record updated successfully');
+        return res.redirect('/blog/admin/featured');
+    }
+
+    // Handle POST requests for new records
     if (!req.file) {
         throw new Error('Album art is required');
     }
@@ -240,6 +275,7 @@ router.post('/admin/featured', ensureAdmin, upload.single('albumArt'), asyncHand
     });
 
     await featured.save();
+    req.flash('success', 'Record added successfully');
     res.redirect('/blog/admin/featured');
 }));
 

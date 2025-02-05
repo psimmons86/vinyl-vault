@@ -1,0 +1,282 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+    <div class="row">
+        <div class="col s12">
+            <!-- Topic Header -->
+            <div class="forum-header">
+                <div class="breadcrumbs">
+                    <a href="/forum">Forum</a>
+                    <i class="material-icons tiny">chevron_right</i>
+                    <a href="/forum/category/<%= topic.category.slug %>"><%= topic.category.name %></a>
+                    <i class="material-icons tiny">chevron_right</i>
+                    <span><%= topic.title %></span>
+                </div>
+                <div class="topic-actions">
+                    <% if (user) { %>
+                        <button 
+                            onclick="subscribeTopic()" 
+                            class="btn-floating waves-effect waves-light"
+                            title="<%= topic.subscribers?.includes(user._id) ? 'Unsubscribe' : 'Subscribe' %>"
+                        >
+                            <i class="material-icons">
+                                <%= topic.subscribers?.includes(user._id) ? 'notifications_active' : 'notifications' %>
+                            </i>
+                        </button>
+                        <button 
+                            onclick="bookmarkTopic()" 
+                            class="btn-floating waves-effect waves-light"
+                            title="Bookmark Topic"
+                        >
+                            <i class="material-icons">bookmark_border</i>
+                        </button>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Topic Info -->
+            <div class="card topic-info-card">
+                <div class="card-content">
+                    <h1 class="topic-title">
+                        <% if (topic.isPinned) { %>
+                            <i class="material-icons tiny" title="Pinned Topic">push_pin</i>
+                        <% } %>
+                        <%= topic.title %>
+                    </h1>
+                    <div class="topic-meta">
+                        Started by 
+                        <a href="/records/profile/<%= topic.author.username %>">
+                            <%= topic.author.profile?.name || topic.author.username %>
+                        </a>
+                        • <%= new Date(topic.createdAt).toLocaleDateString() %>
+                        • <%= topic.views %> views
+                        <% if (topic.tags?.length > 0) { %>
+                            <br>
+                            <% topic.tags.forEach(tag => { %>
+                                <div class="chip"><%= tag %></div>
+                            <% }); %>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Posts -->
+            <div class="posts-section">
+                <% posts.forEach((post, index) => { %>
+                    <div class="card post" id="post-<%= post._id %>">
+                        <div class="post-header">
+                            <div class="post-author">
+                                <img 
+                                    src="<%= post.author.profile?.avatarUrl || '/images/default-avatar.png' %>" 
+                                    alt="<%= post.author.profile?.name || post.author.username %>"
+                                    class="circle"
+                                >
+                                <div class="author-info">
+                                    <a href="/records/profile/<%= post.author.username %>">
+                                        <%= post.author.profile?.name || post.author.username %>
+                                    </a>
+                                    <% if (index === 0) { %>
+                                        <span class="op-badge">OP</span>
+                                    <% } %>
+                                </div>
+                            </div>
+                            <div class="post-meta">
+                                <a href="#post-<%= post._id %>" title="Link to this post">
+                                    #<%= pagination.page === 1 ? index + 1 : (pagination.page - 1) * 20 + index + 1 %>
+                                </a>
+                                • <%= post.formattedCreatedAt %>
+                                <% if (post.isEdited) { %>
+                                    • edited
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="post-content">
+                            <% if (post.quotes?.length > 0) { %>
+                                <% post.quotes.forEach(quote => { %>
+                                    <blockquote>
+                                        <p class="quote-author">
+                                            <%= quote.post.author.profile?.name || quote.post.author.username %> wrote:
+                                        </p>
+                                        <%= quote.content %>
+                                    </blockquote>
+                                <% }); %>
+                            <% } %>
+                            <%= post.content %>
+                        </div>
+
+                        <div class="post-actions">
+                            <% if (user) { %>
+                                <button onclick="likePost('<%= post._id %>')" class="like-button">
+                                    <i class="material-icons">
+                                        <%= post.likes?.includes(user._id) ? 'favorite' : 'favorite_border' %>
+                                    </i>
+                                    <span class="like-count"><%= post.likes?.length || 0 %></span>
+                                </button>
+                                <button onclick="quotePost('<%= post._id %>')" class="quote-button">
+                                    <i class="material-icons">format_quote</i>
+                                    Quote
+                                </button>
+                                <% if (user._id.toString() === post.author._id.toString() || user.isAdmin) { %>
+                                    <button onclick="editPost('<%= post._id %>')" class="edit-button">
+                                        <i class="material-icons">edit</i>
+                                        Edit
+                                    </button>
+                                <% } %>
+                                <button onclick="flagPost('<%= post._id %>')" class="flag-button">
+                                    <i class="material-icons">flag</i>
+                                    Report
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+
+            <!-- Pagination -->
+            <% if (pagination.pageCount > 1) { %>
+                <div class="pagination center-align">
+                    <ul class="pagination">
+                        <% if (pagination.page > 1) { %>
+                            <li>
+                                <a href="?page=<%= pagination.page - 1 %>" class="waves-effect">
+                                    <i class="material-icons">chevron_left</i>
+                                </a>
+                            </li>
+                        <% } %>
+
+                        <% for (let i = 1; i <= pagination.pageCount; i++) { %>
+                            <li class="<%= pagination.page === i ? 'active' : 'waves-effect' %>">
+                                <a href="?page=<%= i %>"><%= i %></a>
+                            </li>
+                        <% } %>
+
+                        <% if (pagination.page < pagination.pageCount) { %>
+                            <li>
+                                <a href="?page=<%= pagination.page + 1 %>" class="waves-effect">
+                                    <i class="material-icons">chevron_right</i>
+                                </a>
+                            </li>
+                        <% } %>
+                    </ul>
+                </div>
+            <% } %>
+
+            <!-- Reply Form -->
+            <% if (user && !topic.isLocked) { %>
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Reply to Topic</span>
+                        <form id="reply-form" action="/forum/topic/<%= topic.slug %>/reply" method="POST">
+                            <div class="input-field">
+                                <textarea 
+                                    id="content" 
+                                    name="content" 
+                                    class="materialize-textarea"
+                                    required
+                                ></textarea>
+                                <label for="content">Your Reply</label>
+                            </div>
+                            <input type="hidden" id="quotes" name="quotes" value="">
+                            <button type="submit" class="btn waves-effect waves-light">
+                                <i class="material-icons left">send</i>
+                                Post Reply
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            <% } else if (topic.isLocked) { %>
+                <div class="card-panel">
+                    <i class="material-icons left">lock</i>
+                    This topic is locked and cannot receive new replies.
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<!-- Topic Scripts -->
+<script>
+function subscribeTopic() {
+    fetch(`/forum/topic/<%= topic.slug %>/subscribe`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const icon = document.querySelector('.topic-actions button:first-child i');
+        icon.textContent = data.isSubscribed ? 'notifications_active' : 'notifications';
+        M.toast({html: data.message});
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        M.toast({html: 'Error updating subscription'});
+    });
+}
+
+function likePost(postId) {
+    fetch(`/forum/post/${postId}/like`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const button = document.querySelector(`#post-${postId} .like-button`);
+        const icon = button.querySelector('i');
+        const count = button.querySelector('.like-count');
+        icon.textContent = data.isLiked ? 'favorite' : 'favorite_border';
+        count.textContent = data.likes;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        M.toast({html: 'Error updating like'});
+    });
+}
+
+function quotePost(postId) {
+    const post = document.querySelector(`#post-${postId} .post-content`);
+    const author = document.querySelector(`#post-${postId} .post-author .author-info a`).textContent.trim();
+    const content = post.textContent.trim();
+    
+    const textarea = document.querySelector('#content');
+    const currentContent = textarea.value;
+    const quote = `[quote="${author}"]${content}[/quote]\n\n`;
+    
+    textarea.value = currentContent + quote;
+    M.textareaAutoResize(textarea);
+    textarea.focus();
+}
+
+function flagPost(postId) {
+    const reason = prompt('Please provide a reason for reporting this post:');
+    if (!reason) return;
+
+    fetch(`/forum/post/${postId}/flag`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reason })
+    })
+    .then(response => response.json())
+    .then(data => {
+        M.toast({html: 'Post has been reported to moderators'});
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        M.toast({html: 'Error reporting post'});
+    });
+}
+
+// Initialize Materialize components
+document.addEventListener('DOMContentLoaded', function() {
+    const textareas = document.querySelectorAll('textarea');
+    M.textareaAutoResize(textareas);
+});
+</script>
+
+<%- include('../partials/footer') %>

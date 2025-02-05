@@ -1,272 +1,152 @@
 <%- include('../partials/header') %>
 
 <div class="container section">
-    <% if (store) { %>
-        <div class="row">
-            <div class="col s12 m8">
-                <h3><%= store.name %></h3>
-                <div class="card">
-                    <div class="card-content">
-                <div class="row">
-                    <div class="col s12 m6">
-                        <div>
-                            <p>
-                                <i class="fas fa-map-marker-alt blue-text"></i> 
-                                <%= store.address %>
-                            </p>
-                            <% if (store.rating) { %>
-                                <p class="mb-2">
-                                    <i class="fas fa-star yellow-text"></i>
-                                    <%= store.rating.toFixed(1) %> rating
-                                </p>
+    <% if (error) { %>
+        <div class="card-panel red white-text"><%= error %></div>
+    <% } else if (store) { %>
+        <div class="card">
+            <div class="card-content">
+                <h4 class="card-title"><%= store.name %></h4>
+                
+                <div class="store-details">
+                    <p>
+                        <i class="fas fa-map-marker-alt blue-text"></i>
+                        <a href="https://maps.google.com/?q=<%= encodeURIComponent(store.address) %>" 
+                           target="_blank"
+                           class="black-text">
+                            <%= store.address %>
+                        </a>
+                    </p>
+
+                    <% if (store.rating) { %>
+                        <p>
+                            <i class="fas fa-star yellow-text"></i>
+                            Rating: <%= store.rating.toFixed(1) %>
+                        </p>
+                    <% } %>
+
+                    <% if (store.phone) { %>
+                        <p>
+                            <i class="fas fa-phone green-text"></i>
+                            <a href="tel:<%= store.phone %>" class="black-text">
+                                <%= store.phone %>
+                            </a>
+                        </p>
+                    <% } %>
+
+                    <% if (store.website) { %>
+                        <p>
+                            <i class="fas fa-globe blue-text"></i>
+                            <a href="<%= store.website %>" 
+                               target="_blank"
+                               class="black-text">
+                                Visit Website
+                            </a>
+                        </p>
+                    <% } %>
+
+                    <% if (store.openNow !== undefined) { %>
+                        <p>
+                            <i class="fas fa-clock"></i>
+                            <% if (store.openNow) { %>
+                                <span class="green-text">Open now</span>
+                            <% } else { %>
+                                <span class="red-text">Closed</span>
                             <% } %>
-                            <% if (store.openNow !== undefined) { %>
-                                <p class="mb-2">
-                                    <i class="fas fa-clock"></i>
-                                    <% if (store.openNow) { %>
-                                        <span class="green-text">Open now</span>
-                                    <% } else { %>
-                                        <span class="red-text">Closed</span>
-                                    <% } %>
-                                </p>
-                            <% } %>
-                            <% if (store.distance) { %>
-                                <p class="mb-2">
-                                    <i class="fas fa-route"></i>
-                                    <%= (store.distance / 1000).toFixed(1) %> km away
-                                </p>
-                            <% } %>
+                        </p>
+                    <% } %>
+
+                    <% if (store.hours && store.hours.length > 0) { %>
+                        <div class="hours-section">
+                            <h5>Hours</h5>
+                            <ul class="hours-list">
+                                <% store.hours.forEach(day => { %>
+                                    <li><%= day %></li>
+                                <% }) %>
+                            </ul>
                         </div>
-                    </div>
-                    <div class="col s12 m6">
+                    <% } %>
+                </div>
+
+                <% if (store.location) { %>
+                    <div class="map-container">
                         <div id="map" 
-                             style="height: 200px;" 
-                             class="rounded"
                              data-lat="<%= store.location.lat %>"
                              data-lng="<%= store.location.lng %>"
-                             data-name="<%= store.name %>">
-                        </div>
-                    </div>
-                </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="col s12 m4">
-                <% if (user && user.isAdmin && !store.hasInventory) { %>
-                    <div class="card">
-                        <div class="card-content">
-                            <span class="card-title">Link Discogs Account</span>
-                            <p class="grey-text">Connect this store to its Discogs seller account to enable inventory search.</p>
-                            <form id="linkDiscogsForm">
-                                <div class="input-field">
-                                    <input type="text" id="discogsUsername" name="discogsUsername" required>
-                                    <label for="discogsUsername">Discogs Username</label>
-                                </div>
-                                <button type="submit" class="btn waves-effect waves-light blue">
-                                    <i class="fas fa-link left"></i> Link Account
-                                </button>
-                            </form>
-                            <div id="linkStatus"></div>
+                             data-name="<%= store.name.replace(/"/g, '&quot;') %>">
                         </div>
                     </div>
                 <% } %>
-
-                <div class="card">
-                    <div class="card-content">
-                        <span class="card-title">Search Inventory</span>
-                        <% if (!store.hasInventory) { %>
-                            <p class="grey-text">This store's inventory is not yet available for search.</p>
-                        <% } %>
-                        <form id="searchForm" action="/stores/search" method="GET">
-                            <input type="hidden" name="store" value="<%= store.id %>">
-                            <div class="input-field">
-                                <input type="text" id="q" name="q" value="<%= query %>" required>
-                                <label for="q">Search records...</label>
-                            </div>
-                            <button type="submit" class="btn waves-effect waves-light blue">
-                                <i class="fas fa-search left"></i> Search
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <div id="searchResults">
-                    <% if (results && results.length > 0) { %>
-                        <% results.forEach(record => { %>
-                            <div class="card hoverable">
-                                <div class="card-content">
-                                    <div class="row mb-0">
-                                        <div class="col s4">
-                                            <img src="<%= record.thumb %>" alt="<%= record.title %>" class="responsive-img">
-                                        </div>
-                                        <div class="col s8">
-                                            <span class="card-title"><%= record.title %></span>
-                                            <p class="grey-text"><%= record.artist %></p>
-                                            <p>
-                                                <% if (record.price) { %>
-                                                    <span class="green-text">$<%= record.price %></span><br>
-                                                <% } %>
-                                                <small>Condition: <%= record.condition %></small>
-                                            </p>
-                                            <a href="<%= record.url %>" target="_blank" class="btn-small waves-effect waves-light blue">
-                                                View Details
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        <% }); %>
-                    <% } else if (query) { %>
-                        <div class="card-panel">No records found.</div>
-                    <% } %>
-                </div>
-            </div>
-
-            <!-- Record Details Modal -->
-            <div id="recordModal" class="modal">
-                <div class="modal-content">
-                    <h4>Record Details</h4>
-                    <div class="center-align">
-                        <img id="modalImage" src="" alt="" class="responsive-img">
-                    </div>
-                    <h5 id="modalTitle"></h5>
-                    <p id="modalArtist" class="grey-text"></p>
-                    <div id="modalDetails"></div>
-                </div>
-                <div class="modal-footer">
-                    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
-                </div>
             </div>
         </div>
-    <% } else { %>
-        <div class="card-panel red white-text">Store not found.</div>
     <% } %>
 </div>
 
+<style>
+.store-details {
+    margin-bottom: 2rem;
+}
 
+.store-details p {
+    margin: 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.hours-section {
+    margin-top: 2rem;
+}
+
+.hours-section h5 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.hours-list {
+    list-style: none;
+    padding: 0;
+}
+
+.hours-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.map-container {
+    margin-top: 2rem;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+#map {
+    height: 400px;
+    width: 100%;
+    border-radius: 4px;
+}
+</style>
+
+<% if (store && store.location) { %>
+<script src="https://maps.googleapis.com/maps/api/js?key=<%= googleApiKey %>"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize search form AJAX
-    const searchForm = document.getElementById('searchForm');
-    const searchResults = document.getElementById('searchResults');
-
-    if (searchForm) {
-        searchForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const query = document.getElementById('q').value;
-            const storeId = searchForm.elements.store.value;
-            
-            try {
-                const response = await fetch(`/stores/search?q=${encodeURIComponent(query)}&store=${encodeURIComponent(storeId)}`);
-                const data = await response.json();
-                
-                if (data.hasInventory === false) {
-                    searchResults.innerHTML = `<div class="card-panel orange lighten-4">${data.message}</div>`;
-                } else if (data.listings) {
-                    searchResults.innerHTML = data.listings.length ? data.listings.map(record => `
-                        <div class="card hoverable">
-                            <div class="card-content">
-                                <div class="row mb-0">
-                                    <div class="col s4">
-                                        <img src="${record.thumb}" alt="${record.title}" class="responsive-img">
-                                    </div>
-                                    <div class="col s8">
-                                        <span class="card-title">${record.title}</span>
-                                        <p class="grey-text">${record.artist}</p>
-                                        <p>
-                                            ${record.price ? `<span class="green-text">$${record.price}</span><br>` : ''}
-                                            <small>Condition: ${record.condition}</small>
-                                        </p>
-                                        <a href="${record.url}" target="_blank" class="btn-small waves-effect waves-light blue">
-                                            View Details
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('') : '<div class="card-panel">No records found.</div>';
-                } else if (data.error) {
-                    searchResults.innerHTML = `<div class="card-panel red white-text">${data.error}</div>`;
-                }
-            } catch (error) {
-                console.error('Error searching inventory:', error);
-                searchResults.innerHTML = '<div class="card-panel red white-text">Error searching inventory. Please try again.</div>';
-            }
-        });
-    }
-
-    // Initialize Discogs linking form
-    const linkForm = document.getElementById('linkDiscogsForm');
-    const linkStatus = document.getElementById('linkStatus');
-
-    if (linkForm) {
-        linkForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('discogsUsername').value;
-            const storeId = '<%= store.id %>';
-            
-            try {
-                const response = await fetch(`/stores/${storeId}/link-discogs`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ discogsUsername: username })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    linkStatus.innerHTML = `
-                        <div class="card-panel green white-text">
-                            ${data.message}
-                        </div>
-                    `;
-                    setTimeout(() => window.location.reload(), 1500);
-                } else {
-                    linkStatus.innerHTML = `
-                        <div class="card-panel red white-text">
-                            ${data.error}
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('Error linking account:', error);
-                linkStatus.innerHTML = `
-                    <div class="card-panel red white-text">
-                        Error linking account. Please try again.
-                    </div>
-                `;
-            }
-        });
-    }
-});
-
-function initMap() {
     const mapElement = document.getElementById('map');
-    if (!mapElement) return;
-
-    const storeLocation = {
-        lat: parseFloat(mapElement.dataset.lat),
-        lng: parseFloat(mapElement.dataset.lng)
-    };
+    const lat = parseFloat(mapElement.dataset.lat);
+    const lng = parseFloat(mapElement.dataset.lng);
+    const storeName = mapElement.dataset.name;
     
     const map = new google.maps.Map(mapElement, {
-        center: storeLocation,
+        center: { lat, lng },
         zoom: 15
     });
 
     new google.maps.Marker({
-        position: storeLocation,
-        map: map,
-        title: mapElement.dataset.name
+        position: { lat, lng },
+        map,
+        title: storeName
     });
-}
+});
 </script>
-<script src="https://maps.googleapis.com/maps/api/js?key=<%= googleApiKey %>&callback=initMap" async defer></script>
+<% } %>
 
 <%- include('../partials/footer') %>

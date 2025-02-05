@@ -1,0 +1,151 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+    <div class="row">
+        <div class="col s12">
+            <!-- Header -->
+            <div class="forum-header">
+                <div class="breadcrumbs">
+                    <a href="/forum">Forum</a>
+                    <i class="material-icons tiny">chevron_right</i>
+                    <a href="/forum/category/<%= category.slug %>"><%= category.name %></a>
+                    <i class="material-icons tiny">chevron_right</i>
+                    <span>New Topic</span>
+                </div>
+            </div>
+
+            <!-- New Topic Form -->
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Create New Topic</span>
+                    <form action="/forum/new-topic/<%= category.slug %>" method="POST">
+                        <!-- Title -->
+                        <div class="input-field">
+                            <input 
+                                type="text" 
+                                id="title" 
+                                name="title" 
+                                required 
+                                minlength="5" 
+                                maxlength="200"
+                                class="validate"
+                            >
+                            <label for="title">Topic Title</label>
+                            <span class="helper-text">
+                                Between 5 and 200 characters
+                            </span>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="input-field">
+                            <textarea 
+                                id="content" 
+                                name="content" 
+                                class="materialize-textarea validate" 
+                                required 
+                                minlength="20"
+                                data-length="10000"
+                            ></textarea>
+                            <label for="content">Topic Content</label>
+                            <span class="helper-text">
+                                Minimum 20 characters
+                            </span>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="input-field">
+                            <input 
+                                type="text" 
+                                id="tags" 
+                                name="tags" 
+                                class="validate"
+                            >
+                            <label for="tags">Tags (comma separated)</label>
+                            <span class="helper-text">
+                                Example: vinyl, jazz, recommendations
+                            </span>
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="preview-section" style="display: none;">
+                            <div class="divider"></div>
+                            <h5>Preview</h5>
+                            <div class="preview-content"></div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="form-actions">
+                            <button type="button" class="btn-flat waves-effect" onclick="previewTopic()">
+                                <i class="material-icons left">preview</i>
+                                Preview
+                            </button>
+                            <button type="submit" class="btn waves-effect waves-light">
+                                <i class="material-icons left">send</i>
+                                Create Topic
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Posting Guidelines -->
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">Posting Guidelines</span>
+                    <ul class="browser-default">
+                        <li>Be respectful and constructive in your discussions</li>
+                        <li>Stay on topic and relevant to the category</li>
+                        <li>No spam, advertising, or self-promotion</li>
+                        <li>Check if a similar topic already exists before posting</li>
+                        <li>Use appropriate tags to help others find your topic</li>
+                        <li>Format your post for readability (use paragraphs)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Topic Scripts -->
+<script>
+function previewTopic() {
+    const title = document.getElementById('title').value;
+    const content = document.getElementById('content').value;
+    const previewSection = document.querySelector('.preview-section');
+    const previewContent = document.querySelector('.preview-content');
+
+    if (!title && !content) {
+        M.toast({html: 'Please enter some content to preview'});
+        return;
+    }
+
+    // Simple markdown-like formatting
+    let formattedContent = content
+        .replace(/\n/g, '<br>')
+        .replace(/\[b\](.*?)\[\/b\]/g, '<strong>$1</strong>')
+        .replace(/\[i\](.*?)\[\/i\]/g, '<em>$1</em>')
+        .replace(/\[url=(.*?)\](.*?)\[\/url\]/g, '<a href="$1">$2</a>');
+
+    previewContent.innerHTML = `
+        <h4>${title}</h4>
+        <div class="preview-body">
+            ${formattedContent}
+        </div>
+    `;
+    
+    previewSection.style.display = 'block';
+}
+
+// Initialize Materialize components
+document.addEventListener('DOMContentLoaded', function() {
+    // Character counter
+    const textareas = document.querySelectorAll('[data-length]');
+    M.CharacterCounter.init(textareas);
+
+    // Auto-resize textareas
+    const materializeTextareas = document.querySelectorAll('textarea');
+    M.textareaAutoResize(materializeTextareas);
+});
+</script>
+
+<%- include('../partials/footer') %>

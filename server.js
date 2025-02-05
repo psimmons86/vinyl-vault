@@ -151,6 +151,7 @@ app.use('/admin', require('./controllers/admin'));         // Admin routes
 app.use('/social', require('./controllers/social'));       // Social routes
 app.use('/blog', require('./controllers/blog'));           // Blog routes
 app.use('/search', require('./controllers/search'));       // Search routes
+app.use('/forum', require('./controllers/forum'));         // Forum routes
 
 // Create blog uploads directory if it doesn't exist
 const fs = require('fs');

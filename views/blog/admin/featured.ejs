@@ -45,10 +45,21 @@
                                             <% } %>
                                         </select>
                                     </div>
-                                    <button class="btn-flat waves-effect waves-red remove-btn" 
-                                            data-record-id="<%= record._id %>">
-                                        <i class="fas fa-trash red-text"></i>
-                                    </button>
+                                    <div class="action-buttons">
+                                        <button class="btn-flat waves-effect waves-blue edit-btn" 
+                                                data-record-id="<%= record._id %>"
+                                                data-title="<%= record.title %>"
+                                                data-artist="<%= record.artist %>"
+                                                data-description="<%= record.description || '' %>"
+                                                data-link="<%= record.link || '' %>"
+                                                data-order="<%= record.order %>">
+                                            <i class="fas fa-edit blue-text"></i>
+                                        </button>
+                                        <button class="btn-flat waves-effect waves-red remove-btn" 
+                                                data-record-id="<%= record._id %>">
+                                            <i class="fas fa-trash red-text"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -63,11 +74,13 @@
     </div>
 </div>
 
-<!-- Add Record Modal -->
+<!-- Add/Edit Record Modal -->
 <div id="addRecordModal" class="modal">
-    <form action="/blog/admin/featured" method="POST" enctype="multipart/form-data">
+    <form action="/blog/admin/featured" method="POST" enctype="multipart/form-data" id="featuredForm">
+        <input type="hidden" name="_method" id="formMethod" value="POST">
+        <input type="hidden" name="recordId" id="recordId" value="">
         <div class="modal-content">
-            <h4>Add Featured Record</h4>
+            <h4 id="modalTitle">Add Featured Record</h4>
             
             <div class="row">
                 <div class="input-field col s12">
@@ -83,7 +96,7 @@
                 <div class="file-field input-field col s12">
                     <div class="btn blue">
                         <span>Album Art</span>
-                        <input type="file" name="albumArt" accept="image/*" required>
+                        <input type="file" name="albumArt" accept="image/*" id="albumArt">
                     </div>
                     <div class="file-path-wrapper">
                         <input class="file-path validate" type="text">
@@ -113,7 +126,7 @@
         </div>
         <div class="modal-footer">
             <button type="submit" class="btn waves-effect waves-light blue">
-                <i class="fas fa-plus left"></i> Add Record
+                <i class="fas fa-save left"></i> <span id="submitText">Add Record</span>
             </button>
             <button type="button" class="btn-flat waves-effect modal-close">
                 Cancel
@@ -200,8 +213,22 @@
 }
 </style>
 
+<style>
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('featuredForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const submitText = document.getElementById('submitText');
+    const formMethod = document.getElementById('formMethod');
+    const recordIdInput = document.getElementById('recordId');
+    const albumArtInput = document.getElementById('albumArt');
+
     // Initialize Materialize components
     M.Modal.init(document.querySelectorAll('.modal'));
     M.FormSelect.init(document.querySelectorAll('select'));
@@ -237,6 +264,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.value = this.querySelector('[selected]').value;
             }
         });
+    });
+
+    // Handle edit button clicks
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modal = M.Modal.getInstance(document.getElementById('addRecordModal'));
+            const data = this.dataset;
+            
+            // Update form for editing
+            modalTitle.textContent = 'Edit Featured Record';
+            submitText.textContent = 'Update Record';
+            formMethod.value = 'PUT';
+            recordIdInput.value = data.recordId;
+            
+            // Fill form fields
+            document.getElementById('title').value = data.title;
+            document.getElementById('artist').value = data.artist;
+            document.getElementById('description').value = data.description;
+            document.getElementById('link').value = data.link;
+            document.querySelector('select[name="order"]').value = data.order;
+            
+            // Make album art optional for editing
+            albumArtInput.removeAttribute('required');
+            
+            // Update Materialize form fields
+            M.updateTextFields();
+            M.textareaAutoResize(document.getElementById('description'));
+            
+            modal.open();
+        });
+    });
+
+    // Reset form when adding new record
+    document.querySelector('[data-target="addRecordModal"]').addEventListener('click', function() {
+        modalTitle.textContent = 'Add Featured Record';
+        submitText.textContent = 'Add Record';
+        formMethod.value = 'POST';
+        recordIdInput.value = '';
+        form.reset();
+        albumArtInput.setAttribute('required', '');
     });
 
     // Handle record removal

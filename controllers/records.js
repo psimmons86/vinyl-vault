@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const fs = require('fs/promises');
+const path = require('path');
+const multer = require('multer');
 const Record = require('../models/record');
 const User = require('../models/user');
 const Activity = require('../models/activity');
@@ -10,10 +12,33 @@ const discogs = require('../services/discogs');
 const upload = require('../config/uploads');
 const asyncHandler = require('../middleware/async-handler');
 
+// Configure multer for album art uploads
+const albumArtStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/records')
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname))
+    }
+});
+
+const albumArtUpload = multer({ 
+    storage: albumArtStorage,
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+        if (extname && mimetype) {
+            return cb(null, true);
+        }
+        cb(new Error('Only image files are allowed!'));
+    }
+});
+
 // Utility function to validate record ownership
-const validateOwnership = async (recordId, userId) => {
+const validateOwnership = async (recordId, userId, isAdmin = false) => {
     const record = await Record.findById(recordId);
-    if (!record || record.owner.toString() !== userId.toString()) {
+    if (!record || (!isAdmin && record.owner.toString() !== userId.toString())) {
         throw new Error('Record not found or unauthorized');
     }
     return record;
@@ -77,7 +102,8 @@ router.get('/profile', asyncHandler(async (req, res) => {
         totalPlays,
         recentlyAdded,
         recentlyPlayed,
-        user
+        user,
+        records
     ] = await Promise.all([
         Record.countDocuments({ owner: req.user._id }),
         
@@ -97,10 +123,44 @@ router.get('/profile', asyncHandler(async (req, res) => {
             .sort('-lastPlayed')
             .limit(5),
         
-        // Fetch user with populated top8Records
+        // Fetch user with populated references
         User.findById(req.user._id)
             .populate('profile.top8Records')
+            .populate({
+                path: 'posts',
+                populate: [
+                    { path: 'recordRef' },
+                    { path: 'likes' },
+                    { path: 'comments' }
+                ]
+            }),
+
+        // Fetch all records for stats
+        Record.find({ owner: req.user._id })
     ]);
+
+    // Calculate genre distribution
+    const genreDistribution = records.reduce((acc, record) => {
+        if (record.genre) {
+            acc[record.genre] = (acc[record.genre] || 0) + 1;
+        }
+        return acc;
+    }, {});
+
+    // Calculate decade distribution
+    const decadeDistribution = records.reduce((acc, record) => {
+        if (record.year) {
+            const decade = Math.floor(record.year / 10) * 10;
+            acc[decade + 's'] = (acc[decade + 's'] || 0) + 1;
+        }
+        return acc;
+    }, {});
+
+    // Get featured post (most liked)
+    const featuredPost = user.posts?.length > 0 ? 
+        user.posts.reduce((prev, current) => 
+            (current.likes?.length || 0) > (prev.likes?.length || 0) ? current : prev
+        ) : null;
 
     res.render('records/profile', {
         title: 'My Profile',
@@ -110,7 +170,10 @@ router.get('/profile', asyncHandler(async (req, res) => {
         recentlyPlayed,
         top8Records: user.profile?.top8Records || [],
         user: user,
-        currentUser: req.user // Add currentUser from the request
+        currentUser: req.user,
+        genreDistribution,
+        decadeDistribution,
+        featuredPost
     });
 }));
 
@@ -428,7 +491,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
 
 // Show edit form
 router.get('/:id/edit', asyncHandler(async (req, res) => {
-    const record = await validateOwnership(req.params.id, req.user._id);
+    const record = await validateOwnership(req.params.id, req.user._id, req.user.isAdmin);
     
     res.render('records/edit', {
         title: 'Edit Record',
@@ -439,7 +502,7 @@ router.get('/:id/edit', asyncHandler(async (req, res) => {
 
 // Track record play
 router.post('/:id/play', asyncHandler(async (req, res) => {
-    const record = await validateOwnership(req.params.id, req.user._id);
+    const record = await validateOwnership(req.params.id, req.user._id, req.user.isAdmin);
     
     // Increment plays and update last played date
     record.plays += 1;
@@ -457,14 +520,34 @@ router.post('/:id/play', asyncHandler(async (req, res) => {
 }));
 
 // Update record
-router.put('/:id', asyncHandler(async (req, res) => {
-    await validateOwnership(req.params.id, req.user._id);
+router.put('/:id', albumArtUpload.single('albumArt'), asyncHandler(async (req, res) => {
+    const record = await validateOwnership(req.params.id, req.user._id, req.user.isAdmin);
 
     // Process tags if provided
     if (req.body.tags) {
         req.body.tags = req.body.tags.split(',')
             .map(tag => tag.trim())
             .filter(tag => tag);
+    }
+
+    // Handle image upload or URL
+    if (req.file) {
+        // If there's an uploaded file, use that
+        req.body.imageUrl = '/uploads/records/' + req.file.filename;
+        
+        // Delete old image if it exists and isn't the default
+        if (record.imageUrl && 
+            !record.imageUrl.includes('default-album') && 
+            record.imageUrl.startsWith('/uploads/')) {
+            try {
+                await fs.unlink('public' + record.imageUrl);
+            } catch (err) {
+                console.error('Error deleting old album art:', err);
+            }
+        }
+    } else if (!req.body.imageUrl) {
+        // If no file uploaded and no URL provided, keep existing image
+        req.body.imageUrl = record.imageUrl;
     }
 
     const updatedRecord = await Record.findByIdAndUpdate(
@@ -485,7 +568,7 @@ router.put('/:id', asyncHandler(async (req, res) => {
 
 // Delete record
 router.delete('/:id', asyncHandler(async (req, res) => {
-    const record = await validateOwnership(req.params.id, req.user._id);
+    const record = await validateOwnership(req.params.id, req.user._id, req.user.isAdmin);
     
     // Delete record and create activity
     await Promise.all([

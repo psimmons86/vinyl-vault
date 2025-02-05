@@ -18,7 +18,11 @@ router.get('/analytics', asyncHandler(async (req, res) => {
         recordGrowth,
         topGenres,
         userActivity,
-        popularRecords
+        popularRecords,
+        activeUsers,
+        recentRecords,
+        genreDistribution,
+        userStats
     ] = await Promise.all([
         User.countDocuments(),
         Record.countDocuments(),
@@ -90,6 +94,74 @@ router.get('/analytics', asyncHandler(async (req, res) => {
                 }
             },
             { $unwind: '$owner' }
+        ]),
+        // Most active users (by record count and plays)
+        User.aggregate([
+            {
+                $lookup: {
+                    from: 'records',
+                    localField: '_id',
+                    foreignField: 'owner',
+                    as: 'records'
+                }
+            },
+            {
+                $project: {
+                    username: 1,
+                    recordCount: { $size: '$records' },
+                    totalPlays: { $sum: '$records.plays' }
+                }
+            },
+            { $sort: { totalPlays: -1 } },
+            { $limit: 10 }
+        ]),
+        // Recently added records
+        Record.find()
+            .populate('owner', 'username')
+            .sort('-createdAt')
+            .limit(10),
+        // Genre distribution over time (last 6 months)
+        Record.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
+                    }
+                }
+            },
+            { $unwind: '$tags' },
+            {
+                $group: {
+                    _id: {
+                        year: { $year: '$createdAt' },
+                        month: { $month: '$createdAt' },
+                        genre: '$tags'
+                    },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { '_id.year': 1, '_id.month': 1 } }
+        ]),
+        // User engagement stats
+        User.aggregate([
+            {
+                $lookup: {
+                    from: 'records',
+                    localField: '_id',
+                    foreignField: 'owner',
+                    as: 'records'
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    avgRecordsPerUser: { $avg: { $size: '$records' } },
+                    maxRecordsPerUser: { $max: { $size: '$records' } },
+                    totalPublicProfiles: {
+                        $sum: { $cond: ['$isPublic', 1, 0] }
+                    }
+                }
+            }
         ])
     ]);
 
@@ -103,7 +175,15 @@ router.get('/analytics', asyncHandler(async (req, res) => {
             recordGrowth,
             topGenres,
             userActivity,
-            popularRecords
+            popularRecords,
+            activeUsers,
+            recentRecords,
+            genreDistribution,
+            userStats: userStats[0] || {
+                avgRecordsPerUser: 0,
+                maxRecordsPerUser: 0,
+                totalPublicProfiles: 0
+            }
         }
     });
 }));
