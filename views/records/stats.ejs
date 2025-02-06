@@ -199,4 +199,9 @@
   </div>
 </div>
 
+<%- include('../partials/share-buttons', {
+    shareText: `Check out my vinyl collection stats on Vinyl Vault! I have ${totalRecords} records in my collection.`,
+    shareUrl: `${process.env.BASE_URL}/users/${user.username}`
+}) %>
+
 <%- include('../partials/footer.ejs') %>

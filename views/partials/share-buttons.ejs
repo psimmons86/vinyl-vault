@@ -1,0 +1,20 @@
+<div class="share-buttons">
+    <button onclick="shareToSocial('twitter', { 
+        text: '<%= shareText %>', 
+        url: '<%= shareUrl %>' 
+    })" class="btn waves-effect waves-light">
+        <i class="fab fa-twitter"></i> Tweet
+    </button>
+    
+    <button onclick="shareToSocial('facebook', { 
+        url: '<%= shareUrl %>' 
+    })" class="btn waves-effect waves-light">
+        <i class="fab fa-facebook"></i> Share
+    </button>
+    
+    <button onclick="shareToSocial('linkedin', { 
+        url: '<%= shareUrl %>' 
+    })" class="btn waves-effect waves-light">
+        <i class="fab fa-linkedin"></i> Share
+    </button>
+</div> 
