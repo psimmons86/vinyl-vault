@@ -1,243 +1,94 @@
 <%- include('../partials/header.ejs') %>
 <link rel="stylesheet" href="/stylesheets/records.css">
 
-<div class="container dashboard">
-    <div class="dashboard-header">
-        <div class="row">
-            <div class="col s12 m6">
-                <h1 class="dashboard-title">My Collection</h1>
+<div class="container">
+    <div class="collection-header">
+        <h1 class="header">My Collection</h1>
+        <div class="collection-stats">
+            <div class="stat-card z-depth-1">
+                <div class="number"><%= records.length %></div>
+                <div class="label">Records</div>
             </div>
-            <div class="col s12 m6">
-                <div class="quick-stats">
-                    <div class="stat-card">
-                        <i class="material-icons">album</i>
-                        <div class="stat-info">
-                            <span class="stat-value"><%= records.length %></span>
-                            <span class="stat-label">Records</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <i class="material-icons">play_circle</i>
-                        <div class="stat-info">
-                            <span class="stat-value"><%= records.reduce((sum, record) => sum + (record.plays || 0), 0) %></span>
-                            <span class="stat-label">Total Plays</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="stat-card z-depth-1">
+                <div class="number"><%= totalPlays %></div>
+                <div class="label">Total Plays</div>
             </div>
         </div>
     </div>
 
-    <div class="controls-section">
-        <div class="row">
-            <div class="col s12 m6 l8">
-                <div class="search-container z-depth-1">
-                    <form id="collection-search-form" class="search-form" onsubmit="return false;">
-                        <div class="input-field">
-                            <i class="material-icons prefix">search</i>
-                            <input type="text" 
-                                   id="collection-search" 
-                                   class="collection-search-input"
-                                   placeholder="Search by title, artist, or tags...">
-                        </div>
-                    </form>
-                </div>
-            </div>
-            
-            <div class="col s12 m6 l4">
-                <div class="view-controls z-depth-1">
-                    <a href="/records?sort=artist" class="control-btn <%= currentSort === 'artist' ? 'active' : '' %>">
-                        <i class="material-icons">sort_by_alpha</i>
-                        <span>A-Z</span>
-                    </a>
-                    <a href="/records" class="control-btn <%= !currentSort ? 'active' : '' %>">
-                        <i class="material-icons">access_time</i>
-                        <span>Recent</span>
-                    </a>
-                    <a href="/records?view=grid" class="control-btn view-toggle <%= view === 'grid' || !view ? 'active' : '' %>">
-                        <i class="material-icons">grid_view</i>
-                    </a>
-                    <a href="/records?view=list" class="control-btn view-toggle <%= view === 'list' ? 'active' : '' %>">
-                        <i class="material-icons">view_list</i>
-                    </a>
-                </div>
-            </div>
+    <div class="search-section z-depth-1">
+        <div class="input-field search-bar">
+            <i class="material-icons prefix">search</i>
+            <input type="text" id="recordSearch" class="validate">
+            <label for="recordSearch">Search by title, artist, or tags...</label>
+        </div>
+        
+        <div class="view-controls">
+            <button class="btn waves-effect waves-light sort-btn" onclick="sortAlphabetically()">
+                <i class="material-icons left">sort_by_alpha</i>
+                A-Z
+            </button>
+            <button class="btn waves-effect waves-light sort-btn" onclick="sortByRecent()">
+                <i class="material-icons left">access_time</i>
+                Recent
+            </button>
+            <button class="btn waves-effect waves-light view-btn" data-view="grid" onclick="toggleView('grid')">
+                <i class="material-icons">grid_view</i>
+            </button>
+            <button class="btn waves-effect waves-light view-btn" data-view="list" onclick="toggleView('list')">
+                <i class="material-icons">view_list</i>
+            </button>
         </div>
     </div>
 
-    <div class="records-container">
-        <div class="row" id="records-grid" style="display: <%= view === 'list' ? 'none' : 'block' %>">
-            <% if (records && records.length > 0) { %>
-                <% records.forEach(function(record) { %>
-                    <div class="col s12 m6 l3 record-item" 
-                         data-title="<%= record.title.toLowerCase() %>" 
-                         data-artist="<%= record.artist.toLowerCase() %>"
-                         data-tags="<%= record.tags ? record.tags.join(' ').toLowerCase() : '' %>">
-                        <div class="record-card z-depth-1 hoverable">
-                            <div class="record-artwork" data-href="/records/<%= record._id %>">
-                                <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
-                                     alt="Album art for <%= record.title %>"
-                                     class="record-img">
-                                <div class="record-overlay">
-                                    <div class="record-info">
-                                        <h2 class="record-title"><%= record.title %></h2>
-                                        <p class="record-artist"><%= record.artist %></p>
-                                        <div class="record-meta">
-                                            <span class="record-plays">
-                                                <i class="material-icons tiny">play_circle_filled</i>
-                                                <%= record.plays || 0 %>
-                                            </span>
-                                            <% if (record.lastPlayed) { %>
-                                                <span class="record-last-played">
-                                                    <i class="material-icons tiny">schedule</i>
-                                                    <%= new Date(record.lastPlayed).toLocaleDateString() %>
-                                                </span>
-                                            <% } %>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="record-actions">
-                                    <a href="/records/<%= record._id %>/edit" class="btn-floating btn-small waves-effect waves-light blue edit-btn">
-                                        <i class="material-icons">edit</i>
-                                    </a>
-                                    <form action="/records/<%= record._id %>/play" method="POST" class="quick-play-form">
-                                        <button type="submit" class="btn-floating btn-small waves-effect waves-light green play-btn">
-                                            <i class="material-icons">play_arrow</i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
+    <div class="records-container grid-view">
+        <% if (records && records.length > 0) { %>
+            <% records.forEach(function(record) { %>
+                <div class="record-card" data-record-id="<%= record._id %>">
+                    <div class="card hoverable">
+                        <div class="card-image">
+                            <img src="<%= record.imageUrl || '/images/default-album.png' %>" alt="<%= record.title %>">
+                        </div>
+                        <div class="card-content">
+                            <button class="play-button waves-effect waves-light" onclick="trackPlay('<%= record._id %>')" title="Track Play">
+                                <i class="material-icons">play_circle_filled</i>
+                            </button>
+                            <span class="card-title truncate"><%= record.title %></span>
+                            <p class="artist truncate"><%= record.artist %></p>
+                            <% if (record.plays) { %>
+                                <p class="plays">Plays: <%= record.plays %></p>
+                            <% } %>
+                        </div>
+                        <div class="card-action">
+                            <a href="/records/<%= record._id %>" class="btn-flat waves-effect">View Details</a>
                         </div>
                     </div>
-                <% }); %>
-            <% } else { %>
-                <div class="empty-state center-align">
-                    <i class="material-icons large">album</i>
-                    <h4>No records yet!</h4>
-                    <p class="grey-text">Start building your collection by adding your first record.</p>
-                    <a href="/records/new" class="btn-large waves-effect waves-light">
-                        <i class="material-icons left">add</i>
-                        Add Your First Record
-                    </a>
                 </div>
-            <% } %>
-        </div>
-
-        <div id="records-list" style="display: <%= view === 'list' ? 'block' : 'none' %>">
-            <% if (records && records.length > 0) { %>
-                <div class="collection">
-                    <% records.forEach(function(record) { %>
-                        <div class="collection-item record-item avatar" 
-                             data-title="<%= record.title.toLowerCase() %>" 
-                             data-artist="<%= record.artist.toLowerCase() %>"
-                             data-tags="<%= record.tags ? record.tags.join(' ').toLowerCase() : '' %>">
-                            <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
-                                 alt="Album art" 
-                                 class="circle">
-                            <div class="record-list-content">
-                                <span class="title"><%= record.title %></span>
-                                <p>
-                                    <%= record.artist %><br>
-                                    <small class="grey-text">
-                                        <i class="tiny material-icons">play_circle_filled</i> <%= record.plays || 0 %> plays
-                                        <% if (record.lastPlayed) { %>
-                                            • Last played <%= new Date(record.lastPlayed).toLocaleDateString() %>
-                                        <% } %>
-                                    </small>
-                                </p>
-                            </div>
-                            <div class="secondary-content">
-                                <form action="/records/<%= record._id %>/play" method="POST" class="quick-play-form">
-                                    <button type="submit" class="btn-floating btn-small waves-effect waves-light green">
-                                        <i class="material-icons">play_arrow</i>
-                                    </button>
-                                </form>
-                                <a href="/records/<%= record._id %>/edit" class="btn-floating btn-small waves-effect waves-light blue">
-                                    <i class="material-icons">edit</i>
-                                </a>
-                            </div>
-                        </div>
-                    <% }); %>
-                </div>
-            <% } %>
-        </div>
-
-        <div id="no-results-message" class="center-align" style="display: none;">
-            <i class="material-icons medium grey-text">search_off</i>
-            <p class="grey-text">No records found matching your search.</p>
-        </div>
+            <% }); %>
+        <% } else { %>
+            <div class="empty-state center-align">
+                <i class="material-icons large">album</i>
+                <h4>No records yet!</h4>
+                <p class="grey-text">Start building your collection by adding your first record.</p>
+                <a href="/records/new" class="btn-large waves-effect waves-light">
+                    <i class="material-icons left">add</i>
+                    Add Your First Record
+                </a>
+            </div>
+        <% } %>
     </div>
 
     <div class="fixed-action-btn">
-        <a href="/records/new" class="btn-floating btn-large waves-effect waves-light">
+        <a class="btn-floating btn-large waves-effect waves-light dropdown-trigger" data-target="add-record-dropdown">
             <i class="material-icons">add</i>
         </a>
+        <ul id="add-record-dropdown" class="dropdown-content">
+            <li><a href="/records/new"><i class="material-icons">playlist_add</i>Add Manually</a></li>
+            <li><a href="/records/discogs"><i class="material-icons">search</i>Add from Discogs</a></li>
+        </ul>
     </div>
 </div>
 
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchForm = document.getElementById('collection-search-form');
-    const searchInput = document.getElementById('collection-search');
-    const records = document.querySelectorAll('.record-item');
-    const noResultsMsg = document.getElementById('no-results-message');
-
-    function performSearch() {
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        let foundMatches = false;
-
-        records.forEach(record => {
-            const title = record.dataset.title || '';
-            const artist = record.dataset.artist || '';
-            const tags = record.dataset.tags || '';
-            
-            const matches = title.includes(searchTerm) || 
-                           artist.includes(searchTerm) || 
-                           tags.includes(searchTerm);
-
-            record.style.display = matches ? '' : 'none';
-            if (matches) foundMatches = true;
-        });
-
-        if (noResultsMsg) {
-            noResultsMsg.style.display = searchTerm && !foundMatches ? 'block' : 'none';
-        }
-    }
-
-    searchInput.addEventListener('input', performSearch);
-
-    document.querySelectorAll('.quick-play-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }).then(response => {
-                if (response.ok) {
-                    const playsElement = form.closest('.record-card').querySelector('.record-plays');
-                    if (playsElement) {
-                        const currentPlays = parseInt(playsElement.textContent);
-                        playsElement.textContent = `${currentPlays + 1}`;
-                    }
-                    M.toast({html: 'Play recorded!'});
-                }
-            });
-        });
-    });
-
-    document.querySelectorAll('.record-artwork').forEach(artwork => {
-        artwork.addEventListener('click', function(e) {
-            if (!e.target.closest('.edit-btn') && !e.target.closest('.play-btn')) {
-                window.location.href = this.dataset.href;
-            }
-        });
-    });
-
-    M.FloatingActionButton.init(document.querySelectorAll('.fixed-action-btn'));
-});
-</script>
+<script src="/javascripts/collection.js"></script>
 
 <%- include('../partials/footer.ejs') %>

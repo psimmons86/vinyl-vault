@@ -3,13 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= title %> | Vinyl Vault</title>
+    <title><%= typeof title !== 'undefined' ? title + ' | ' : '' %>Vinyl Vault</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
     />
     <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -24,256 +28,150 @@
     <script src="/javascripts/darkMode.js" defer></script>
     <script src="/javascripts/sharing.js"></script>
     <nav class="main-nav">
-      <div class="nav-content">
-        <a href="<%= user ? '/records' : '/' %>" class="nav-logo">Vinyl Vault</a>
-        <button class="mobile-menu-toggle hide-on-large-only">
-          <i class="material-icons">menu</i>
-        </button>
-        <% if (user) { %>
-        <!-- Desktop Navigation -->
-        <div class="nav-links hide-on-med-and-down">
-          <a href="/records">
-            <i class="material-icons">album</i>Collection
-          </a>
-          <a href="/records/stats">
-            <i class="material-icons">bar_chart</i>Stats
-          </a>
-          <!-- Add Record Dropdown -->
-          <a class="dropdown-trigger" href="#" data-target="add-record-dropdown">
-            <i class="material-icons">add</i>Add Record<i class="material-icons right">arrow_drop_down</i>
-          </a>
-          <a href="/stores/nearby">
-            <i class="material-icons">store</i>Stores
-          </a>
-          <a href="/search">
-            <i class="material-icons">group</i>Users
-          </a>
-          <a href="/blog">
-            <i class="material-icons">article</i>Blog
-          </a>
-          <a href="/forum">
-            <i class="material-icons">forum</i>Forum
-          </a>
-          <!-- Notifications Dropdown -->
-          <div class="notifications-nav">
-            <a href="#" class="dropdown-trigger notifications-trigger" data-target="notifications-dropdown">
-              <i class="material-icons">notifications</i>
-              <% if (locals.unreadNotifications > 0) { %>
-                <span class="notification-badge"><%= locals.unreadNotifications %></span>
-              <% } %>
-            </a>
-            <ul id="notifications-dropdown" class="dropdown-content notifications-dropdown">
-              <li class="notifications-header">
-                <span>Notifications</span>
-                <a href="/notifications" class="view-all">View All</a>
-              </li>
-              <% if (locals.recentNotifications?.length > 0) { %>
-                <% locals.recentNotifications.forEach(notification => { %>
-                  <li>
-                    <a href="<%= notification.link %>" class="notification-item <%= notification.read ? '' : 'unread' %>">
-                      <% if (notification.sender) { %>
-                        <img src="<%= notification.sender.profile?.avatarUrl || '/images/default-avatar.png' %>" 
-                             alt="Avatar" class="notification-avatar">
-                      <% } else { %>
-                        <i class="material-icons notification-icon">
-                          <%= notification.type === 'price_alert' ? 'trending_up' : 
-                              notification.type === 'milestone' ? 'emoji_events' : 'notifications' %>
-                        </i>
-                      <% } %>
-                      <div class="notification-content">
-                        <div class="notification-message"><%= notification.message %></div>
-                        <time class="timeago" datetime="<%= notification.createdAt.toISOString() %>">
-                          <%= notification.createdAt.toLocaleDateString() %>
-                        </time>
-                      </div>
-                    </a>
-                  </li>
-                <% }); %>
-              <% } else { %>
-                <li class="no-notifications">
-                  <i class="material-icons">notifications_none</i>
-                  <span>No new notifications</span>
-                </li>
-              <% } %>
-            </ul>
-          </div>
-          <% if (user.isAdmin) { %>
-            <a href="/blog/admin/featured">
-              <i class="material-icons">featured_play_list</i>Featured
-            </a>
-          <% } %>
-          <div class="user-menu">
-            <a class="dropdown-trigger" href="#" data-target="user-dropdown">
-              <img
-                src="<%= user.profile?.avatarUrl || '/images/default-avatar.png' %>"
-                alt="Avatar"
-                class="user-avatar"
-              />
-              <%= user.profile?.name || user.username %>
-              <i class="material-icons right">arrow_drop_down</i>
-            </a>
-          </div>
-        </div>
-
-        <!-- Mobile Navigation -->
-        <div class="nav-links hide-on-large-only mobile-nav">
-          <div class="mobile-user-info">
-            <img
-              src="<%= user.profile?.avatarUrl || '/images/default-avatar.png' %>"
-              alt="Avatar"
-              class="user-avatar"
-            />
-            <span><%= user.profile?.name || user.username %></span>
-          </div>
-          <div class="mobile-nav-links">
-            <a href="/records">
-              <i class="material-icons">album</i>My Collection
-            </a>
-            <a href="/records/stats">
-              <i class="material-icons">bar_chart</i>Stats
-            </a>
-            <!-- Add Record Options -->
-            <a href="/records/new">
-              <i class="material-icons">add_circle</i>Add Manually
-            </a>
-            <a href="/records/search">
-              <i class="material-icons">album</i>Import from Discogs
-            </a>
-            <a href="/stores/nearby">
-              <i class="material-icons">store</i>Find Stores
-            </a>
-            <a href="/search">
-              <i class="material-icons">group</i>Find Users
-            </a>
-            <a href="/blog">
-              <i class="material-icons">article</i>Blog
-            </a>
-            <a href="/forum">
-              <i class="material-icons">forum</i>Forum
-            </a>
-            <a href="/notifications">
-              <i class="material-icons">notifications</i>Notifications
-              <% if (locals.unreadNotifications > 0) { %>
-                <span class="mobile-notification-badge"><%= locals.unreadNotifications %></span>
-              <% } %>
-            </a>
-            <% if (user.isAdmin) { %>
-              <a href="/blog/admin/featured">
-                <i class="material-icons">featured_play_list</i>Featured Records
+      <div class="nav-wrapper">
+        <a href="/" class="brand-logo">Vinyl Vault</a>
+        <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        
+        <ul class="right hide-on-med-and-down">
+          <% if (locals.user) { %>
+            <li><a href="/records"><i class="material-icons">album</i>Collection</a></li>
+            <li><a href="/stores"><i class="material-icons">store</i>Record Stores</a></li>
+            <li><a href="/blog"><i class="material-icons">article</i>Blog</a></li>
+            <li><a href="/forum"><i class="material-icons">forum</i>Forum</a></li>
+            <li><a href="/blog/admin/featured"><i class="material-icons">star</i>Featured</a></li>
+            <li>
+              <a class="dropdown-trigger add-record" href="#!" data-target="add-record-dropdown">
+                <i class="material-icons">add</i>Add Record<i class="material-icons">arrow_drop_down</i>
               </a>
-            <% } %>
-            <div class="divider"></div>
-            <a href="/records/profile">
-              <i class="material-icons">person</i>View Profile
-            </a>
-            <a href="/records/settings">
-              <i class="material-icons">settings</i>Settings
-            </a>
-            <a href="/auth/sign-out">
-              <i class="material-icons">exit_to_app</i>Sign Out
-            </a>
-          </div>
-        </div>
-
-        <!-- Add Record dropdown structure -->
-        <ul id="add-record-dropdown" class="dropdown-content">
-          <li>
-            <a href="/records/new">
-              <i class="material-icons">add_circle</i>Add Manually
-            </a>
-          </li>
-          <li>
-            <a href="/records/search">
-              <i class="material-icons">album</i>Import from Discogs
-            </a>
-          </li>
+            </li>
+            <li>
+              <a class="dropdown-trigger" href="#!" data-target="user-dropdown">
+                <%= user.username %> 
+                <% if (locals.notifications && notifications.length > 0) { %>
+                  <span class="new badge"><%= notifications.length %></span>
+                <% } %>
+                <i class="material-icons right">arrow_drop_down</i>
+              </a>
+            </li>
+            <li>
+              <div class="switch">
+                <label>
+                  🌞
+                  <input type="checkbox" id="darkModeToggle">
+                  <span class="lever"></span>
+                  🌙
+                </label>
+              </div>
+            </li>
+          <% } else { %>
+            <li><a href="/auth/login">Login</a></li>
+            <li><a href="/auth/register">Register</a></li>
+            <li>
+              <div class="switch">
+                <label>
+                  🌞
+                  <input type="checkbox" id="darkModeToggle">
+                  <span class="lever"></span>
+                  🌙
+                </label>
+              </div>
+            </li>
+          <% } %>
         </ul>
-
-        <!-- User dropdown structure -->
-        <ul id="user-dropdown" class="dropdown-content user-dropdown">
-          <li>
-            <a href="/records/profile">
-              <i class="material-icons">person</i>View Profile
-            </a>
-          </li>
-          <li>
-            <a href="/records/settings">
-              <i class="material-icons">settings</i>Settings
-            </a>
-          </li>
-          <li class="divider"></li>
-          <li>
-            <a href="/auth/sign-out">
-              <i class="material-icons">exit_to_app</i>Sign Out
-            </a>
-          </li>
-        </ul>
-        <% } else { %>
-        <div class="nav-links">
-          <a href="/auth/sign-in">Sign In</a>
-        </div>
-        <% } %>
-        <div class="switch">
-            <label>
-                🌞
-                <input type="checkbox" id="darkModeToggle">
-                <span class="lever"></span>
-                🌙
-            </label>
-        </div>
       </div>
     </nav>
+
+    <!-- Add Record Dropdown Structure -->
+    <ul id="add-record-dropdown" class="dropdown-content">
+      <li><a href="/records/new"><i class="material-icons">playlist_add</i>Add Manually</a></li>
+      <li><a href="/records/discogs"><i class="material-icons">search</i>Add from Discogs</a></li>
+    </ul>
+
+    <!-- User Dropdown Structure -->
+    <% if (locals.user) { %>
+    <ul id="user-dropdown" class="dropdown-content">
+      <li><a href="/notifications">Notifications</a></li>
+      <li><a href="/users/<%= user.username %>">Profile</a></li>
+      <% if (user.isAdmin) { %>
+        <li><a href="/admin">Admin</a></li>
+      <% } %>
+      <li class="divider"></li>
+      <li><a href="/auth/logout">Logout</a></li>
+    </ul>
+    <% } %>
+
+    <!-- Mobile Navigation -->
+    <ul class="sidenav" id="mobile-nav">
+      <% if (locals.user) { %>
+        <li><a href="/records"><i class="material-icons">album</i>Collection</a></li>
+        <li><a href="/stores"><i class="material-icons">store</i>Record Stores</a></li>
+        <li><a href="/blog"><i class="material-icons">article</i>Blog</a></li>
+        <li><a href="/forum"><i class="material-icons">forum</i>Forum</a></li>
+        <li><a href="/blog/admin/featured"><i class="material-icons">star</i>Featured</a></li>
+        <li><a href="/records/new"><i class="material-icons">playlist_add</i>Add Record</a></li>
+        <li><a href="/records/discogs"><i class="material-icons">search</i>Add from Discogs</a></li>
+        <li><a href="/notifications">Notifications</a></li>
+        <li><a href="/users/<%= user.username %>">Profile</a></li>
+        <% if (user.isAdmin) { %>
+          <li><a href="/admin">Admin</a></li>
+        <% } %>
+        <li class="divider"></li>
+        <li><a href="/auth/logout">Logout</a></li>
+      <% } else { %>
+        <li><a href="/auth/login">Login</a></li>
+        <li><a href="/auth/register">Register</a></li>
+      <% } %>
+      <li>
+        <div class="switch">
+          <label>
+            🌞
+            <input type="checkbox" id="darkModeToggle-mobile">
+            <span class="lever"></span>
+            🌙
+          </label>
+        </div>
+      </li>
+    </ul>
+
     <main class="main-content"></main>
     
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <style>
+      :root {
+        --primary: #D81B60;
+        --primary-dark: #C2185B;
+        --text: #424242;
+        --border: #e0e0e0;
+      }
+    </style>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         // Initialize dropdowns
-        var dropdowns = document.querySelectorAll('.dropdown-trigger');
-        M.Dropdown.init(dropdowns, {
-          constrainWidth: false,
-          coverTrigger: false
-        });
-        
-        // Initialize collapsibles
-        var collapsibles = document.querySelectorAll('.collapsible');
-        M.Collapsible.init(collapsibles);
-
-        // Mobile menu toggle
-        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-        const mobileNav = document.querySelector('.mobile-nav');
-        
-        if (mobileMenuToggle && mobileNav) {
-          mobileMenuToggle.addEventListener('click', function() {
-            mobileNav.classList.toggle('active');
-            const icon = this.querySelector('i');
-            icon.textContent = mobileNav.classList.contains('active') ? 'close' : 'menu';
-            
-            // Prevent body scroll when menu is open
-            document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
-          });
-
-          // Close mobile menu when clicking outside
-          document.addEventListener('click', function(event) {
-            if (!mobileNav.contains(event.target) && 
-                !mobileMenuToggle.contains(event.target) && 
-                mobileNav.classList.contains('active')) {
-              mobileNav.classList.remove('active');
-              mobileMenuToggle.querySelector('i').textContent = 'menu';
-              document.body.style.overflow = '';
-            }
-          });
-
-          // Close mobile menu when clicking a link
-          mobileNav.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-              mobileNav.classList.remove('active');
-              mobileMenuToggle.querySelector('i').textContent = 'menu';
-              document.body.style.overflow = '';
-            });
+        var userDropdown = document.querySelector('[data-target="user-dropdown"]');
+        if (userDropdown) {
+          M.Dropdown.init(userDropdown, {
+            constrainWidth: false,
+            coverTrigger: false,
+            alignment: 'right'
           });
         }
+
+        var addRecordDropdown = document.querySelector('[data-target="add-record-dropdown"]');
+        if (addRecordDropdown) {
+          M.Dropdown.init(addRecordDropdown, {
+            constrainWidth: false,
+            coverTrigger: false,
+            alignment: 'left'
+          });
+        }
+
+        // Initialize sidenav
+        var sidenav = document.querySelectorAll('.sidenav');
+        M.Sidenav.init(sidenav, {
+          edge: 'left',
+          draggable: true
+        });
       });
     </script>
   </body>

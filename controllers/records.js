@@ -88,6 +88,9 @@ router.get('/', asyncHandler(async (req, res) => {
             : b.createdAt - a.createdAt
     );
 
+    // Calculate total plays
+    const totalPlays = sortedRecords.reduce((sum, record) => sum + (record.plays || 0), 0);
+
     // Return JSON if requested
     if (req.headers.accept?.includes('application/json')) {
         return res.json(sortedRecords);
@@ -100,7 +103,8 @@ router.get('/', asyncHandler(async (req, res) => {
         currentSort: req.query.sort,
         currentTag: req.query.tag,
         tags,
-        view: req.query.view || 'grid'  // Default to grid view if not specified
+        view: req.query.view || 'grid',  // Default to grid view if not specified
+        totalPlays
     });
 }));
 
@@ -578,7 +582,7 @@ router.post('/:id/play', asyncHandler(async (req, res) => {
     const record = await validateOwnership(req.params.id, req.user._id, req.user.isAdmin);
     
     // Increment plays and update last played date
-    record.plays += 1;
+    record.plays = (record.plays || 0) + 1;
     record.lastPlayed = new Date();
     await record.save();
 
@@ -589,7 +593,12 @@ router.post('/:id/play', asyncHandler(async (req, res) => {
         activityType: 'play_record'
     });
 
-    res.redirect(`/records/${record._id}`);
+    // Return JSON response for AJAX request
+    res.json({ 
+        success: true, 
+        plays: record.plays,
+        message: 'Play tracked successfully'
+    });
 }));
 
 // Update record
