@@ -57,10 +57,11 @@ router.post('/sign-up', validateSignUp, asyncHandler(async (req, res) => {
         activityType: 'signup'
     });
 
-    // Set session with limited user data
+    // Set session with user data including admin status
     req.session.user = {
         _id: user._id,
-        username: user.username
+        username: user.username,
+        isAdmin: user.isAdmin
     };
     
     res.redirect('/records');
@@ -134,10 +135,11 @@ router.post('/sign-in', validateSignIn, asyncHandler(async (req, res) => {
         }
     );
 
-    // Set session with limited user data
+    // Set session with user data including admin status
     req.session.user = {
         _id: user._id,
-        username: user.username
+        username: user.username,
+        isAdmin: user.isAdmin
     };
     
     res.redirect('/records');
