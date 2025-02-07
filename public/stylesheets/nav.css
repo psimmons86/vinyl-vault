@@ -41,7 +41,7 @@ nav.main-nav .nav-wrapper ul.right > li > .dropdown-trigger {
   align-items: center;
   gap: 6px;
   height: 48px;
-  color: #D81B60 !important;
+  color: white !important;
   transition: all 0.2s ease;
   font-weight: 500;
   line-height: 48px;
@@ -50,7 +50,7 @@ nav.main-nav .nav-wrapper ul.right > li > .dropdown-trigger {
 
 nav.main-nav .nav-wrapper ul.right > li > a i,
 nav.main-nav .nav-wrapper ul.right > li > .dropdown-trigger i {
-  color: #D81B60 !important;
+  color: white !important;
   margin: 0;
   font-size: 18px;
   height: 48px;
@@ -59,7 +59,7 @@ nav.main-nav .nav-wrapper ul.right > li > .dropdown-trigger i {
 
 nav.main-nav .nav-wrapper ul.right > li > a:hover,
 nav.main-nav .nav-wrapper ul.right > li > .dropdown-trigger:hover {
-  background-color: rgba(255,255,255,0.05);
+  background-color: rgba(255,255,255,0.15);
 }
 
 nav.main-nav .nav-wrapper ul.right > li > .dropdown-trigger.add-record {
