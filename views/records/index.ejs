@@ -1,105 +1,304 @@
-<%- include('../partials/header.ejs') %>
-<link rel="stylesheet" href="/stylesheets/records.css">
-<div class="container">
-    <div class="collection-header">
-        <h1 class="header">My Collection</h1>
-        <div class="collection-stats">
-            <div class="stat-card z-depth-1">
-                <div class="number"><%= records.length %></div>
-                <div class="label">Records</div>
-            </div>
-            <div class="stat-card z-depth-1">
-                <div class="number"><%= totalPlays %></div>
-                <div class="label">Total Plays</div>
-            </div>
+<!-- Collection Header -->
+<header class="mb-6">
+    <h1 class="text-2xl font-bold mb-2">Your Collection</h1>
+    <div class="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
+        <div class="flex items-center">
+            <span class="material-icons mr-1">album</span>
+            <%= recordCount %> Records
+        </div>
+        <div class="flex items-center">
+            <span class="material-icons mr-1">category</span>
+            <%= genreCount %> Genres
+        </div>
+        <div class="flex items-center">
+            <span class="material-icons mr-1">person</span>
+            <%= artistCount %> Artists
         </div>
     </div>
+</header>
 
-    <div class="search-section z-depth-1">
-        <div class="input-field search-bar">
-            <i class="material-icons prefix">search</i>
-            <input type="text" id="recordSearch" class="validate">
-            <label for="recordSearch">Search by title, artist, or tags...</label>
+<!-- Search and Filter Bar -->
+<div class="sticky top-16 -mx-4 px-4 py-3 bg-white dark:bg-gray-800 shadow-sm z-30">
+    <div class="flex items-center gap-3">
+        <div class="relative flex-1">
+            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                <span class="material-icons text-xl">search</span>
+            </span>
+            <input type="search" 
+                   id="searchInput"
+                   placeholder="Search your collection..." 
+                   enterkeyhint="search"
+                   class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
+                          bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light
+                          appearance-none">
         </div>
-        
-        <div class="view-controls">
-            <button class="btn waves-effect waves-light sort-btn" id="sortAlphabeticalBtn">
-                <i class="material-icons left">sort_by_alpha</i>
-                A-Z
-            </button>
-            <button class="btn waves-effect waves-light sort-btn" id="sortRecentBtn">
-                <i class="material-icons left">access_time</i>
-                Recent
-            </button>
-            <button class="btn waves-effect waves-light view-btn" data-view="grid" id="gridViewBtn">
-                <i class="material-icons">grid_view</i>
-            </button>
-            <button class="btn waves-effect waves-light view-btn" data-view="list" id="listViewBtn">
-                <i class="material-icons">view_list</i>
-            </button>
-        </div>
+        <button id="filterButton" 
+                class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+            <span class="material-icons">filter_list</span>
+        </button>
+        <button id="viewToggle" 
+                class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+            <span class="material-icons view-icon">grid_view</span>
+        </button>
     </div>
-
-    <div class="records-container grid-view">
-        <div class="row">
-            <% if (records && records.length > 0) { %>
-                <% records.forEach(function(record) { %>
-                    <div class="col s12 m6 l3">
-                        <div class="record-card" data-record-id="<%= record._id %>">
-                            <div class="card hoverable">
-                                <div class="card-image">
-                                    <img src="<%= record.imageUrl || '/images/default-album.png' %>" alt="<%= record.title %>">
-                                </div>
-                                <div class="card-content">
-                                    <button class="play-button waves-effect waves-light" onclick="trackPlay('<%= record._id %>')" title="Track Play">
-                                        <i class="material-icons">play_circle_filled</i>
-                                    </button>
-                                    <span class="card-title truncate"><%= record.title %></span>
-                                    <p class="artist truncate"><%= record.artist %></p>
-                                    <% if (record.plays) { %>
-                                        <p class="plays">Plays: <%= record.plays %></p>
-                                    <% } %>
-                                </div>
-                                <div class="card-action">
-                                    <a href="/records/<%= record._id %>" class="btn-flat waves-effect">View Details</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <% }); %>
-            <% } else { %>
-                <div class="empty-state center-align">
-                    <i class="material-icons large">album</i>
-                    <h4>No records yet!</h4>
-                    <p class="grey-text">Start building your collection by adding your first record.</p>
-                    <a href="/records/new" class="btn-large waves-effect waves-light">
-                        <i class="material-icons left">add</i>
-                        Add Your First Record
-                    </a>
-                </div>
-            <% } %>
-        </div>
-    </div>
-
-    <!-- Fixed Action Button with Dropdown -->
-    <div class="fixed-action-btn">
-        <a class="btn-floating btn-large waves-effect waves-light pink">
-            <i class="material-icons">add</i>
-        </a>
-        <ul>
-            <li>
-                <a href="/records/new" class="btn-floating green tooltipped" data-position="left" data-tooltip="Add Manually">
-                    <i class="material-icons">playlist_add</i>
-                </a>
-            </li>
-            <li>
-                <a href="/records/discogs" class="btn-floating blue tooltipped" data-position="left" data-tooltip="Add from Discogs">
-                    <i class="material-icons">search</i>
-                </a>
-            </li>
-        </ul>
-    </div>
-    
 </div>
 
-<%- include('../partials/footer.ejs') %>
+<!-- Loading State -->
+<div id="loadingState" class="hidden mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+    <% for(let i = 0; i < 8; i++) { %>
+        <div class="animate-pulse">
+            <div class="aspect-square rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+            <div class="mt-2 space-y-2">
+                <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<!-- Records Grid/List -->
+<div id="recordsContainer" class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" data-view="grid">
+    <% records.forEach(record => { %>
+        <div class="record-card group">
+            <a href="/records/<%= record._id %>" class="block active:opacity-75">
+                <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <img src="<%= record.artwork || record.imageUrl || '/images/default-album.png' %>" 
+                         alt="<%= record.title %>"
+                         loading="lazy"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                </div>
+                <div class="mt-2">
+                    <h3 class="font-medium line-clamp-1"><%= record.title %></h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-1"><%= record.artist %></p>
+                </div>
+            </a>
+        </div>
+    <% }) %>
+</div>
+
+<!-- Filter Sheet Backdrop -->
+<div id="filterBackdrop"
+     class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-40">
+</div>
+
+<!-- Filter Bottom Sheet -->
+<div id="filterSheet" 
+     class="fixed inset-x-0 bottom-0 z-50 bg-white dark:bg-gray-800 rounded-t-2xl shadow-lg transform translate-y-full transition-transform duration-300">
+    <!-- Drag Handle -->
+    <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mt-3 mb-2"></div>
+    <div class="p-4 max-h-[80vh] overflow-y-auto overscroll-contain">
+        <div class="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-gray-800 py-2 -mt-2">
+            <h3 class="text-lg font-semibold">Filter Records</h3>
+            <button id="closeFilter" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full active:scale-95 transition-transform">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+        
+        <!-- Genre Filter -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium mb-2">Genres</label>
+            <div class="flex flex-wrap gap-2">
+                <% genres.forEach(genre => { %>
+                    <button class="filter-chip px-4 py-2 rounded-full text-sm border border-gray-200 dark:border-gray-700
+                                 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-transform"
+                            data-genre="<%= genre %>">
+                        <%= genre %>
+                    </button>
+                <% }) %>
+            </div>
+        </div>
+        
+        <!-- Year Filter -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium mb-2">Year Range</label>
+            <div class="flex items-center gap-4">
+                <input type="number" 
+                       inputmode="numeric"
+                       pattern="[0-9]*"
+                       placeholder="From" 
+                       class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700
+                              bg-gray-50 dark:bg-gray-900 text-lg">
+                <span>-</span>
+                <input type="number" 
+                       inputmode="numeric"
+                       pattern="[0-9]*"
+                       placeholder="To" 
+                       class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700
+                              bg-gray-50 dark:bg-gray-900 text-lg">
+            </div>
+        </div>
+        
+        <!-- Sort Options -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium mb-2">Sort By</label>
+            <select class="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700
+                          bg-gray-50 dark:bg-gray-900 text-lg">
+                <option value="title">Title (A-Z)</option>
+                <option value="-title">Title (Z-A)</option>
+                <option value="artist">Artist (A-Z)</option>
+                <option value="-artist">Artist (Z-A)</option>
+                <option value="-dateAdded">Recently Added</option>
+                <option value="dateAdded">Oldest Added</option>
+            </select>
+        </div>
+        
+        <div class="flex gap-3">
+            <button id="resetFilters" 
+                    class="flex-1 py-3 rounded-lg border border-gray-200 dark:border-gray-700
+                           hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-transform">
+                Reset
+            </button>
+            <button id="applyFilters" 
+                    class="flex-1 py-3 rounded-lg bg-primary text-white hover:bg-primary-dark
+                           dark:bg-primary-light dark:hover:bg-primary active:scale-95 transition-transform">
+                Apply Filters
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let touchStartY = 0;
+    let touchEndY = 0;
+    const container = document.getElementById('recordsContainer');
+    const viewToggle = document.getElementById('viewToggle');
+    const viewIcon = viewToggle.querySelector('.view-icon');
+    const filterButton = document.getElementById('filterButton');
+    const filterSheet = document.getElementById('filterSheet');
+    const filterBackdrop = document.getElementById('filterBackdrop');
+    const closeFilter = document.getElementById('closeFilter');
+    const filterChips = document.querySelectorAll('.filter-chip');
+    const dragHandle = filterSheet.querySelector('.w-12');
+    
+    const loadingState = document.getElementById('loadingState');
+    
+    // View Toggle
+    viewToggle.addEventListener('click', () => {
+        const currentView = container.dataset.view;
+        const newView = currentView === 'grid' ? 'list' : 'grid';
+        
+        if (newView === 'list') {
+            [container, loadingState].forEach(el => {
+                el.classList.remove('grid-cols-2', 'sm:grid-cols-3', 'md:grid-cols-4', 'gap-4');
+                el.classList.add('grid-cols-1', 'gap-3');
+            });
+            viewIcon.textContent = 'view_list';
+            
+            // Update card layout
+            document.querySelectorAll('.record-card').forEach(card => {
+                card.classList.add('flex', 'items-center', 'gap-4');
+                const imgContainer = card.querySelector('.aspect-square');
+                imgContainer.classList.add('w-20', 'h-20', 'flex-shrink-0');
+            });
+        } else {
+            [container, loadingState].forEach(el => {
+                el.classList.remove('grid-cols-1', 'gap-3');
+                el.classList.add('grid-cols-2', 'sm:grid-cols-3', 'md:grid-cols-4', 'gap-4');
+            });
+            viewIcon.textContent = 'grid_view';
+            
+            // Reset card layout
+            document.querySelectorAll('.record-card').forEach(card => {
+                card.classList.remove('flex', 'items-center', 'gap-4');
+                const imgContainer = card.querySelector('.aspect-square');
+                imgContainer.classList.remove('w-20', 'h-20', 'flex-shrink-0');
+            });
+        }
+        
+        container.dataset.view = newView;
+    });
+    
+    // Filter Sheet
+    function closeFilterSheet() {
+        filterSheet.classList.add('translate-y-full');
+        filterBackdrop.classList.add('opacity-0', 'pointer-events-none');
+        document.body.style.overflow = '';
+    }
+
+    function openFilterSheet() {
+        filterSheet.classList.remove('translate-y-full');
+        filterBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    filterButton.addEventListener('click', openFilterSheet);
+    closeFilter.addEventListener('click', closeFilterSheet);
+    filterBackdrop.addEventListener('click', closeFilterSheet);
+    
+    // Touch gestures for filter sheet
+    [dragHandle, filterSheet].forEach(el => {
+        el.addEventListener('touchstart', e => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        el.addEventListener('touchmove', e => {
+            touchEndY = e.touches[0].clientY;
+            const diff = touchEndY - touchStartY;
+            
+            if (diff > 0) { // Only allow dragging down
+                filterSheet.style.transform = `translateY(${diff}px)`;
+                // Fade backdrop based on drag distance
+                const opacity = Math.max(0, 0.5 - (diff / 1000));
+                filterBackdrop.style.opacity = opacity;
+            }
+        }, { passive: true });
+        
+        el.addEventListener('touchend', () => {
+            const diff = touchEndY - touchStartY;
+            
+            if (diff > 100) { // If dragged down more than 100px, close the sheet
+                closeFilterSheet();
+            } else {
+                filterSheet.style.transform = ''; // Reset position
+                filterBackdrop.style.opacity = ''; // Reset opacity
+            }
+            
+            touchStartY = 0;
+            touchEndY = 0;
+        });
+    });
+    
+    // Filter Chips
+    filterChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            chip.classList.toggle('bg-primary');
+            chip.classList.toggle('text-white');
+            chip.classList.toggle('border-primary');
+        });
+    });
+    
+    // Search Input
+    let searchTimeout;
+    const searchInput = document.getElementById('searchInput');
+    
+    // Clear search when clicking the clear button (x) on search input
+    searchInput.addEventListener('search', () => {
+        if (searchInput.value === '') {
+            container.classList.remove('hidden');
+            loadingState.classList.add('hidden');
+        }
+    });
+    
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            const query = e.target.value.trim();
+            if (query.length > 0) {
+                // Show loading state
+                container.classList.add('hidden');
+                loadingState.classList.remove('hidden');
+                
+                // Simulate search delay
+                setTimeout(() => {
+                    // Hide loading state
+                    container.classList.remove('hidden');
+                    loadingState.classList.add('hidden');
+                    
+                    console.log('Searching for:', query);
+                }, 1000);
+            }
+        }, 300);
+    });
+});
+</script>

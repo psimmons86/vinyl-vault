@@ -110,19 +110,21 @@ router.get('/', asyncHandler(async (req, res) => {
     const sort = sortOptions[req.query.sort] || sortOptions.recent;
 
     // Execute queries in parallel
-    const [records, total, tags, totalPlays] = await Promise.all([
+    const [records, total, tags, totalPlays, genres, artists] = await Promise.all([
         Record.find(query)
             .sort(sort)
             .skip(skip)
             .limit(limit)
-            .select('title artist imageUrl year plays tags createdAt')
+            .select('title artist artwork imageUrl year plays tags createdAt')
             .lean(),
         Record.countDocuments(query),
         Record.distinct('tags', { owner: req.user._id }),
         Record.aggregate([
             { $match: { owner: req.user._id } },
             { $group: { _id: null, total: { $sum: '$plays' } } }
-        ])
+        ]),
+        Record.distinct('genre', { owner: req.user._id }),
+        Record.distinct('artist', { owner: req.user._id })
     ]);
 
     // Return JSON if requested
@@ -145,6 +147,10 @@ router.get('/', asyncHandler(async (req, res) => {
         tags,
         view: req.query.view || 'grid',
         totalPlays: totalPlays[0]?.total || 0,
+        recordCount: total,
+        genreCount: genres.length,
+        artistCount: artists.length,
+        genres,
         pagination: {
             page,
             totalPages: Math.ceil(total / limit),

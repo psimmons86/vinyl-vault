@@ -1,428 +1,131 @@
-<%- include('./partials/header.ejs') %>
-
-<div class="landing-page">
-    <!-- Hero Section -->
-    <div class="hero-section">
-        <div class="hero-content">
-            <div class="hero-text">
-                <h1>Track Your Vinyl Journey</h1>
-                <p class="hero-subtitle">Discover, collect, and share your vinyl records with a community of music lovers.</p>
+<!-- Hero Section -->
+<section class="relative -mt-6 px-4 py-12 bg-gradient-to-br from-primary to-primary-dark text-white">
+    <div class="max-w-lg mx-auto text-center">
+        <h1 class="text-3xl font-bold mb-4">Track Your Vinyl Journey</h1>
+        <p class="text-lg mb-8 text-white/90">Discover, collect, and share your vinyl records with a community of music lovers.</p>
+        <% if (!locals.user) { %>
+            <div class="space-y-4">
+                <a href="/auth/sign-up" class="block w-full btn bg-white text-primary hover:bg-gray-100">
+                    Start Your Collection
+                </a>
+                <a href="/auth/sign-in" class="block w-full btn border-2 border-white text-white hover:bg-white/10">
+                    Sign In
+                </a>
             </div>
-            
-            <!-- Authentication Section -->
-            <div class="auth-section">
-                <div class="auth-card">
-                    <form action="/auth/sign-up" method="POST" class="signup-form">
-                        <p class="auth-intro">Join the community today</p>
-                        
-                        <div class="input-field">
-                            <input type="text" id="username" name="username" required class="validate">
-                            <label for="username">Username</label>
-                        </div>
-
-                        <div class="input-field">
-                            <input type="password" id="password" name="password" required class="validate">
-                            <label for="password">Password</label>
-                        </div>
-
-                        <div class="input-field">
-                            <input type="password" id="confirmPassword" name="confirmPassword" required class="validate">
-                            <label for="confirmPassword">Confirm Password</label>
-                        </div>
-
-                        <button type="submit" class="btn waves-effect">
-                            Start Your Collection
-                        </button>
-
-                        <p class="sign-in-link">
-                            Already have an account? <a href="/auth/sign-in">Sign In</a>
-                        </p>
-                    </form>
-
-                    <div class="feature-section">
-                        <div class="feature-grid">
-                            <div class="feature-card">
-                                <i class="fas fa-record-vinyl"></i>
-                                <h3>Track Collection</h3>
-                                <p>Organize and manage your vinyl records with ease.</p>
-                            </div>
-                            <div class="feature-card">
-                                <i class="fas fa-users"></i>
-                                <h3>Community</h3>
-                                <p>Connect with fellow vinyl enthusiasts.</p>
-                            </div>
-                            <div class="feature-card">
-                                <i class="fas fa-store"></i>
-                                <h3>Find Stores</h3>
-                                <p>Discover local record stores near you.</p>
-                            </div>
-                            <div class="feature-card">
-                                <i class="fas fa-chart-line"></i>
-                                <h3>Statistics</h3>
-                                <p>Track your listening habits and more.</p>
-                            </div>
-                        </div>
-
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-number">10K+</div>
-                                <div class="stat-label">Active Users</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number">500K+</div>
-                                <div class="stat-label">Records Tracked</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-number">1000+</div>
-                                <div class="stat-label">Record Stores</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <% } else { %>
+            <div class="space-y-4">
+                <a href="/records" class="block w-full btn bg-white text-primary hover:bg-gray-100">
+                    View Your Collection
+                </a>
+                <a href="/records/new" class="block w-full btn border-2 border-white text-white hover:bg-white/10">
+                    Add New Record
+                </a>
             </div>
-        </div>
-
-        <!-- Recent Albums -->
-        <% if (recentRecords?.length > 0) { %>
-        <div class="album-background">
-            <% recentRecords.slice(0, 25).forEach((record, index) => { %>
-                <div class="album-card" style="--delay: <%= index * 0.1 %>s; --x: <%= Math.random() * 90 + 5 %>%; --y: <%= Math.random() * 90 + 5 %>%; --rotate: <%= Math.random() * 360 %>deg;">
-                    <img
-                        src="<%= record.imageUrl || '/images/default-album.png' %>"
-                        alt="Album artwork for <%= record.title %>"
-                        loading="lazy"
-                        title="<%= record.title %> by <%= record.artist %>"
-                    >
-                </div>
-            <% }) %>
-        </div>
         <% } %>
+    </div>
+    
+    <!-- Decorative vinyl records -->
+    <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 flex -space-x-4">
+        <div class="w-16 h-16 bg-black rounded-full shadow-lg transform -rotate-12"></div>
+        <div class="w-16 h-16 bg-black rounded-full shadow-lg"></div>
+        <div class="w-16 h-16 bg-black rounded-full shadow-lg transform rotate-12"></div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="px-4 py-16 bg-white dark:bg-gray-800">
+    <div class="max-w-lg mx-auto space-y-12">
+        <div class="text-center space-y-2">
+            <span class="material-icons text-4xl text-primary">album</span>
+            <h3 class="text-xl font-semibold">Track Collection</h3>
+            <p class="text-gray-600 dark:text-gray-400">Organize and manage your vinyl records with ease.</p>
+        </div>
+        
+        <div class="text-center space-y-2">
+            <span class="material-icons text-4xl text-primary">people</span>
+            <h3 class="text-xl font-semibold">Community</h3>
+            <p class="text-gray-600 dark:text-gray-400">Connect with fellow vinyl enthusiasts.</p>
+        </div>
+        
+        <div class="text-center space-y-2">
+            <span class="material-icons text-4xl text-primary">analytics</span>
+            <h3 class="text-xl font-semibold">Insights</h3>
+            <p class="text-gray-600 dark:text-gray-400">Get statistics and insights about your collection.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Records Section -->
+<section class="px-4 py-12 bg-gray-50 dark:bg-gray-900">
+    <div class="max-w-lg mx-auto">
+        <h2 class="text-2xl font-bold mb-6">Featured Records</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <% if (locals.featuredRecords && featuredRecords.length > 0) { %>
+                <% featuredRecords.forEach(record => { %>
+                    <a href="/records/<%= record._id %>" class="block group">
+                        <div class="aspect-square rounded-lg overflow-hidden bg-white dark:bg-gray-800 shadow-sm">
+                            <img src="<%= record.artwork || '/images/default-album.png' %>" 
+                                 alt="<%= record.title %>"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        </div>
+                        <h4 class="mt-2 font-medium truncate"><%= record.title %></h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 truncate"><%= record.artist %></p>
+                    </a>
+                <% }) %>
+            <% } else { %>
+                <p class="col-span-2 text-center text-gray-600 dark:text-gray-400 py-8">No featured records yet.</p>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<!-- Community Section -->
+<section class="px-4 py-12 bg-white dark:bg-gray-800">
+    <div class="max-w-lg mx-auto text-center">
+        <h2 class="text-2xl font-bold mb-4">Join the Community</h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-8">Connect with vinyl enthusiasts, share your collection, and discover new music.</p>
+        <% if (!locals.user) { %>
+            <a href="/auth/sign-up" class="btn btn-primary">Get Started</a>
+        <% } %>
+    </div>
+</section>
+
+<!-- App Install Banner -->
+<div id="installBanner" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 p-4 shadow-lg transform translate-y-full transition-transform duration-300 ease-in-out z-40">
+    <div class="flex items-center justify-between max-w-lg mx-auto">
+        <div class="flex items-center space-x-3">
+            <img src="/images/favicon.svg" alt="Vinyl Vault" class="w-12 h-12">
+            <div>
+                <h4 class="font-semibold">Install Vinyl Vault</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Add to Home Screen</p>
+            </div>
+        </div>
+        <button id="installButton" class="btn btn-primary">Install</button>
     </div>
 </div>
 
-<style>
-.landing-page {
-    height: 100vh;
-    background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-surface-alt) 100%);
-    overflow: hidden;
-}
+<script>
+    // PWA Install Banner Logic
+    let deferredPrompt;
+    const installBanner = document.getElementById('installBanner');
+    const installButton = document.getElementById('installButton');
 
-/* Hero Section */
-.hero-section {
-    position: relative;
-    height: 100%;
-    padding: 0.5rem 1rem;
-    display: flex;
-    align-items: flex-start;
-    background: linear-gradient(to bottom, rgba(216,27,96,0.05), transparent);
-}
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBanner.style.transform = 'translateY(0)';
+    });
 
-.hero-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 30% 30%, rgba(216,27,96,0.05) 0%, transparent 70%);
-    pointer-events: none;
-}
-
-.hero-content {
-    max-width: 1200px;
-    width: 100%;
-    margin: 0 auto;
-    position: relative;
-    z-index: 3;
-    display: grid;
-    grid-template-columns: 1fr 600px;
-    gap: 2rem;
-    align-items: flex-start;
-}
-
-.hero-text h1 {
-    font-size: 3rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem;
-    line-height: 1.2;
-    color: #D81B60;
-    text-shadow: 2px 2px 4px rgba(216,27,96,0.1);
-    font-family: 'Inter', sans-serif;
-}
-
-.hero-subtitle {
-    font-size: 1.25rem;
-    margin-bottom: 0;
-    line-height: 1.4;
-    color: #D81B60;
-    opacity: 0.8;
-    text-shadow: 1px 1px 2px rgba(216,27,96,0.1);
-}
-
-/* Auth Section */
-.auth-section {
-    width: 100%;
-}
-
-.auth-card {
-    background: var(--bg-surface);
-    padding: 1.25rem 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(216,27,96,0.1);
-}
-
-.auth-intro {
-    font-size: 1rem;
-    color: var(--text-primary);
-    margin-bottom: 0.75rem;
-    text-align: center;
-}
-
-.input-field {
-    margin-bottom: 0.75rem;
-    height: 2.25rem;
-}
-
-.input-field input {
-    background: var(--bg-surface-alt) !important;
-    border-radius: 8px !important;
-    padding: 0 1rem !important;
-    box-sizing: border-box !important;
-    margin-bottom: 0 !important;
-    height: 2.25rem !important;
-}
-
-.input-field label {
-    transform: translateY(-14px) !important;
-    font-size: 0.875rem;
-}
-
-.input-field input:focus {
-    border-bottom: 2px solid #D81B60 !important;
-    box-shadow: none !important;
-}
-
-.sign-in-link {
-    text-align: center;
-    margin: 0.75rem 0;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-}
-
-.sign-in-link a {
-    color: #D81B60;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.sign-in-link a:hover {
-    text-decoration: underline;
-}
-
-.btn {
-    height: 2.25rem;
-    line-height: 2.25rem;
-    width: 100%;
-    font-size: 0.875rem;
-    text-transform: none;
-    font-weight: 500;
-    padding: 0 1rem;
-}
-
-/* Feature Section */
-.feature-section {
-    margin-top: 1.25rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid rgba(216,27,96,0.1);
-}
-
-.feature-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.feature-card {
-    padding: 1rem;
-    text-align: center;
-    background: var(--bg-surface-alt);
-    border-radius: 8px;
-    transition: transform 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    border: 1px solid rgba(216,27,96,0.1);
-}
-
-.feature-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(216,27,96,0.1);
-}
-
-.feature-card i {
-    font-size: 1.5rem;
-    color: #D81B60;
-    margin-bottom: 0.5rem;
-}
-
-.feature-card h3 {
-    font-size: 1rem;
-    margin: 0 0 0.5rem;
-    color: var(--text-primary);
-}
-
-.feature-card p {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    line-height: 1.4;
-    margin: 0;
-}
-
-/* Stats */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-}
-
-.stat-card {
-    padding: 1rem;
-    background: linear-gradient(135deg, #D81B60 0%, #E91E63 100%);
-    color: white;
-    border-radius: 8px;
-    text-align: center;
-    transition: transform 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-4px);
-}
-
-.stat-number {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
-
-.stat-label {
-    font-size: 0.875rem;
-    opacity: 0.9;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-}
-
-/* Album Background */
-.album-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    z-index: 1;
-    overflow: hidden;
-}
-
-.album-card {
-    position: absolute;
-    width: 80px;
-    height: 80px;
-    left: var(--x);
-    top: var(--y);
-    animation: float 20s infinite linear;
-    animation-delay: var(--delay);
-    transform: rotate(var(--rotate));
-}
-
-.album-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(216,27,96,0.2);
-    opacity: 0.2;
-    transition: all 0.3s ease;
-}
-
-@keyframes float {
-    0% { transform: translate(0, 0) rotate(var(--rotate)); }
-    33% { transform: translate(-20px, 20px) rotate(calc(var(--rotate) + 5deg)); }
-    66% { transform: translate(20px, -20px) rotate(calc(var(--rotate) - 5deg)); }
-    100% { transform: translate(0, 0) rotate(var(--rotate)); }
-}
-
-/* Responsive Design */
-@media (max-width: 1200px) {
-    .hero-content {
-        grid-template-columns: 1fr;
-        text-align: center;
-        gap: 1.5rem;
-    }
-
-    .hero-text h1 {
-        font-size: 2.5rem;
-    }
-
-    .hero-subtitle {
-        font-size: 1.25rem;
-    }
-
-    .auth-card {
-        max-width: 600px;
-        margin: 0 auto;
-    }
-}
-
-@media (max-width: 768px) {
-    .hero-section {
-        padding: 0.5rem;
-    }
-
-    .auth-card {
-        max-width: 500px;
-    }
-
-    .album-card {
-        width: 70px;
-        height: 70px;
-    }
-
-    .feature-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .hero-text h1 {
-        font-size: 2rem;
-    }
-
-    .album-card {
-        width: 60px;
-        height: 60px;
-    }
-
-    .feature-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .stat-number {
-        font-size: 1.25rem;
-    }
-
-    .stat-label {
-        font-size: 0.75rem;
-    }
-}
-</style>
-
-<%- include('./partials/footer.ejs') %>
+    installButton.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+            installBanner.style.transform = 'translateY(full)';
+        }
+        
+        deferredPrompt = null;
+    });
+</script>

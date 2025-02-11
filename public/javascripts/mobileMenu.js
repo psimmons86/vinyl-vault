@@ -1,57 +1,113 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize mobile menu
-    const mobileMenuButton = document.querySelector('.sidenav-trigger');
-    const sideNav = document.querySelector('.sidenav');
+    // Elements
+    const menuButton = document.getElementById('menuButton');
+    const menuDrawer = document.getElementById('menuDrawer');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const navItems = document.querySelectorAll('.nav-item');
     
-    if (mobileMenuButton && sideNav) {
-        // Initialize Materialize sidenav with enhanced options
-        const sideNavInstance = M.Sidenav.init(sideNav, {
-            edge: 'left',
-            draggable: true,
-            preventScrolling: true,
-            inDuration: 250,
-            outDuration: 200,
-            onOpenStart: function() {
-                // Close any open dropdowns when sidenav opens
-                const dropdowns = document.querySelectorAll('.dropdown-trigger');
-                dropdowns.forEach(dropdown => {
-                    if (dropdown.M_Dropdown) {
-                        dropdown.M_Dropdown.close();
-                    }
-                });
-                
-                // Add opening animation
-                sideNav.style.transition = 'transform 250ms cubic-bezier(0.4, 0, 0.2, 1)';
-                mobileMenuButton.classList.add('active');
-            },
-            onCloseStart: function() {
-                // Add closing animation
-                sideNav.style.transition = 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)';
-                mobileMenuButton.classList.remove('active');
+    // Set active nav item based on current path
+    const currentPath = window.location.pathname;
+    navItems.forEach(item => {
+        const href = item.getAttribute('href');
+        if (href === currentPath || currentPath.startsWith(href + '/')) {
+            item.classList.add('active');
+        }
+    });
+
+    // Menu drawer functionality
+    if (menuButton && menuDrawer) {
+        // Open menu
+        menuButton.addEventListener('click', () => {
+            menuDrawer.classList.remove('-translate-x-full');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        });
+
+        // Close menu
+        const closeMenu = () => {
+            menuDrawer.classList.add('-translate-x-full');
+            document.body.style.overflow = '';
+        };
+
+        menuOverlay.addEventListener('click', closeMenu);
+
+        // Handle escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !menuDrawer.classList.contains('-translate-x-full')) {
+                closeMenu();
             }
         });
+
+        // Touch gestures
+        const hammer = new Hammer(menuDrawer);
         
-        // Add active class to current page link and its parent
-        const currentPath = window.location.pathname;
-        const sideNavLinks = sideNav.querySelectorAll('a');
-        sideNavLinks.forEach(link => {
-            const href = link.getAttribute('href');
-            if (href === currentPath || currentPath.startsWith(href + '/')) {
-                link.classList.add('active');
-                // Add active state to parent list item for better visual feedback
-                const parentLi = link.closest('li');
-                if (parentLi) {
-                    parentLi.classList.add('active');
-                }
+        // Swipe to close
+        hammer.on('swipeleft', closeMenu);
+
+        // Pan gesture for smoother drawer movement
+        let isDragging = false;
+        let startX = 0;
+        let currentX = 0;
+
+        hammer.on('panstart', (e) => {
+            isDragging = true;
+            startX = e.center.x;
+            menuDrawer.style.transition = 'none';
+        });
+
+        hammer.on('panmove', (e) => {
+            if (!isDragging) return;
+            
+            currentX = Math.min(0, e.center.x - startX);
+            menuDrawer.style.transform = `translateX(${currentX}px)`;
+            
+            // Adjust overlay opacity based on drawer position
+            const progress = Math.abs(currentX) / menuDrawer.offsetWidth;
+            menuOverlay.style.opacity = 1 - progress;
+        });
+
+        hammer.on('panend', (e) => {
+            isDragging = false;
+            menuDrawer.style.transition = 'transform 300ms ease-in-out';
+            
+            if (Math.abs(currentX) > menuDrawer.offsetWidth * 0.3) {
+                closeMenu();
+            } else {
+                menuDrawer.style.transform = '';
+                menuOverlay.style.opacity = '';
             }
         });
-
-        // Add touch ripple effect to menu items
-        sideNavLinks.forEach(link => {
-            link.classList.add('waves-effect');
-        });
-
-        // Store instance for later use
-        mobileMenuButton.M_Sidenav = sideNavInstance;
     }
+
+    // Bottom navigation active states and ripple effect
+    navItems.forEach(item => {
+        // Add ripple effect
+        item.addEventListener('click', function(e) {
+            const ripple = document.createElement('div');
+            ripple.classList.add('ripple');
+            
+            const rect = item.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${e.clientX - rect.left - size/2}px`;
+            ripple.style.top = `${e.clientY - rect.top - size/2}px`;
+            
+            item.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+
+    // Handle iOS safe areas
+    function updateSafeAreas() {
+        const safeTop = getComputedStyle(document.documentElement).getPropertyValue('--sat') || '0px';
+        const safeBottom = getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0px';
+        
+        document.documentElement.style.setProperty('--safe-top', safeTop);
+        document.documentElement.style.setProperty('--safe-bottom', safeBottom);
+    }
+
+    // Update safe areas on orientation change
+    window.addEventListener('orientationchange', updateSafeAreas);
+    updateSafeAreas();
 });

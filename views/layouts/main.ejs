@@ -1,54 +1,171 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= typeof title !== 'undefined' ? title + ' | ' : '' %>Vinyl Vault</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Vinyl Vault</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#D81B60">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#D81B60">
     
-    <!-- Materialize CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Material Icons -->
+    <!-- Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Custom CSS -->
+    <!-- Styles -->
     <link rel="stylesheet" href="/stylesheets/style.css">
-    <link rel="stylesheet" href="/stylesheets/material.css">
-    <link rel="stylesheet" href="/stylesheets/records.css">
-    <link rel="stylesheet" href="/stylesheets/notifications.css">
     
-    <!-- jQuery (required for Materialize) -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    
-    <!-- Materialize JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 </head>
-<body>
-    <%- include('../partials/header.ejs') %>
-    
-    <main class="main-content container">
-        <%- body %>
+<body class="h-full bg-gray-50 dark:bg-gray-900 antialiased">
+
+    <!-- Mobile Navigation -->
+    <% if (locals.user) { %>
+    <nav class="nav-container safe-bottom">
+        <div class="nav-menu">
+            <a href="/records" class="nav-item">
+                <span class="material-icons nav-icon">album</span>
+                <span class="nav-label">Collection</span>
+            </a>
+            <a href="/blog" class="nav-item">
+                <span class="material-icons nav-icon">article</span>
+                <span class="nav-label">Blog</span>
+            </a>
+            <a href="/records/new" class="nav-item">
+                <span class="material-icons nav-icon">add_circle</span>
+                <span class="nav-label">Add</span>
+            </a>
+            <a href="/search" class="nav-item">
+                <span class="material-icons nav-icon">search</span>
+                <span class="nav-label">Search</span>
+            </a>
+            <a href="/users/<%= user.username %>" class="nav-item">
+                <span class="material-icons nav-icon">person</span>
+                <span class="nav-label">Profile</span>
+            </a>
+        </div>
+    </nav>
+    <% } %>
+
+    <!-- Main Content -->
+    <main class="pt-16 pb-16 min-h-screen">
+        <div class="container mx-auto px-4 py-6">
+            <%- body %>
+        </div>
     </main>
 
-    <!-- App Scripts -->
-    <script src="/javascripts/init.js"></script>
-    <script src="/javascripts/mobileMenu.js"></script>
-    <% if (typeof title !== 'undefined' && title.includes('Records')) { %>
-        <script src="/javascripts/collection.js"></script>
+    <!-- Mobile Menu Drawer -->
+    <% if (locals.user) { %>
+    <div id="menuDrawer" class="fixed inset-0 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="absolute inset-0 bg-black bg-opacity-50" id="menuOverlay"></div>
+        <div class="absolute inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 shadow-xl">
+            <div class="flex flex-col h-full">
+                <div class="p-4 border-b dark:border-gray-700">
+                    <div class="flex items-center space-x-3">
+                        <img src="<%= user.avatar || '/images/default-avatar.png' %>" 
+                             alt="<%= user.username %>" 
+                             class="w-10 h-10 rounded-full object-cover">
+                        <div>
+                            <div class="font-medium"><%= user.username %></div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">View Profile</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <nav class="flex-1 px-2 py-4 space-y-1">
+                    <a href="/records" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                        <span class="material-icons mr-3">album</span>
+                        Collection
+                    </a>
+                    <a href="/blog" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                        <span class="material-icons mr-3">article</span>
+                        Blog
+                    </a>
+                    <a href="/blog/admin/featured" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                        <span class="material-icons mr-3">star</span>
+                        Featured
+                    </a>
+                    <% if (user.isAdmin) { %>
+                    <a href="/admin" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                        <span class="material-icons mr-3">admin_panel_settings</span>
+                        Admin
+                    </a>
+                    <% } %>
+                </nav>
+                
+                <div class="p-4 border-t dark:border-gray-700">
+                    <a href="/auth/sign-out" class="flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+                        <span class="material-icons mr-3">logout</span>
+                        Sign Out
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
     <% } %>
+
+    <!-- Toast Messages -->
+    <div id="toastContainer" class="fixed bottom-20 left-0 right-0 flex flex-col items-center space-y-2 pointer-events-none z-50">
+        <% if (locals.messages && messages.error) { %>
+            <div class="toast-message bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                <%= messages.error %>
+            </div>
+        <% } %>
+        <% if (locals.messages && messages.success) { %>
+            <div class="toast-message bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                <%= messages.success %>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/javascripts/darkMode.js"></script>
+    <script src="/javascripts/mobileMenu.js"></script>
+    <script>
+        // Initialize mobile menu drawer
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuButton = document.getElementById('menuButton');
+            const menuDrawer = document.getElementById('menuDrawer');
+            const menuOverlay = document.getElementById('menuOverlay');
+
+            if (menuButton && menuDrawer) {
+                menuButton.addEventListener('click', () => {
+                    menuDrawer.classList.remove('-translate-x-full');
+                });
+
+                menuOverlay.addEventListener('click', () => {
+                    menuDrawer.classList.add('-translate-x-full');
+                });
+
+                // Add swipe to close
+                const hammer = new Hammer(menuDrawer);
+                hammer.on('swipeleft', () => {
+                    menuDrawer.classList.add('-translate-x-full');
+                });
+            }
+
+            // Auto-hide toast messages
+            const toasts = document.querySelectorAll('.toast-message');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            });
+        });
+    </script>
 </body>
 </html>
