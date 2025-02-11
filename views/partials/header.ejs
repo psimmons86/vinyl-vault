@@ -1,51 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= typeof title !== 'undefined' ? title + ' | ' : '' %>Vinyl Vault</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
-    />
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <link rel="stylesheet" href="/styles.css" />
-    <link rel="stylesheet" href="/stylesheets/nav.css" />
-    <link rel="stylesheet" href="/stylesheets/notifications.css" />
-    <link rel="stylesheet" href="/stylesheets/dark-mode.css">
-    <link rel="stylesheet" href="/stylesheets/share-buttons.css">
-  </head>
-  <body>
-    <script src="/javascripts/theme.js"></script>
-    <script src="/javascripts/darkMode.js" defer></script>
-    <script src="/javascripts/sharing.js"></script>
-    <nav class="main-nav">
+<nav class="main-nav">
       <div class="nav-wrapper">
-        <a href="/" class="brand-logo">Vinyl Vault</a>
+        <a href="/" class="brand-logo">
+          <div class="vinyl-logo">
+            <div class="record">
+              <div class="record-label">
+                <span class="logo-text">VV</span>
+              </div>
+            </div>
+            <span class="brand-text">Vinyl Vault</span>
+          </div>
+        </a>
         <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
         
         <ul class="right hide-on-med-and-down">
           <% if (locals.user) { %>
             <li><a href="/records"><i class="material-icons">album</i>Collection</a></li>
-            <li><a href="/stores"><i class="material-icons">store</i>Record Stores</a></li>
             <li><a href="/blog"><i class="material-icons">article</i>Blog</a></li>
-            <li><a href="/forum"><i class="material-icons">forum</i>Forum</a></li>
             <li><a href="/blog/admin/featured"><i class="material-icons">star</i>Featured</a></li>
             <li>
-              <a class="dropdown-trigger add-record" href="#!" data-target="add-record-dropdown">
-                <i class="material-icons">add</i>Add Record<i class="material-icons">arrow_drop_down</i>
+              <a class="dropdown-trigger" href="#" data-target="add-record-dropdown">
+                <i class="material-icons">add</i>Add Record<i class="material-icons right">arrow_drop_down</i>
               </a>
             </li>
             <li>
-              <a class="dropdown-trigger" href="#!" data-target="user-dropdown">
+              <a class="dropdown-trigger" href="#" data-target="user-dropdown">
                 <%= user.username %> 
                 <% if (locals.notifications && notifications.length > 0) { %>
                   <span class="new badge"><%= notifications.length %></span>
@@ -87,6 +65,124 @@
       <li><a href="/records/discogs"><i class="material-icons">search</i>Add from Discogs</a></li>
     </ul>
 
+<style>
+/* Vinyl Logo in Header */
+.main-nav {
+    padding: 0 10px;
+    background: #D81B60;
+}
+
+.vinyl-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: 5px;
+    height: 64px;
+}
+
+.vinyl-logo .record {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 50%, #333 100%);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3),
+                inset 0 2px 5px rgba(255,255,255,0.1),
+                inset 0 -2px 5px rgba(0,0,0,0.2);
+    animation: spin 10s linear infinite;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.vinyl-logo .record:hover {
+    animation-play-state: paused;
+}
+
+.vinyl-logo .record::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30%;
+    height: 30%;
+    background: #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 3px #000,
+                0 0 0 6px #333,
+                0 0 0 9px #000,
+                0 0 0 12px #333;
+}
+
+.vinyl-logo .record-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 35%;
+    height: 35%;
+    background: linear-gradient(135deg, #fff 0%, #f0f0f0 50%, #e6e6e6 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.vinyl-logo .logo-text {
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: 0.65rem;
+    background: linear-gradient(45deg, #1a237e 0%, #0d47a1 50%, #1565c0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 5px rgba(26,35,126,0.3);
+    letter-spacing: -0.5px;
+}
+
+.vinyl-logo .brand-text {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    background: linear-gradient(45deg, #ffffff 0%, #f5f5f5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3),
+                 0 0 10px rgba(255,255,255,0.5),
+                 0 0 20px rgba(26,35,126,0.3);
+    position: relative;
+    padding-left: 5px;
+}
+
+.vinyl-logo .brand-text::after {
+    content: 'Vinyl Vault';
+    position: absolute;
+    left: 5px;
+    top: 0;
+    color: rgba(255,255,255,0.1);
+    z-index: -1;
+    filter: blur(4px);
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .vinyl-logo {
+        margin-left: 50px;
+    }
+    
+    .vinyl-logo .brand-text {
+        font-size: 1.2rem;
+    }
+}
+</style>
     <!-- User Dropdown Structure -->
     <% if (locals.user) { %>
     <ul id="user-dropdown" class="dropdown-content">
@@ -104,9 +200,7 @@
     <ul class="sidenav" id="mobile-nav">
       <% if (locals.user) { %>
         <li><a href="/records"><i class="material-icons">album</i>Collection</a></li>
-        <li><a href="/stores"><i class="material-icons">store</i>Record Stores</a></li>
         <li><a href="/blog"><i class="material-icons">article</i>Blog</a></li>
-        <li><a href="/forum"><i class="material-icons">forum</i>Forum</a></li>
         <li><a href="/blog/admin/featured"><i class="material-icons">star</i>Featured</a></li>
         <li><a href="/records/new"><i class="material-icons">playlist_add</i>Add Record</a></li>
         <li><a href="/records/discogs"><i class="material-icons">search</i>Add from Discogs</a></li>
@@ -132,47 +226,3 @@
         </div>
       </li>
     </ul>
-
-    <main class="main-content"></main>
-    
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <style>
-      :root {
-        --primary: #D81B60;
-        --primary-dark: #C2185B;
-        --text: #424242;
-        --border: #e0e0e0;
-      }
-    </style>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Initialize dropdowns
-        var userDropdown = document.querySelector('[data-target="user-dropdown"]');
-        if (userDropdown) {
-          M.Dropdown.init(userDropdown, {
-            constrainWidth: false,
-            coverTrigger: false,
-            alignment: 'right'
-          });
-        }
-
-        var addRecordDropdown = document.querySelector('[data-target="add-record-dropdown"]');
-        if (addRecordDropdown) {
-          M.Dropdown.init(addRecordDropdown, {
-            constrainWidth: false,
-            coverTrigger: false,
-            alignment: 'left'
-          });
-        }
-
-        // Initialize sidenav
-        var sidenav = document.querySelectorAll('.sidenav');
-        M.Sidenav.init(sidenav, {
-          edge: 'left',
-          draggable: true
-        });
-      });
-    </script>
-  </body>
-</html>

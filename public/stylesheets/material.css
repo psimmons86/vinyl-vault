@@ -1,0 +1,198 @@
+/* Custom Material Design Component Styles */
+
+/* Material Icons */
+.material-icons {
+  vertical-align: middle;
+}
+
+/* Cards */
+.card {
+  border-radius: 8px;
+}
+
+.card .card-image img {
+  border-radius: 8px 8px 0 0;
+}
+
+/* Buttons */
+.btn, .btn-large, .btn-floating {
+  text-transform: none;
+  font-weight: 500;
+}
+
+.btn-floating {
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Inputs */
+.input-field input[type=text]:focus + label,
+.input-field input[type=password]:focus + label,
+.input-field input[type=email]:focus + label {
+  color: #26a69a;
+}
+
+.input-field input[type=text]:focus,
+.input-field input[type=password]:focus,
+.input-field input[type=email]:focus {
+  border-bottom: 1px solid #26a69a;
+  box-shadow: 0 1px 0 0 #26a69a;
+}
+
+/* Dropdown */
+.dropdown-content {
+  min-width: 200px;
+  position: fixed !important;
+  display: none;
+  opacity: 1 !important;
+  transform: none !important;
+  z-index: 9999 !important;
+  background-color: #fff;
+  margin: 0;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  will-change: transform, opacity;
+  transform-origin: top !important;
+  bottom: auto !important;
+}
+
+.dropdown-content li {
+  min-height: 48px;
+}
+
+.dropdown-content li > a {
+  color: rgba(0,0,0,0.87);
+  display: flex !important;
+  align-items: center;
+  padding: 14px 16px;
+  font-size: 14px;
+}
+
+.dropdown-content li > a > i {
+  margin-right: 12px;
+  color: #757575;
+}
+
+.dropdown-content .divider {
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  background-color: #e0e0e0;
+}
+
+/* Navigation */
+nav {
+    height: 64px;
+    line-height: 64px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.main-content {
+    padding-top: 84px; /* nav height (64px) + extra padding (20px) */
+    min-height: calc(100vh - 64px);
+}
+
+nav .nav-wrapper {
+    padding: 0 20px;
+    height: 100%;
+}
+
+nav .brand-logo {
+    padding-left: 15px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    color: #fff;
+}
+
+nav ul li {
+    height: 64px;
+}
+
+nav ul li a {
+    display: flex !important;
+    align-items: center;
+    padding: 0 15px;
+    height: 64px;
+    color: #fff;
+    font-weight: 500;
+}
+
+nav ul li a i.material-icons {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+    font-size: 24px;
+    height: 24px;
+    line-height: 24px;
+}
+
+nav ul li a i.material-icons.right {
+    margin-right: 0;
+    margin-left: 8px;
+}
+
+nav ul li a:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+nav ul li .switch {
+    margin: 0 15px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+}
+
+.sidenav li > a {
+    display: flex;
+    align-items: center;
+    height: 48px;
+    line-height: 1.5;
+}
+
+.sidenav li > a i.material-icons {
+    margin-right: 32px;
+    color: rgba(0,0,0,0.54);
+}
+
+.sidenav .user-view {
+    padding: 32px 32px 0;
+}
+
+/* Collection specific */
+.play-button {
+  background: none;
+  border: none;
+  color: #26a69a;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.3s ease;
+}
+
+.play-button:hover {
+  color: #2bbbad;
+}
+
+.play-button .material-icons {
+  font-size: 24px;
+}
+
+/* Dark mode adjustments */
+body.dark-mode .dropdown-content {
+  background-color: #424242;
+}
+
+body.dark-mode .dropdown-content li > a {
+  color: #fff;
+}
+
+body.dark-mode .dropdown-content .divider {
+  background-color: #616161;
+}
+
+body.dark-mode .dropdown-content li > a > i {
+  color: #bdbdbd;
+}

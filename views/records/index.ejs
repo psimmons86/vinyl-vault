@@ -1,6 +1,5 @@
 <%- include('../partials/header.ejs') %>
 <link rel="stylesheet" href="/stylesheets/records.css">
-
 <div class="container">
     <div class="collection-header">
         <h1 class="header">My Collection</h1>
@@ -24,71 +23,83 @@
         </div>
         
         <div class="view-controls">
-            <button class="btn waves-effect waves-light sort-btn" onclick="sortAlphabetically()">
+            <button class="btn waves-effect waves-light sort-btn" id="sortAlphabeticalBtn">
                 <i class="material-icons left">sort_by_alpha</i>
                 A-Z
             </button>
-            <button class="btn waves-effect waves-light sort-btn" onclick="sortByRecent()">
+            <button class="btn waves-effect waves-light sort-btn" id="sortRecentBtn">
                 <i class="material-icons left">access_time</i>
                 Recent
             </button>
-            <button class="btn waves-effect waves-light view-btn" data-view="grid" onclick="toggleView('grid')">
+            <button class="btn waves-effect waves-light view-btn" data-view="grid" id="gridViewBtn">
                 <i class="material-icons">grid_view</i>
             </button>
-            <button class="btn waves-effect waves-light view-btn" data-view="list" onclick="toggleView('list')">
+            <button class="btn waves-effect waves-light view-btn" data-view="list" id="listViewBtn">
                 <i class="material-icons">view_list</i>
             </button>
         </div>
     </div>
 
     <div class="records-container grid-view">
-        <% if (records && records.length > 0) { %>
-            <% records.forEach(function(record) { %>
-                <div class="record-card" data-record-id="<%= record._id %>">
-                    <div class="card hoverable">
-                        <div class="card-image">
-                            <img src="<%= record.imageUrl || '/images/default-album.png' %>" alt="<%= record.title %>">
-                        </div>
-                        <div class="card-content">
-                            <button class="play-button waves-effect waves-light" onclick="trackPlay('<%= record._id %>')" title="Track Play">
-                                <i class="material-icons">play_circle_filled</i>
-                            </button>
-                            <span class="card-title truncate"><%= record.title %></span>
-                            <p class="artist truncate"><%= record.artist %></p>
-                            <% if (record.plays) { %>
-                                <p class="plays">Plays: <%= record.plays %></p>
-                            <% } %>
-                        </div>
-                        <div class="card-action">
-                            <a href="/records/<%= record._id %>" class="btn-flat waves-effect">View Details</a>
+        <div class="row">
+            <% if (records && records.length > 0) { %>
+                <% records.forEach(function(record) { %>
+                    <div class="col s12 m6 l3">
+                        <div class="record-card" data-record-id="<%= record._id %>">
+                            <div class="card hoverable">
+                                <div class="card-image">
+                                    <img src="<%= record.imageUrl || '/images/default-album.png' %>" alt="<%= record.title %>">
+                                </div>
+                                <div class="card-content">
+                                    <button class="play-button waves-effect waves-light" onclick="trackPlay('<%= record._id %>')" title="Track Play">
+                                        <i class="material-icons">play_circle_filled</i>
+                                    </button>
+                                    <span class="card-title truncate"><%= record.title %></span>
+                                    <p class="artist truncate"><%= record.artist %></p>
+                                    <% if (record.plays) { %>
+                                        <p class="plays">Plays: <%= record.plays %></p>
+                                    <% } %>
+                                </div>
+                                <div class="card-action">
+                                    <a href="/records/<%= record._id %>" class="btn-flat waves-effect">View Details</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                <% }); %>
+            <% } else { %>
+                <div class="empty-state center-align">
+                    <i class="material-icons large">album</i>
+                    <h4>No records yet!</h4>
+                    <p class="grey-text">Start building your collection by adding your first record.</p>
+                    <a href="/records/new" class="btn-large waves-effect waves-light">
+                        <i class="material-icons left">add</i>
+                        Add Your First Record
+                    </a>
                 </div>
-            <% }); %>
-        <% } else { %>
-            <div class="empty-state center-align">
-                <i class="material-icons large">album</i>
-                <h4>No records yet!</h4>
-                <p class="grey-text">Start building your collection by adding your first record.</p>
-                <a href="/records/new" class="btn-large waves-effect waves-light">
-                    <i class="material-icons left">add</i>
-                    Add Your First Record
-                </a>
-            </div>
-        <% } %>
+            <% } %>
+        </div>
     </div>
 
+    <!-- Fixed Action Button with Dropdown -->
     <div class="fixed-action-btn">
-        <a class="btn-floating btn-large waves-effect waves-light dropdown-trigger" data-target="add-record-dropdown">
+        <a class="btn-floating btn-large waves-effect waves-light pink">
             <i class="material-icons">add</i>
         </a>
-        <ul id="add-record-dropdown" class="dropdown-content">
-            <li><a href="/records/new"><i class="material-icons">playlist_add</i>Add Manually</a></li>
-            <li><a href="/records/discogs"><i class="material-icons">search</i>Add from Discogs</a></li>
+        <ul>
+            <li>
+                <a href="/records/new" class="btn-floating green tooltipped" data-position="left" data-tooltip="Add Manually">
+                    <i class="material-icons">playlist_add</i>
+                </a>
+            </li>
+            <li>
+                <a href="/records/discogs" class="btn-floating blue tooltipped" data-position="left" data-tooltip="Add from Discogs">
+                    <i class="material-icons">search</i>
+                </a>
+            </li>
         </ul>
     </div>
+    
 </div>
-
-<script src="/javascripts/collection.js"></script>
 
 <%- include('../partials/footer.ejs') %>

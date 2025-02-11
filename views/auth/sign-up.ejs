@@ -1,76 +1,263 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="landing-container landing-page">
-    <!-- Authentication Section -->
-    <div class="auth-section">
-        <!-- Sign Up Card -->
-        <div class="auth-card">
-            <p class="auth-intro">Start tracking your vinyl collection today</p>
-            
-            <% if (error) { %>
-                <div class="error-message">
-                    <i class="material-icons">error</i>
-                    <%= error %>
+<div class="landing-page">
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="auth-section">
+                <div class="auth-card">
+                    <h1 class="auth-title">Start Your Collection</h1>
+                    
+                    <% if (error) { %>
+                        <div class="error-message">
+                            <i class="material-icons">error</i>
+                            <%= error %>
+                        </div>
+                    <% } %>
+
+                    <form action="/auth/sign-up" method="POST" class="signup-form">
+                        <div class="input-field">
+                            <input type="text" 
+                                id="username" 
+                                name="username" 
+                                pattern="[a-zA-Z0-9_\-]{3,20}"
+                                value="<%= locals.username || '' %>"
+                                required>
+                            <label for="username">Username</label>
+                        </div>
+
+                        <div class="input-field">
+                            <input type="password" 
+                                id="password" 
+                                name="password" 
+                                required>
+                            <label for="password">Password</label>
+                        </div>
+
+                        <div class="input-field">
+                            <input type="password" 
+                                id="confirmPassword" 
+                                name="confirmPassword" 
+                                required>
+                            <label for="confirmPassword">Confirm Password</label>
+                        </div>
+
+                        <button type="submit" class="btn waves-effect">
+                            Create Account
+                        </button>
+
+                        <p class="sign-in-link">
+                            Already have an account? <a href="/auth/sign-in">Sign In</a>
+                        </p>
+                    </form>
                 </div>
-            <% } %>
-
-            <form action="/auth/sign-up" method="POST" class="signup-form">
-                <div class="input-field">
-                    <input type="text" 
-                           id="username" 
-                           name="username" 
-                           pattern="[a-zA-Z0-9_\-]{3,20}"
-                           value="<%= locals.username || '' %>"
-                           required>
-                    <label for="username">Username</label>
-                </div>
-
-                <div class="input-field">
-                    <input type="password" 
-                           id="password" 
-                           name="password" 
-                           required>
-                    <label for="password">Password</label>
-                </div>
-
-                <div class="input-field">
-                    <input type="password" 
-                           id="confirmPassword" 
-                           name="confirmPassword" 
-                           required>
-                    <label for="confirmPassword">Confirm Password</label>
-                </div>
-
-                <button type="submit" class="btn btn-large full-width waves-effect">
-                    Create Account
-                </button>
-
-                <div class="auth-separator">
-                    <span>Already have an account?</span>
-                </div>
-                
-                <a href="/auth/sign-in" class="btn-flat full-width waves-effect">
-                    Sign In
-                </a>
-            </form>
-        </div>
-    </div>
-
-    <!-- Recent Records Floating Grid -->
-    <% if (recentRecords?.length > 0) { %>
-    <div class="floating-records">
-        <% recentRecords.forEach((record, index) => { %>
-            <div class="floating-record" style="--delay: <%= index * 0.2 %>s">
-                <img
-                    src="<%= record.imageUrl || '/images/default-album.png' %>"
-                    alt="Album artwork for <%= record.title %>"
-                    loading="lazy"
-                    title="<%= record.title %> by <%= record.artist %>"
-                >
             </div>
-        <% }) %>
+        </div>
+
+        <!-- Recent Albums -->
+        <% if (recentRecords?.length > 0) { %>
+        <div class="album-background">
+            <% recentRecords.slice(0, 12).forEach((record, index) => { %>
+                <div class="album-card" style="--delay: <%= index * 0.15 %>s; --x: <%= Math.random() * 100 %>%; --y: <%= Math.random() * 100 %>%;">
+                    <img
+                        src="<%= record.imageUrl || '/images/default-album.png' %>"
+                        alt="Album artwork for <%= record.title %>"
+                        loading="lazy"
+                        title="<%= record.title %> by <%= record.artist %>"
+                    >
+                </div>
+            <% }) %>
+        </div>
+        <% } %>
     </div>
-    <% } %>
 </div>
+
+<style>
+.landing-page {
+    height: 100vh;
+    background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-surface-alt) 100%);
+    overflow: hidden;
+}
+
+.hero-section {
+    position: relative;
+    height: 100%;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(216,27,96,0.05), transparent);
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(216,27,96,0.05) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.hero-content {
+    max-width: 400px;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.auth-section {
+    width: 100%;
+}
+
+.auth-card {
+    background: var(--bg-surface);
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(216,27,96,0.1);
+}
+
+.auth-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+    color: #D81B60;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    text-shadow: 2px 2px 4px rgba(216,27,96,0.1);
+}
+
+.error-message {
+    background: rgba(244,67,54,0.1);
+    color: #f44336;
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.error-message i {
+    font-size: 1.25rem;
+}
+
+.input-field {
+    margin-bottom: 0.5rem;
+    height: 2.25rem;
+}
+
+.input-field input {
+    background: var(--bg-surface-alt) !important;
+    border-radius: 8px !important;
+    padding: 0 1rem !important;
+    box-sizing: border-box !important;
+    margin-bottom: 0 !important;
+    height: 2.25rem !important;
+}
+
+.input-field label {
+    transform: translateY(-14px) !important;
+    font-size: 0.875rem;
+}
+
+.input-field input:focus {
+    border-bottom: 2px solid #D81B60 !important;
+    box-shadow: none !important;
+}
+
+.sign-in-link {
+    text-align: center;
+    margin: 0.5rem 0 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.sign-in-link a {
+    color: #D81B60;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.sign-in-link a:hover {
+    text-decoration: underline;
+}
+
+.btn {
+    height: 2.25rem;
+    line-height: 2.25rem;
+    width: 100%;
+    font-size: 0.875rem;
+    text-transform: none;
+    font-weight: 500;
+    padding: 0 1rem;
+}
+
+/* Album Background */
+.album-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.album-card {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    left: var(--x);
+    top: var(--y);
+    animation: float 20s infinite linear;
+    animation-delay: var(--delay);
+    transform: rotate(var(--rotate, 0deg));
+}
+
+.album-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(216,27,96,0.2);
+    opacity: 0.2;
+    transition: all 0.3s ease;
+}
+
+@keyframes float {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(-20px, 20px) rotate(5deg); }
+    66% { transform: translate(20px, -20px) rotate(-5deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 0.5rem;
+    }
+
+    .album-card {
+        width: 70px;
+        height: 70px;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-title {
+        font-size: 1.5rem;
+    }
+
+    .album-card {
+        width: 60px;
+        height: 60px;
+    }
+}
+</style>
 
 <%- include('../partials/footer.ejs') %>

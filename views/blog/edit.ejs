@@ -13,6 +13,16 @@
                                 <label for="title" class="active">Title</label>
                             </div>
 
+                            <div class="input-field col s12">
+                                <select name="category" id="category" required>
+                                    <option value="general" <%= post.category === 'general' ? 'selected' : '' %>>General</option>
+                                    <option value="music-news" <%= post.category === 'music-news' ? 'selected' : '' %>>Music News</option>
+                                    <option value="artist-spotlight" <%= post.category === 'artist-spotlight' ? 'selected' : '' %>>Artist Spotlight</option>
+                                    <option value="reviews" <%= post.category === 'reviews' ? 'selected' : '' %>>Reviews</option>
+                                </select>
+                                <label for="category">Category</label>
+                            </div>
+
                             <div class="col s12">
                                 <div class="current-cover">
                                     <p>Current Cover Image:</p>
@@ -119,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize Materialize components
     M.textareaAutoResize(contentArea);
+    M.FormSelect.init(document.querySelectorAll('select'));
     
     // Setup markdown preview
     function updatePreview() {

@@ -13,34 +13,47 @@ const upload = require('../config/uploads');
 const asyncHandler = require('../middleware/async-handler');
 
 // Configure multer for album art uploads
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = /jpeg|jpg|png|gif/;
+
 const albumArtStorage = multer.diskStorage({
     destination: async function (req, file, cb) {
-        // Ensure directory exists
+        const uploadDir = 'public/uploads/records';
         try {
-            await fs.access('public/uploads/records');
+            await fs.access(uploadDir);
         } catch {
-            await fs.mkdir('public/uploads/records', { recursive: true });
+            await fs.mkdir(uploadDir, { recursive: true });
         }
-        cb(null, 'public/uploads/records');
+        cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, 'album-' + uniqueSuffix + path.extname(file.originalname));
+        const ext = path.extname(file.originalname).toLowerCase();
+        cb(null, `album-${uniqueSuffix}${ext}`);
     }
 });
 
 const albumArtUpload = multer({ 
     storage: albumArtStorage,
+    limits: {
+        fileSize: MAX_FILE_SIZE,
+        files: 1
+    },
     fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png|gif/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
-        if (extname && mimetype) {
-            return cb(null, true);
+        const extname = ALLOWED_TYPES.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = ALLOWED_TYPES.test(file.mimetype);
+        
+        if (!extname || !mimetype) {
+            return cb(new Error('Only JPG, PNG and GIF files are allowed'));
         }
-        cb(new Error('Only image files are allowed!'));
+
+        if (file.size > MAX_FILE_SIZE) {
+            return cb(new Error('File size cannot exceed 5MB'));
+        }
+
+        cb(null, true);
     }
-});
+}).single('albumArt');
 
 // Utility function to validate record ownership
 const validateOwnership = async (recordId, userId, isAdmin = false) => {
@@ -69,42 +82,75 @@ async function cleanupFiles(files) {
 // Get all records for the logged-in user
 // Get all records (HTML or JSON)
 router.get('/', asyncHandler(async (req, res) => {
-    // Filter by tag if provided
     const query = { owner: req.user._id };
+    const page = parseInt(req.query.page) || 1;
+    const limit = 50; // Number of records per page
+    const skip = (page - 1) * limit;
+    
+    // Add tag filter if provided
     if (req.query.tag) {
         query.tags = req.query.tag;
     }
-    
-    // Get records and available tags
-    const [records, tags] = await Promise.all([
-        Record.find(query),
-        Record.distinct('tags', { owner: req.user._id })
-    ]);
-    
-    // Sort by artist name or date added
-    const sortedRecords = [...records].sort((a, b) => 
-        req.query.sort === 'artist' 
-            ? a.artist.toLowerCase().localeCompare(b.artist.toLowerCase())
-            : b.createdAt - a.createdAt
-    );
 
-    // Calculate total plays
-    const totalPlays = sortedRecords.reduce((sum, record) => sum + (record.plays || 0), 0);
+    // Add search filter if provided
+    if (req.query.search) {
+        query.$or = [
+            { title: new RegExp(req.query.search, 'i') },
+            { artist: new RegExp(req.query.search, 'i') }
+        ];
+    }
+
+    // Determine sort order
+    const sortOptions = {
+        artist: { artist: 1, title: 1 },
+        title: { title: 1 },
+        recent: { createdAt: -1 },
+        plays: { plays: -1, artist: 1 }
+    };
+    const sort = sortOptions[req.query.sort] || sortOptions.recent;
+
+    // Execute queries in parallel
+    const [records, total, tags, totalPlays] = await Promise.all([
+        Record.find(query)
+            .sort(sort)
+            .skip(skip)
+            .limit(limit)
+            .select('title artist imageUrl year plays tags createdAt')
+            .lean(),
+        Record.countDocuments(query),
+        Record.distinct('tags', { owner: req.user._id }),
+        Record.aggregate([
+            { $match: { owner: req.user._id } },
+            { $group: { _id: null, total: { $sum: '$plays' } } }
+        ])
+    ]);
 
     // Return JSON if requested
     if (req.headers.accept?.includes('application/json')) {
-        return res.json(sortedRecords);
+        return res.json({
+            records,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit)
+        });
     }
     
     // Otherwise render HTML
     res.render('records/index', {
-        records: sortedRecords,
+        records,
         title: 'My Records',
-        currentSort: req.query.sort,
+        currentSort: req.query.sort || 'recent',
         currentTag: req.query.tag,
+        currentSearch: req.query.search,
         tags,
-        view: req.query.view || 'grid',  // Default to grid view if not specified
-        totalPlays
+        view: req.query.view || 'grid',
+        totalPlays: totalPlays[0]?.total || 0,
+        pagination: {
+            page,
+            totalPages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrev: page > 1
+        }
     });
 }));
 
@@ -456,6 +502,16 @@ router.get('/stats', asyncHandler(async (req, res) => {
         });
 }));
 
+// Discogs search page
+router.get('/discogs', asyncHandler(async (req, res) => {
+    res.render('records/search', {
+        title: 'Search Discogs',
+        results: [],
+        query: '',
+        error: null
+    });
+}));
+
 // Search Discogs database
 router.get('/search', asyncHandler(async (req, res) => {
     if (!req.query.q) {
@@ -555,6 +611,7 @@ router.get('/add-from-discogs/:id', asyncHandler(async (req, res) => {
     });
 }));
 
+
 // Show single record
 router.get('/:id', asyncHandler(async (req, res) => {
     const record = await Record.findById(req.params.id);
@@ -602,50 +659,71 @@ router.post('/:id/play', asyncHandler(async (req, res) => {
 }));
 
 // Update record
-router.put('/:id', albumArtUpload.single('albumArt'), asyncHandler(async (req, res) => {
+router.put('/:id', asyncHandler(async (req, res) => {
     const record = await validateOwnership(req.params.id, req.user._id, req.user.isAdmin);
+    let oldImagePath = null;
 
-    // Process tags if provided
-    if (req.body.tags) {
-        req.body.tags = req.body.tags.split(',')
-            .map(tag => tag.trim())
-            .filter(tag => tag);
-    }
+    try {
+        // Handle file upload first
+        await new Promise((resolve, reject) => {
+            albumArtUpload(req, res, (err) => {
+                if (err instanceof multer.MulterError) {
+                    reject(new Error(`Upload error: ${err.message}`));
+                } else if (err) {
+                    reject(err);
+                }
+                resolve();
+            });
+        });
 
-    // Handle image upload or URL
-    if (req.file) {
-        // If there's an uploaded file, use that
-        req.body.imageUrl = '/uploads/records/' + path.basename(req.file.filename);
-        
-        // Delete old image if it exists and isn't the default
-        if (record.imageUrl && 
-            !record.imageUrl.includes('default-album') && 
-            record.imageUrl.startsWith('/uploads/')) {
-            try {
-                await fs.unlink('public' + record.imageUrl);
-            } catch (err) {
-                console.error('Error deleting old album art:', err);
-            }
+        // Process tags
+        if (req.body.tags) {
+            req.body.tags = req.body.tags.split(',')
+                .map(tag => tag.trim())
+                .filter(tag => tag);
         }
-    } else if (!req.body.imageUrl) {
-        // If no file uploaded and no URL provided, keep existing image
-        req.body.imageUrl = record.imageUrl;
+
+        // Handle image paths
+        if (req.file) {
+            req.body.imageUrl = '/uploads/records/' + req.file.filename;
+            
+            // Store old image path for cleanup
+            if (record.imageUrl && 
+                !record.imageUrl.includes('default-album') && 
+                record.imageUrl.startsWith('/uploads/')) {
+                oldImagePath = 'public' + record.imageUrl;
+            }
+        } else if (!req.body.imageUrl) {
+            req.body.imageUrl = record.imageUrl;
+        }
+
+        // Update record and create activity in parallel
+        const [updatedRecord] = await Promise.all([
+            Record.findByIdAndUpdate(
+                req.params.id, 
+                { ...req.body, owner: req.user._id },
+                { new: true, runValidators: true }
+            ),
+            Activity.create({
+                user: req.user._id,
+                record: record._id,
+                activityType: 'update'
+            })
+        ]);
+
+        // Clean up old image if needed
+        if (oldImagePath) {
+            await fs.unlink(oldImagePath).catch(console.error);
+        }
+
+        res.redirect(`/records/${updatedRecord._id}`);
+    } catch (error) {
+        // Clean up uploaded file if there was an error
+        if (req.file) {
+            await fs.unlink(req.file.path).catch(console.error);
+        }
+        throw error;
     }
-
-    const updatedRecord = await Record.findByIdAndUpdate(
-        req.params.id, 
-        { ...req.body, owner: req.user._id },
-        { new: true, runValidators: true }
-    );
-
-    // Create activity for update
-    await Activity.create({
-        user: req.user._id,
-        record: updatedRecord._id,
-        activityType: 'update'
-    });
-
-    res.redirect(`/records/${req.params.id}`);
 }));
 
 // Delete record

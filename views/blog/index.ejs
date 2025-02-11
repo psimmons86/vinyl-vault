@@ -1,130 +1,159 @@
 <%- include('../partials/header') %>
 
-<div class="container section">
-    <!-- Featured Records Section -->
-    <div class="section">
-        <div class="section-header">
-            <h4>Heavy Rotation</h4>
-            <% if (user && user.isAdmin) { %>
-                <a href="/blog/admin/featured" class="btn waves-effect waves-light blue">
-                    <i class="fas fa-cog left"></i> Manage
-                </a>
+<div class="blog-container">
+    <!-- Category Navigation -->
+    <div class="category-nav">
+        <a href="/blog" class="<%= !category ? 'active' : '' %>">All</a>
+        <a href="/blog?category=music-news" class="<%= category === 'music-news' ? 'active' : '' %>">Music News</a>
+        <a href="/blog?category=artist-spotlight" class="<%= category === 'artist-spotlight' ? 'active' : '' %>">Artist Spotlight</a>
+        <a href="/blog?category=reviews" class="<%= category === 'reviews' ? 'active' : '' %>">Reviews</a>
+    </div>
+
+    <div class="blog-layout">
+        <!-- Main Content -->
+        <div class="blog-main">
+            <% if (user) { %>
+                <div class="write-post">
+                    <a href="/blog/new" class="btn waves-effect waves-light green">
+                        Write New Post
+                    </a>
+                </div>
             <% } %>
-        </div>
-        <% if (featured && featured.length > 0) { %>
-            <div class="featured-records">
-                <div class="row">
-                    <% featured.forEach(record => { %>
-                        <div class="col s12 m6 l2-4">
-                            <div class="card">
-                                <div class="card-image">
-                                    <img src="<%= record.albumArt %>" alt="<%= record.title %>" class="responsive-img">
-                                    <% if (record.link) { %>
-                                        <a href="<%= record.link %>" target="_blank" 
-                                           class="btn-floating halfway-fab waves-effect waves-light blue">
-                                            <i class="fas fa-play"></i>
-                                        </a>
-                                    <% } %>
+
+            <% if (posts && posts.length > 0) { %>
+                <!-- Featured Post -->
+                <% const featuredPost = posts[0]; %>
+                <div class="featured-post">
+                    <div class="post-image">
+                        <img src="<%= featuredPost.coverImage %>" alt="<%= featuredPost.title %>">
+                        <div class="post-category">
+                            <%= featuredPost.category || 'General' %>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <div class="post-meta">
+                            <span class="post-date"><%= featuredPost.formattedDate %></span>
+                            <span class="post-author">
+                                <%= featuredPost.author.username %>
+                                <% if (featuredPost.author.isAdmin) { %>
+                                    <span class="admin-badge">Admin</span>
+                                <% } %>
+                            </span>
+                        </div>
+                        <h2 class="post-title">
+                            <a href="/blog/<%= featuredPost.slug %>"><%= featuredPost.title %></a>
+                        </h2>
+                        <p class="post-excerpt">
+                            <%= featuredPost.content.substring(0, 200) %>...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Other Posts -->
+                <div class="posts-grid">
+                    <% posts.slice(1).forEach(post => { %>
+                        <div class="post-card">
+                            <div class="post-image">
+                                <img src="<%= post.coverImage %>" alt="<%= post.title %>">
+                                <div class="post-category">
+                                    <%= post.category || 'General' %>
                                 </div>
-                                <div class="card-content">
-                                    <span class="card-title truncate"><%= record.title %></span>
-                                    <p class="grey-text truncate"><%= record.artist %></p>
-                                    <% if (record.description) { %>
-                                        <p class="description"><%= record.description %></p>
-                                    <% } %>
+                            </div>
+                            <div class="post-content">
+                                <div class="post-meta">
+                                    <span class="post-date"><%= post.formattedDate %></span>
+                                    <span class="post-author">
+                                        <%= post.author.username %>
+                                        <% if (post.author.isAdmin) { %>
+                                            <span class="admin-badge">Admin</span>
+                                        <% } %>
+                                    </span>
                                 </div>
+                                <h3 class="post-title">
+                                    <a href="/blog/<%= post.slug %>"><%= post.title %></a>
+                                </h3>
+                                <p class="post-excerpt">
+                                    <%= post.content.substring(0, 150) %>...
+                                </p>
                             </div>
                         </div>
                     <% }); %>
                 </div>
-            </div>
-        </div>
-        <% } else { %>
-            <div class="card-panel">No featured records yet.</div>
-        <% } %>
-    </div>
 
-    <!-- Blog Posts Section -->
-    <div class="section">
-        <div class="row">
-            <div class="col s12">
-                <div class="blog-header">
-                    <h4>Blog Posts</h4>
-                    <% if (user) { %>
-                        <a href="/blog/new" class="btn waves-effect waves-light blue">
-                            <i class="fas fa-plus left"></i> New Post
+                <!-- Pagination -->
+                <% if (totalPages > 1) { %>
+                    <div class="pagination">
+                        <% if (currentPage > 1) { %>
+                            <a href="/blog?page=<%= currentPage - 1 %>" class="page-nav">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        <% } %>
+                        
+                        <% for(let i = 1; i <= totalPages; i++) { %>
+                            <a href="/blog?page=<%= i %>" 
+                               class="page-number <%= i === currentPage ? 'active' : '' %>">
+                                <%= i %>
+                            </a>
+                        <% } %>
+                        
+                        <% if (currentPage < totalPages) { %>
+                            <a href="/blog?page=<%= currentPage + 1 %>" class="page-nav">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        <% } %>
+                    </div>
+                <% } %>
+            <% } else { %>
+                <div class="no-posts">No posts yet.</div>
+            <% } %>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="blog-sidebar">
+            <!-- Heavy Rotation Section -->
+            <div class="heavy-rotation-section">
+                <div class="section-header">
+                    <div class="header-content">
+                        <h4>Heavy Rotation</h4>
+                        <div class="spinning-icon">
+                            <i class="fas fa-compact-disc"></i>
+                        </div>
+                    </div>
+                    <% if (user && user.isAdmin) { %>
+                        <a href="/blog/admin/featured" class="btn waves-effect waves-light">
+                            <i class="fas fa-cog left"></i> Manage
                         </a>
                     <% } %>
                 </div>
-
-                <% if (posts && posts.length > 0) { %>
-                    <% posts.forEach(post => { %>
-                        <div class="card horizontal hoverable">
-                            <div class="card-image hide-on-small-only">
-                                <img src="<%= post.coverImage %>" alt="<%= post.title %>">
-                            </div>
-                            <div class="card-stacked">
-                                <div class="card-content">
-                                    <div class="post-meta">
-                                        <span class="post-date grey-text">
-                                            <%= post.formattedDate %>
-                                        </span>
-                                        <span class="author">
-                                            by <%= post.author.username %>
-                                            <% if (post.author.isAdmin) { %>
-                                                <span class="admin-badge">Admin</span>
+                <% if (featured && featured.length > 0) { %>
+                    <div class="featured-records">
+                        <div class="row">
+                            <% featured.forEach(record => { %>
+                                <div class="col">
+                                    <div class="card">
+                                        <div class="card-image">
+                                            <img src="<%= record.albumArt %>" alt="<%= record.title %>" class="responsive-img">
+                                            <% if (record.link) { %>
+                                                <a href="<%= record.link %>" target="_blank" 
+                                                   class="btn-floating halfway-fab waves-effect waves-light">
+                                                    <i class="fas fa-play"></i>
+                                                </a>
                                             <% } %>
-                                        </span>
-                                    </div>
-                                    <h5 class="card-title">
-                                        <a href="/blog/<%= post.slug %>"><%= post.title %></a>
-                                    </h5>
-                                    <p class="post-excerpt">
-                                        <%= post.content.substring(0, 200) %>...
-                                    </p>
-                                    <% if (post.tags && post.tags.length > 0) { %>
-                                        <div class="post-tags">
-                                            <% post.tags.forEach(tag => { %>
-                                                <div class="chip"><%= tag %></div>
-                                            <% }); %>
                                         </div>
-                                    <% } %>
+                                        <div class="card-content">
+                                            <span class="card-title truncate"><%= record.title %></span>
+                                            <p class="artist truncate"><%= record.artist %></p>
+                                            <% if (record.description) { %>
+                                                <p class="description"><%= record.description %></p>
+                                            <% } %>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="card-action">
-                                    <a href="/blog/<%= post.slug %>" class="blue-text">Read More</a>
-                                </div>
-                            </div>
+                            <% }); %>
                         </div>
-                    <% }); %>
-
-                    <!-- Pagination -->
-                    <% if (totalPages > 1) { %>
-                        <ul class="pagination center">
-                            <% if (currentPage > 1) { %>
-                                <li class="waves-effect">
-                                    <a href="/blog?page=<%= currentPage - 1 %>">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </a>
-                                </li>
-                            <% } %>
-                            
-                            <% for(let i = 1; i <= totalPages; i++) { %>
-                                <li class="<%= i === currentPage ? 'active blue' : 'waves-effect' %>">
-                                    <a href="/blog?page=<%= i %>"><%= i %></a>
-                                </li>
-                            <% } %>
-                            
-                            <% if (currentPage < totalPages) { %>
-                                <li class="waves-effect">
-                                    <a href="/blog?page=<%= currentPage + 1 %>">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </a>
-                                </li>
-                            <% } %>
-                        </ul>
-                    <% } %>
+                    </div>
                 <% } else { %>
-                    <div class="card-panel">No posts yet.</div>
+                    <div class="empty-state">No featured records yet.</div>
                 <% } %>
             </div>
         </div>
@@ -132,51 +161,161 @@
 </div>
 
 <style>
-.featured-records {
+/* Blog Layout */
+.blog-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.category-nav {
+    display: flex;
+    gap: 1rem;
     margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
 }
 
-.featured-records .card {
-    height: 100%;
+.category-nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
 }
 
-.featured-records .card-image {
-    height: 200px;
+.category-nav a:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+.category-nav a.active {
+    color: white;
+    background: var(--primary);
+}
+
+.blog-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+}
+
+.blog-main {
+    min-width: 0;
+}
+
+.write-post {
+    margin-bottom: 2rem;
+    text-align: right;
+}
+
+.featured-post {
+    margin-bottom: 3rem;
+    border-radius: 12px;
     overflow: hidden;
+    background: var(--bg-surface);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.featured-records .card-image img {
+.featured-post .post-image {
+    position: relative;
+    height: 400px;
+}
+
+.featured-post .post-image img {
+    width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.featured-records .card-content {
-    padding: 12px;
+.featured-post .post-content {
+    padding: 2rem;
 }
 
-.featured-records .description {
+.featured-post .post-title {
+    font-size: 2rem;
+    margin: 1rem 0;
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+}
+
+.post-card {
+    background: var(--bg-surface);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-4px);
+}
+
+.post-image {
+    position: relative;
+    padding-top: 60%;
+}
+
+.post-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-category {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
     font-size: 0.9rem;
-    margin-top: 8px;
 }
 
-.section-header,
-.blog-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
+.post-content {
+    padding: 1.5rem;
 }
 
 .post-meta {
-    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
 
-.post-meta > * {
-    margin-right: 1rem;
+.post-title {
+    margin: 1rem 0;
+    line-height: 1.4;
+}
+
+.post-title a {
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.post-title a:hover {
+    color: var(--primary);
+}
+
+.post-excerpt {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 1rem 0;
 }
 
 .admin-badge {
-    background: #2196f3;
+    background: var(--primary);
     color: white;
     padding: 2px 8px;
     border-radius: 12px;
@@ -184,44 +323,214 @@
     margin-left: 5px;
 }
 
-.post-excerpt {
-    color: #666;
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 3rem;
+}
+
+.page-number,
+.page-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.page-number:hover,
+.page-nav:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.page-number.active {
+    background: var(--primary);
+    color: white;
+}
+
+/* Heavy Rotation Section */
+.heavy-rotation-section {
+    background: var(--bg-surface);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.heavy-rotation-section .section-header {
+    margin-bottom: 1.5rem;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-content h4 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+}
+
+.spinning-icon {
+    animation: spin-icon 4s linear infinite;
+    color: var(--primary);
+}
+
+@keyframes spin-icon {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Featured Records Grid */
+.featured-records {
     margin: 1rem 0;
 }
 
-.post-tags {
-    margin-top: 1rem;
+.featured-records .row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin: 0;
 }
 
-.post-tags .chip {
-    margin-right: 5px;
+.featured-records .col {
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-.card.horizontal .card-image {
-    max-width: 200px;
+.featured-records .card {
+    margin: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s ease;
 }
 
-.card.horizontal .card-image img {
+.featured-records .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.featured-records .card-image {
+    position: relative;
+    padding-top: 100%;
+    overflow: hidden;
+}
+
+.featured-records .card-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-@media (max-width: 600px) {
-    .section-header,
-    .blog-header {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
+.featured-records .card-content {
+    padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+}
+
+.featured-records .btn-floating {
+    background-color: var(--primary);
+    transition: opacity 0.2s ease;
+}
+
+.featured-records .btn-floating:hover {
+    opacity: 0.9;
+}
+
+.featured-records .card-title {
+    font-size: 1rem;
+    line-height: 1.4;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+
+.featured-records .artist {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.featured-records .description {
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 1rem;
+    background: var(--bg-surface-alt);
+    border-radius: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .blog-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .blog-sidebar {
+        order: -1;
+    }
+
+    .heavy-rotation-section {
+        margin-bottom: 2rem;
     }
 }
 
-/* Custom grid for featured records */
-@media (min-width: 993px) {
-    .l2-4 {
-        width: 20% !important;
-        margin-left: auto;
-        left: auto;
-        right: auto;
+@media (max-width: 768px) {
+    .posts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .featured-post .post-image {
+        height: 300px;
+    }
+
+    .featured-post .post-title {
+        font-size: 1.5rem;
+    }
+
+    .blog-container {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .category-nav {
+        padding: 0.5rem 0;
+    }
+
+    .category-nav a {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .featured-post .post-image {
+        height: 200px;
+    }
+
+    .featured-post .post-content {
+        padding: 1rem;
     }
 }
 </style>

@@ -1,84 +1,428 @@
-<!-- Include header partial -->
 <%- include('./partials/header.ejs') %>
 
-<!-- Main landing page container -->
-<div class="landing-container landing-page">
-    <!-- Authentication Section -->
-    <div class="auth-section">
-        <!-- Sign Up Card -->
-        <div class="auth-card">
-            <!-- Sign Up Form -->
-            <form action="/auth/sign-up" method="POST" class="signup-form">
-                <p class="auth-intro">Start tracking your vinyl collection today</p>
-                
-                <!-- Username Field -->
-                <div class="input-field">
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        required
-                        class="validate"
-                    >
-                    <label for="username">Username</label>
-                </div>
-
-                <!-- Password Field -->
-                <div class="input-field">
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        required
-                        class="validate"
-                    >
-                    <label for="password">Password</label>
-                </div>
-
-                <!-- Confirm Password Field -->
-                <div class="input-field">
-                    <input
-                        type="password"
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        required
-                        class="validate"
-                    >
-                    <label for="confirmPassword">Confirm Password</label>
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" class="btn btn-large full-width waves-effect">
-                    Create Account
-                </button>
-
-                <!-- Sign In Link Section -->
-                <div class="auth-separator">
-                    <span>Already have an account?</span>
-                </div>
-                <a href="/auth/sign-in" class="btn-flat full-width waves-effect">
-                    Sign In
-                </a>
-            </form>
-        </div>
-    </div>
-
-    <!-- Recent Records Floating Grid -->
-    <% if (recentRecords?.length > 0) { %>
-    <div class="floating-records">
-        <% recentRecords.forEach((record, index) => { %>
-            <div class="floating-record" style="--delay: <%= index * 0.2 %>s">
-                <img
-                    src="<%= record.imageUrl || '/images/default-album.png' %>"
-                    alt="Album artwork for <%= record.title %>"
-                    loading="lazy"
-                    title="<%= record.title %> by <%= record.artist %>"
-                >
+<div class="landing-page">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Track Your Vinyl Journey</h1>
+                <p class="hero-subtitle">Discover, collect, and share your vinyl records with a community of music lovers.</p>
             </div>
-        <% }) %>
+            
+            <!-- Authentication Section -->
+            <div class="auth-section">
+                <div class="auth-card">
+                    <form action="/auth/sign-up" method="POST" class="signup-form">
+                        <p class="auth-intro">Join the community today</p>
+                        
+                        <div class="input-field">
+                            <input type="text" id="username" name="username" required class="validate">
+                            <label for="username">Username</label>
+                        </div>
+
+                        <div class="input-field">
+                            <input type="password" id="password" name="password" required class="validate">
+                            <label for="password">Password</label>
+                        </div>
+
+                        <div class="input-field">
+                            <input type="password" id="confirmPassword" name="confirmPassword" required class="validate">
+                            <label for="confirmPassword">Confirm Password</label>
+                        </div>
+
+                        <button type="submit" class="btn waves-effect">
+                            Start Your Collection
+                        </button>
+
+                        <p class="sign-in-link">
+                            Already have an account? <a href="/auth/sign-in">Sign In</a>
+                        </p>
+                    </form>
+
+                    <div class="feature-section">
+                        <div class="feature-grid">
+                            <div class="feature-card">
+                                <i class="fas fa-record-vinyl"></i>
+                                <h3>Track Collection</h3>
+                                <p>Organize and manage your vinyl records with ease.</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-users"></i>
+                                <h3>Community</h3>
+                                <p>Connect with fellow vinyl enthusiasts.</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-store"></i>
+                                <h3>Find Stores</h3>
+                                <p>Discover local record stores near you.</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-chart-line"></i>
+                                <h3>Statistics</h3>
+                                <p>Track your listening habits and more.</p>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">10K+</div>
+                                <div class="stat-label">Active Users</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">500K+</div>
+                                <div class="stat-label">Records Tracked</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">1000+</div>
+                                <div class="stat-label">Record Stores</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Albums -->
+        <% if (recentRecords?.length > 0) { %>
+        <div class="album-background">
+            <% recentRecords.slice(0, 25).forEach((record, index) => { %>
+                <div class="album-card" style="--delay: <%= index * 0.1 %>s; --x: <%= Math.random() * 90 + 5 %>%; --y: <%= Math.random() * 90 + 5 %>%; --rotate: <%= Math.random() * 360 %>deg;">
+                    <img
+                        src="<%= record.imageUrl || '/images/default-album.png' %>"
+                        alt="Album artwork for <%= record.title %>"
+                        loading="lazy"
+                        title="<%= record.title %> by <%= record.artist %>"
+                    >
+                </div>
+            <% }) %>
+        </div>
+        <% } %>
     </div>
-    <% } %>
 </div>
 
-<!-- Include footer partial -->
+<style>
+.landing-page {
+    height: 100vh;
+    background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-surface-alt) 100%);
+    overflow: hidden;
+}
+
+/* Hero Section */
+.hero-section {
+    position: relative;
+    height: 100%;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: flex-start;
+    background: linear-gradient(to bottom, rgba(216,27,96,0.05), transparent);
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 30%, rgba(216,27,96,0.05) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.hero-content {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: 1fr 600px;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.hero-text h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    line-height: 1.2;
+    color: #D81B60;
+    text-shadow: 2px 2px 4px rgba(216,27,96,0.1);
+    font-family: 'Inter', sans-serif;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 0;
+    line-height: 1.4;
+    color: #D81B60;
+    opacity: 0.8;
+    text-shadow: 1px 1px 2px rgba(216,27,96,0.1);
+}
+
+/* Auth Section */
+.auth-section {
+    width: 100%;
+}
+
+.auth-card {
+    background: var(--bg-surface);
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(216,27,96,0.1);
+}
+
+.auth-intro {
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    text-align: center;
+}
+
+.input-field {
+    margin-bottom: 0.75rem;
+    height: 2.25rem;
+}
+
+.input-field input {
+    background: var(--bg-surface-alt) !important;
+    border-radius: 8px !important;
+    padding: 0 1rem !important;
+    box-sizing: border-box !important;
+    margin-bottom: 0 !important;
+    height: 2.25rem !important;
+}
+
+.input-field label {
+    transform: translateY(-14px) !important;
+    font-size: 0.875rem;
+}
+
+.input-field input:focus {
+    border-bottom: 2px solid #D81B60 !important;
+    box-shadow: none !important;
+}
+
+.sign-in-link {
+    text-align: center;
+    margin: 0.75rem 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.sign-in-link a {
+    color: #D81B60;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.sign-in-link a:hover {
+    text-decoration: underline;
+}
+
+.btn {
+    height: 2.25rem;
+    line-height: 2.25rem;
+    width: 100%;
+    font-size: 0.875rem;
+    text-transform: none;
+    font-weight: 500;
+    padding: 0 1rem;
+}
+
+/* Feature Section */
+.feature-section {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(216,27,96,0.1);
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.feature-card {
+    padding: 1rem;
+    text-align: center;
+    background: var(--bg-surface-alt);
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid rgba(216,27,96,0.1);
+}
+
+.feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(216,27,96,0.1);
+}
+
+.feature-card i {
+    font-size: 1.5rem;
+    color: #D81B60;
+    margin-bottom: 0.5rem;
+}
+
+.feature-card h3 {
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+    color: var(--text-primary);
+}
+
+.feature-card p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Stats */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.stat-card {
+    padding: 1rem;
+    background: linear-gradient(135deg, #D81B60 0%, #E91E63 100%);
+    color: white;
+    border-radius: 8px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Album Background */
+.album-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.album-card {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    left: var(--x);
+    top: var(--y);
+    animation: float 20s infinite linear;
+    animation-delay: var(--delay);
+    transform: rotate(var(--rotate));
+}
+
+.album-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(216,27,96,0.2);
+    opacity: 0.2;
+    transition: all 0.3s ease;
+}
+
+@keyframes float {
+    0% { transform: translate(0, 0) rotate(var(--rotate)); }
+    33% { transform: translate(-20px, 20px) rotate(calc(var(--rotate) + 5deg)); }
+    66% { transform: translate(20px, -20px) rotate(calc(var(--rotate) - 5deg)); }
+    100% { transform: translate(0, 0) rotate(var(--rotate)); }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .hero-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .hero-text h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+    }
+
+    .auth-card {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 0.5rem;
+    }
+
+    .auth-card {
+        max-width: 500px;
+    }
+
+    .album-card {
+        width: 70px;
+        height: 70px;
+    }
+
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-text h1 {
+        font-size: 2rem;
+    }
+
+    .album-card {
+        width: 60px;
+        height: 60px;
+    }
+
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-number {
+        font-size: 1.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+}
+</style>
+
 <%- include('./partials/footer.ejs') %>

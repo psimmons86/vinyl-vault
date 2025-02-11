@@ -13,6 +13,16 @@
                                 <label for="title">Title</label>
                             </div>
 
+                            <div class="input-field col s12">
+                                <select name="category" id="category" required>
+                                    <option value="general">General</option>
+                                    <option value="music-news">Music News</option>
+                                    <option value="artist-spotlight">Artist Spotlight</option>
+                                    <option value="reviews">Reviews</option>
+                                </select>
+                                <label for="category">Category</label>
+                            </div>
+
                             <div class="file-field input-field col s12">
                                 <div class="btn blue">
                                     <span>Cover Image</span>
@@ -95,6 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize Materialize components
     M.textareaAutoResize(contentArea);
+    M.FormSelect.init(document.querySelectorAll('select'));
     
     // Setup markdown preview
     function updatePreview() {

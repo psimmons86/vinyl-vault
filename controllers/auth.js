@@ -5,18 +5,22 @@ const Activity = require('../models/activity');
 const Record = require('../models/record');
 const bcrypt = require('bcrypt');
 const asyncHandler = require('../middleware/async-handler');
-const { validateSignUp, validateSignIn } = require('../middleware/validate');
+const { validateSignUp, validateSignIn, authLimiter } = require('../middleware/validate');
+const { SALT_ROUNDS, MAX_LOGIN_ATTEMPTS, LOGIN_TIMEOUT } = require('../config/security');
 
-const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
-const MAX_LOGIN_ATTEMPTS = 5;
-const LOGIN_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+// Apply rate limiting to all auth routes
+router.use(authLimiter);
 
-router.get('/sign-up', asyncHandler(async (req, res) => {
-    const recentRecords = await Record.find()
+// Helper function to get recent records for auth pages
+const getRecentRecords = async () => {
+    return Record.find()
         .sort({ createdAt: -1 })
         .limit(8)
         .populate('owner', 'username');
+};
 
+router.get('/sign-up', asyncHandler(async (req, res) => {
+    const recentRecords = await getRecentRecords();
     res.render('auth/sign-up', { 
         title: 'Sign Up',
         error: null,
@@ -27,8 +31,8 @@ router.get('/sign-up', asyncHandler(async (req, res) => {
 
 router.post('/sign-up', validateSignUp, asyncHandler(async (req, res) => {
     const [existingUser, recentRecords] = await Promise.all([
-        User.findOne({ username: req.body.username }),
-        Record.find().sort({ createdAt: -1 }).limit(8).populate('owner', 'username')
+        User.findOne({ username: req.body.username.toLowerCase() }),
+        getRecentRecords()
     ]);
 
     if (existingUser) {
@@ -42,7 +46,7 @@ router.post('/sign-up', validateSignUp, asyncHandler(async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(req.body.password, SALT_ROUNDS);
     const user = await User.create({
-        username: req.body.username,
+        username: req.body.username.toLowerCase(),
         password: hashedPassword,
         profile: {
             name: req.body.username,
@@ -68,11 +72,7 @@ router.post('/sign-up', validateSignUp, asyncHandler(async (req, res) => {
 }));
 
 router.get('/sign-in', asyncHandler(async (req, res) => {
-    const recentRecords = await Record.find()
-        .sort({ createdAt: -1 })
-        .limit(8)
-        .populate('owner', 'username');
-
+    const recentRecords = await getRecentRecords();
     res.render('auth/sign-in', { 
         title: 'Sign In',
         error: null,
@@ -82,8 +82,8 @@ router.get('/sign-in', asyncHandler(async (req, res) => {
 
 router.post('/sign-in', validateSignIn, asyncHandler(async (req, res) => {
     const [user, recentRecords] = await Promise.all([
-        User.findOne({ username: req.body.username }),
-        Record.find().sort({ createdAt: -1 }).limit(8).populate('owner', 'username')
+        User.findOne({ username: req.body.username.toLowerCase() }),
+        getRecentRecords()
     ]);
     
     if (!user) {
@@ -130,7 +130,8 @@ router.post('/sign-in', validateSignIn, asyncHandler(async (req, res) => {
         {
             $set: { 
                 loginAttempts: 0,
-                lastLoginAttempt: null
+                lastLoginAttempt: null,
+                lastLoginAt: Date.now()
             }
         }
     );
@@ -142,10 +143,24 @@ router.post('/sign-in', validateSignIn, asyncHandler(async (req, res) => {
         isAdmin: user.isAdmin
     };
     
+    // Record login activity
+    await Activity.create({
+        user: user._id,
+        activityType: 'login'
+    });
+    
     res.redirect('/records');
 }));
 
 router.get('/sign-out', asyncHandler(async (req, res) => {
+    if (req.session.user) {
+        // Record logout activity
+        await Activity.create({
+            user: req.session.user._id,
+            activityType: 'logout'
+        });
+    }
+    
     await new Promise((resolve) => req.session.destroy(resolve));
     res.clearCookie('_sid'); // Clear session cookie
     res.redirect('/');

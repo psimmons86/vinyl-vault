@@ -20,6 +20,11 @@ const postSchema = new Schema({
         type: Boolean,
         default: false
     },
+    category: {
+        type: String,
+        enum: ['music-news', 'artist-spotlight', 'reviews', 'general'],
+        default: 'general'
+    },
     tags: [{
         type: String,
         trim: true

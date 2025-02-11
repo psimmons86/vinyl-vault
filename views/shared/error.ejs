@@ -1,9 +1,97 @@
 <%- include('../partials/header.ejs') %>
 
 <div class="error-container">
-    <h1>Something Went Wrong</h1>
-    <p><%= message %></p>
-    <a href="/records" class="btn btn-primary">Back to Collection</a>
+    <div class="error-content">
+        <h1><%= statusCode %> - <%= title %></h1>
+        <p class="error-message"><%= message %></p>
+        
+        <% if (process.env.NODE_ENV === 'development' && stack) { %>
+            <div class="error-details">
+                <h3>Error Details</h3>
+                <pre class="error-stack"><%= stack %></pre>
+                
+                <% if (details && Object.keys(details).length > 0) { %>
+                    <h3>Additional Information</h3>
+                    <pre class="error-info"><%= JSON.stringify(details, null, 2) %></pre>
+                <% } %>
+            </div>
+        <% } %>
+
+        <div class="error-actions">
+            <button onclick="window.history.back()" class="btn btn-secondary">Go Back</button>
+            <a href="/" class="btn btn-primary">Home</a>
+            <% if (typeof req !== 'undefined' && req.user) { %>
+                <a href="/records" class="btn btn-primary">My Collection</a>
+            <% } %>
+        </div>
+    </div>
 </div>
+
+<style>
+.error-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--bg-surface);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.error-content {
+    text-align: center;
+}
+
+.error-message {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin: 1.5rem 0;
+}
+
+.error-details {
+    margin: 2rem 0;
+    text-align: left;
+    background: var(--bg-surface-alt);
+    padding: 1.5rem;
+    border-radius: 6px;
+}
+
+.error-stack,
+.error-info {
+    background: var(--bg-code);
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 0.9rem;
+    color: var(--text-code);
+}
+
+.error-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-secondary {
+    background: var(--secondary);
+    color: white;
+}
+</style>
 
 <%- include('../partials/footer.ejs') %>

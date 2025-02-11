@@ -47,8 +47,14 @@ router.get('/', asyncHandler(async (req, res) => {
     const limit = 10;
     const skip = (page - 1) * limit;
 
+    const category = req.query.category;
+    const query = { approved: true };
+    if (category) {
+        query.category = category;
+    }
+
     const [posts, featured, total] = await Promise.all([
-        Post.find({ approved: true })
+        Post.find(query)
             .populate('author', 'username isAdmin')
             .sort('-createdAt')
             .skip(skip)
@@ -57,16 +63,17 @@ router.get('/', asyncHandler(async (req, res) => {
         FeaturedRecord.find()
             .sort('order')
             .lean(),
-        Post.countDocuments({ approved: true })
+        Post.countDocuments(query)
     ]);
 
     res.render('blog/index', {
-        title: 'Blog',
+        title: category ? `${category.replace(/-/g, ' ').replace(/(^|\s)\S/g, l => l.toUpperCase())}` : 'Blog',
         posts,
         featured,
         currentPage: page,
         totalPages: Math.ceil(total / limit),
-        user: req.user
+        user: req.user,
+        category
     });
 }));
 
@@ -77,11 +84,12 @@ router.get('/new', (req, res) => {
 
 // Create post
 router.post('/', upload.single('coverImage'), asyncHandler(async (req, res) => {
-    const { title, content, tags } = req.body;
+    const { title, content, tags, category } = req.body;
     
     const post = new Post({
         title,
         content,
+        category,
         author: req.user._id,
         tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
         approved: req.user.isAdmin, // Auto-approve admin posts
@@ -150,6 +158,7 @@ router.put('/:slug', upload.single('coverImage'), asyncHandler(async (req, res) 
 
     post.title = req.body.title;
     post.content = req.body.content;
+    post.category = req.body.category;
     post.tags = req.body.tags ? req.body.tags.split(',').map(tag => tag.trim()) : [];
     
     if (req.file) {

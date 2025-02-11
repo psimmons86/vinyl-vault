@@ -11,6 +11,8 @@ const activitySchema = new Schema({
         type: String,
         enum: [
             'signup',
+            'login',
+            'logout',
             'add_record',
             'play_record',
             'like_record',

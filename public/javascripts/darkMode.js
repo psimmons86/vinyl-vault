@@ -1,50 +1,16 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    // Function to enable dark mode
-    const enableDarkMode = () => {
+document.addEventListener('DOMContentLoaded', function() {
+    // Check for saved dark mode preference
+    const darkMode = localStorage.getItem('darkMode') === 'true';
+    if (darkMode) {
         document.body.classList.add('dark-mode');
-        localStorage.setItem('theme', 'dark');
-        if (darkModeToggle) darkModeToggle.checked = true;
-    };
-
-    // Function to disable dark mode
-    const disableDarkMode = () => {
-        document.body.classList.remove('dark-mode');
-        localStorage.setItem('theme', 'light');
-        if (darkModeToggle) darkModeToggle.checked = false;
-    };
-
-    // Check for saved theme preference or use system preference
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        enableDarkMode();
-    } else if (savedTheme === 'light') {
-        disableDarkMode();
-    } else if (prefersDarkScheme.matches) {
-        enableDarkMode();
     }
 
-    // Listen for toggle changes
+    // Add dark mode toggle to header if it exists
+    const darkModeToggle = document.getElementById('darkModeToggle');
     if (darkModeToggle) {
-        darkModeToggle.addEventListener('change', () => {
-            if (darkModeToggle.checked) {
-                enableDarkMode();
-            } else {
-                disableDarkMode();
-            }
+        darkModeToggle.addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
         });
     }
-
-    // Listen for system theme changes
-    prefersDarkScheme.addListener((e) => {
-        if (!localStorage.getItem('theme')) {
-            if (e.matches) {
-                enableDarkMode();
-            } else {
-                disableDarkMode();
-            }
-        }
-    });
-}); 
+});

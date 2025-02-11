@@ -1,15 +1,20 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize view from localStorage or default to 'grid'
-    const currentView = localStorage.getItem('collectionView') || 'grid';
-    setView(currentView);
-
+    // Only run on collection page
+    if (!document.querySelector('.records-container')) return;
+    
     // Initialize Materialize components
-    const elems = document.querySelectorAll('select, .dropdown-trigger');
-    M.FormSelect.init(elems);
-    M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), {
-        constrainWidth: false,
-        coverTrigger: false
-    });
+    M.FormSelect.init(document.querySelectorAll('select'));
+    M.Tooltip.init(document.querySelectorAll('.tooltipped'));
+
+    // Initialize floating action button
+    const fab = document.querySelector('.fixed-action-btn');
+    if (fab) {
+        M.FloatingActionButton.init(fab, {
+            direction: 'top',
+            hoverEnabled: false,
+            toolbarEnabled: false
+        });
+    }
 
     // Initialize search functionality
     const searchInput = document.getElementById('recordSearch');
@@ -19,8 +24,45 @@ document.addEventListener('DOMContentLoaded', function() {
         M.updateTextFields();
     }
 
+    // Initialize sort buttons
+    const sortAlphabeticalBtn = document.getElementById('sortAlphabeticalBtn');
+    const sortRecentBtn = document.getElementById('sortRecentBtn');
+    if (sortAlphabeticalBtn) {
+        sortAlphabeticalBtn.addEventListener('click', () => {
+            window.location.href = '/records?sort=artist';
+        });
+    }
+    if (sortRecentBtn) {
+        sortRecentBtn.addEventListener('click', () => {
+            window.location.href = '/records?sort=recent';
+        });
+    }
+
+    // Initialize view buttons
+    const gridViewBtn = document.getElementById('gridViewBtn');
+    const listViewBtn = document.getElementById('listViewBtn');
+    if (gridViewBtn) {
+        gridViewBtn.addEventListener('click', function() {
+            console.log('Grid view clicked');
+            toggleView('grid');
+        });
+    }
+    if (listViewBtn) {
+        listViewBtn.addEventListener('click', function() {
+            console.log('List view clicked');
+            toggleView('list');
+        });
+    }
+
     // Initialize active states for sort/view buttons
     initializeButtonStates();
+
+    // Initialize view state
+    const savedView = localStorage.getItem('recordsView') || 'grid';
+    toggleView(savedView);
+
+    // Debug log
+    console.log('DOM Content Loaded, components initialized');
 });
 
 function initializeButtonStates() {
@@ -49,18 +91,19 @@ function handleSearch(event) {
         const title = record.querySelector('.card-title')?.textContent.toLowerCase() || '';
         const artist = record.querySelector('.artist')?.textContent.toLowerCase() || '';
         const isVisible = title.includes(searchTerm) || artist.includes(searchTerm);
+        const parentCol = record.closest('.col');
         
         if (isVisible) {
-            record.style.display = '';
+            parentCol.style.display = '';
             // Add a subtle animation
-            record.style.opacity = '1';
-            record.style.transform = 'scale(1)';
+            parentCol.style.opacity = '1';
+            parentCol.style.transform = 'scale(1)';
         } else {
-            record.style.opacity = '0';
-            record.style.transform = 'scale(0.95)';
+            parentCol.style.opacity = '0';
+            parentCol.style.transform = 'scale(0.95)';
             setTimeout(() => {
                 if (!title.includes(searchTerm) && !artist.includes(searchTerm)) {
-                    record.style.display = 'none';
+                    parentCol.style.display = 'none';
                 }
             }, 200);
         }
@@ -68,7 +111,7 @@ function handleSearch(event) {
 
     // Show/hide empty state
     const emptyState = document.querySelector('.empty-state');
-    const visibleRecords = Array.from(records).filter(r => r.style.display !== 'none');
+    const visibleRecords = Array.from(records).filter(r => r.closest('.col').style.display !== 'none');
     
     if (emptyState) {
         if (visibleRecords.length === 0 && searchTerm) {
@@ -83,44 +126,118 @@ function handleSearch(event) {
 }
 
 function toggleView(viewType) {
-    setView(viewType);
-    localStorage.setItem('collectionView', viewType);
-}
-
-function setView(viewType) {
-    const recordsContainer = document.querySelector('.records-container');
-    const gridBtn = document.querySelector('[data-view="grid"]');
-    const listBtn = document.querySelector('[data-view="list"]');
-
-    if (!recordsContainer || !gridBtn || !listBtn) return;
-
-    if (viewType === 'grid') {
-        recordsContainer.classList.remove('list-view');
-        recordsContainer.classList.add('grid-view');
-        gridBtn.classList.add('active');
-        listBtn.classList.remove('active');
-    } else {
-        recordsContainer.classList.remove('grid-view');
-        recordsContainer.classList.add('list-view');
-        listBtn.classList.add('active');
-        gridBtn.classList.remove('active');
+    console.log('toggleView called with:', viewType);
+    
+    const container = document.querySelector('.records-container');
+    const gridBtn = document.getElementById('gridViewBtn');
+    const listBtn = document.getElementById('listViewBtn');
+    
+    if (!container || !gridBtn || !listBtn) {
+        console.error('Required elements not found:', {
+            container: !!container,
+            gridBtn: !!gridBtn,
+            listBtn: !!listBtn
+        });
+        return;
     }
 
-    // Add transition effect
-    const records = document.querySelectorAll('.record-card');
-    records.forEach((record, index) => {
-        record.style.transitionDelay = `${index * 50}ms`;
-        record.style.opacity = '1';
-        record.style.transform = 'scale(1)';
-    });
-}
+    console.log('Updating view to:', viewType);
 
-function sortAlphabetically() {
-    window.location.href = '/records?sort=artist';
-}
+    // Update container class
+    container.classList.remove('grid-view', 'list-view');
+    container.classList.add(`${viewType}-view`);
 
-function sortByRecent() {
-    window.location.href = '/records?sort=recent';
+    // Update button states
+    gridBtn.classList.remove('active');
+    listBtn.classList.remove('active');
+    if (viewType === 'grid') {
+        gridBtn.classList.add('active');
+    } else {
+        listBtn.classList.add('active');
+    }
+
+    // Save preference
+    localStorage.setItem('recordsView', viewType);
+
+    const recordColumns = document.querySelectorAll('.records-container .col');
+    
+    if (viewType === 'list') {
+        recordColumns.forEach(col => {
+            col.classList.remove('s12', 'm6', 'l3');
+            col.classList.add('s12');
+            
+            const card = col.querySelector('.card');
+            if (card) {
+                card.style.display = 'flex';
+                card.style.flexDirection = 'row';
+                card.style.height = '150px';
+                
+                const imageDiv = card.querySelector('.card-image');
+                if (imageDiv) {
+                    imageDiv.style.width = '150px';
+                    imageDiv.style.flexShrink = '0';
+                    imageDiv.style.paddingTop = '0';
+                    imageDiv.style.height = '100%';
+                }
+                
+                const contentDiv = card.querySelector('.card-content');
+                if (contentDiv) {
+                    contentDiv.style.flexGrow = '1';
+                    contentDiv.style.display = 'flex';
+                    contentDiv.style.flexDirection = 'column';
+                    contentDiv.style.justifyContent = 'center';
+                }
+                
+                const actionDiv = card.querySelector('.card-action');
+                if (actionDiv) {
+                    actionDiv.style.width = '150px';
+                    actionDiv.style.borderLeft = '1px solid rgba(0,0,0,0.1)';
+                    actionDiv.style.borderTop = 'none';
+                    actionDiv.style.display = 'flex';
+                    actionDiv.style.alignItems = 'center';
+                }
+            }
+        });
+    } else {
+        recordColumns.forEach(col => {
+            col.classList.remove('s12');
+            col.classList.add('s12', 'm6', 'l3');
+            
+            const card = col.querySelector('.card');
+            if (card) {
+                card.style.display = '';
+                card.style.flexDirection = '';
+                card.style.height = '';
+                
+                const imageDiv = card.querySelector('.card-image');
+                if (imageDiv) {
+                    imageDiv.style.width = '';
+                    imageDiv.style.flexShrink = '';
+                    imageDiv.style.paddingTop = '100%';
+                    imageDiv.style.height = '';
+                }
+                
+                const contentDiv = card.querySelector('.card-content');
+                if (contentDiv) {
+                    contentDiv.style.flexGrow = '';
+                    contentDiv.style.display = '';
+                    contentDiv.style.flexDirection = '';
+                    contentDiv.style.justifyContent = '';
+                }
+                
+                const actionDiv = card.querySelector('.card-action');
+                if (actionDiv) {
+                    actionDiv.style.width = '';
+                    actionDiv.style.borderLeft = '';
+                    actionDiv.style.borderTop = '1px solid rgba(0,0,0,0.1)';
+                    actionDiv.style.display = '';
+                    actionDiv.style.alignItems = '';
+                }
+            }
+        });
+    }
+
+    console.log('View updated successfully');
 }
 
 async function trackPlay(recordId) {
