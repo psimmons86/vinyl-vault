@@ -25,9 +25,11 @@
     "node": "20.x"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.17",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
+    "compression": "^1.8.0",
     "connect-flash": "^0.1.1",
     "disconnect": "^1.2.2",
     "dotenv": "^16.4.7",
@@ -36,20 +38,19 @@
     "express-ejs-layouts": "^2.5.1",
     "express-rate-limit": "^7.5.0",
     "express-session": "^1.18.1",
+    "hammerjs": "^2.0.8",
     "marked": "^15.0.6",
     "method-override": "^3.0.0",
     "mongoose": "^8.9.0",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "multer-s3": "^3.0.1",
-    "sharp": "^0.33.5",
-    "slugify": "^1.6.6",
-    "tailwindcss": "^3.4.1",
-    "autoprefixer": "^10.4.17",
     "postcss": "^8.4.35",
     "postcss-cli": "^11.0.0",
+    "sharp": "^0.33.5",
+    "slugify": "^1.6.6",
     "swiper": "^11.0.6",
-    "hammerjs": "^2.0.8"
+    "tailwindcss": "^3.4.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.9",

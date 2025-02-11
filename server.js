@@ -11,6 +11,7 @@ const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 const session = require('express-session');
 const expressLayouts = require('express-ejs-layouts');
+const compression = require('compression');
 
 // Initialize Express app and port
 const app = express();
@@ -37,7 +38,23 @@ app.set('layout', 'layouts/main');
 
 // Set up middleware
 app.use(morgan('dev'));                             // Request logging
-app.use(express.static('public'));                  // Serve static files
+// Compression middleware
+app.use(compression());
+
+// Static file serving with cache control
+app.use(express.static('public', {
+    maxAge: '1d', // Cache for 1 day
+    setHeaders: (res, path) => {
+        // Set different cache times based on file type
+        if (path.endsWith('.css') || path.endsWith('.js')) {
+            res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day
+        } else if (path.endsWith('.png') || path.endsWith('.jpg') || path.endsWith('.svg')) {
+            res.setHeader('Cache-Control', 'public, max-age=604800'); // 1 week
+        } else if (path.endsWith('.woff2') || path.endsWith('.woff') || path.endsWith('.ttf')) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000'); // 1 year
+        }
+    }
+}));
 app.use(express.urlencoded({ extended: false }));   // Parse form data
 app.use(express.json());                           // Parse JSON requests
 app.use(methodOverride("_method"));                 // Support PUT/DELETE methods
