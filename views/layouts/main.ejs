@@ -125,14 +125,14 @@
 
     <!-- Toast Messages -->
     <div id="toastContainer" class="fixed bottom-20 left-0 right-0 flex flex-col items-center space-y-2 pointer-events-none z-50">
-        <% if (locals.messages && messages.error) { %>
+        <% if ((locals.messages && messages.error) || (locals.message && message.type === 'error')) { %>
             <div class="toast-message bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg">
-                <%= messages.error %>
+                <%= (locals.messages && messages.error) || (locals.message && message.text) %>
             </div>
         <% } %>
-        <% if (locals.messages && messages.success) { %>
+        <% if ((locals.messages && messages.success) || (locals.message && message.type === 'success')) { %>
             <div class="toast-message bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
-                <%= messages.success %>
+                <%= (locals.messages && messages.success) || (locals.message && message.text) %>
             </div>
         <% } %>
     </div>

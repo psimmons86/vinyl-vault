@@ -59,7 +59,13 @@ const recordSchema = new Schema({
         type: Number,
         min: [0, 'Value cannot be negative'],
         default: 0
-    }
+    },
+    discogsId: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
+    label: String
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

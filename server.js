@@ -69,12 +69,9 @@ SESSION_CONFIG.store = MongoStore.create({
 
 app.use(session(SESSION_CONFIG));                   // Session management
 
-// Set up flash messages
+// Set up flash messages and session messages
 app.use(flash());
-app.use((req, res, next) => {
-    res.locals.messages = req.flash();
-    next();
-});
+app.use(require('./middleware/add-messages-to-locals'));
 
 // Add user data and notifications to all requests
 app.use(require('./middleware/add-user-to-locals-and-req'));

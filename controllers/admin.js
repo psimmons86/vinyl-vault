@@ -3,6 +3,12 @@ const router = express.Router();
 const asyncHandler = require('../middleware/async-handler');
 const ensureAdmin = require('../middleware/ensure-admin');
 const Record = require('../models/record');
+
+// Root route - redirect to analytics
+router.get('/', (req, res) => {
+    res.redirect('/admin/analytics');
+});
+
 const User = require('../models/user');
 const Activity = require('../models/activity');
 

@@ -11,6 +11,7 @@ const { getMusicNews } = require('../services/newsapi');
 const discogs = require('../services/discogs');
 const upload = require('../config/uploads');
 const asyncHandler = require('../middleware/async-handler');
+const axios = require('axios');
 
 // Configure multer for album art uploads
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -395,8 +396,9 @@ router.post('/import-discogs', asyncHandler(async (req, res) => {
         // Create activity for import
         await Activity.create({
             user: req.user._id,
-            activityType: 'import',
-            metadata: { 
+            activityType: 'add_record',
+            details: { 
+                action: 'import',
                 source: 'Discogs',
                 count: createdRecords.length
             }
@@ -520,23 +522,34 @@ router.get('/discogs', asyncHandler(async (req, res) => {
 
 // Search Discogs database
 router.get('/search', asyncHandler(async (req, res) => {
-    if (!req.query.q) {
-        return res.render('records/search', {
-            title: 'Search Discogs',
-            results: [],
-            query: '',
+    try {
+        const { q } = req.query;
+        if (!q) {
+            return res.render('records/search', { 
+                title: 'Search Records',
+                results: [],
+                query: '',
+                error: null
+            });
+        }
+
+        const results = await discogs.searchRecords(q);
+
+        res.render('records/search', {
+            title: 'Search Results',
+            results,
+            query: q,
             error: null
         });
+    } catch (err) {
+        console.error('Error searching Discogs:', err);
+        res.render('records/search', {
+            title: 'Search Records',
+            results: [],
+            query: q,
+            error: 'Error connecting to Discogs'
+        });
     }
-
-    const results = await discogs.searchRecords(req.query.q);
-    
-    res.render('records/search', {
-        title: 'Search Results',
-        results,
-        query: req.query.q,
-        error: null
-    });
 }));
 
 // Show new record form
@@ -591,6 +604,34 @@ router.post('/settings/top8', asyncHandler(async (req, res) => {
     });
 }));
 
+// Add record from Discogs
+router.get('/add-from-discogs/:id', asyncHandler(async (req, res) => {
+    try {
+        const recordDetails = await discogs.getRecordDetails(req.params.id);
+        
+        // Create new record
+        const record = await Record.create({
+            ...recordDetails,
+            owner: req.user._id,
+            discogsId: req.params.id
+        });
+
+        // Create activity
+        await Activity.create({
+            user: req.user._id,
+            activityType: 'add_record',
+            record: record._id
+        });
+
+        req.session.message = { type: 'success', text: 'Record added successfully from Discogs' };
+        res.redirect('/records');
+    } catch (err) {
+        console.error('Error adding record from Discogs:', err);
+        req.session.message = { type: 'error', text: err.message };
+        res.redirect('/records/search');
+    }
+}));
+
 // Create new record
 router.post('/', asyncHandler(async (req, res) => {
     // Add owner and process tags
@@ -602,21 +643,6 @@ router.post('/', asyncHandler(async (req, res) => {
     await Record.create(req.body);
     res.redirect('/records');
 }));
-
-// Add record from Discogs
-router.get('/add-from-discogs/:id', asyncHandler(async (req, res) => {
-    const recordDetails = await discogs.getRecordDetails(req.params.id);
-    if (!recordDetails) {
-        return res.redirect('/records/search');
-    }
-    
-    res.render('records/new', {
-        title: 'Add Record',
-        formats: Record.schema.path('format').enumValues,
-        prefilledData: recordDetails
-    });
-}));
-
 
 // Show single record
 router.get('/:id', asyncHandler(async (req, res) => {
@@ -713,7 +739,12 @@ router.put('/:id', asyncHandler(async (req, res) => {
             Activity.create({
                 user: req.user._id,
                 record: record._id,
-                activityType: 'update'
+                activityType: 'play_record',
+                details: {
+                    action: 'update',
+                    recordTitle: record.title,
+                    recordArtist: record.artist
+                }
             })
         ]);
 
@@ -736,18 +767,20 @@ router.put('/:id', asyncHandler(async (req, res) => {
 router.delete('/:id', asyncHandler(async (req, res) => {
     const record = await validateOwnership(req.params.id, req.user._id, req.user.isAdmin);
     
-    // Delete record and create activity
-    await Promise.all([
-        Record.findByIdAndDelete(req.params.id),
-        Activity.create({
-            user: req.user._id,
-            activityType: 'delete',
-            metadata: { 
-                recordTitle: record.title,
-                recordArtist: record.artist
-            }
-        })
-    ]);
+    // Create activity first
+    await Activity.create({
+        user: req.user._id,
+        activityType: 'play_record',
+        record: record._id,
+        details: { 
+            action: 'delete',
+            recordTitle: record.title,
+            recordArtist: record.artist
+        }
+    });
+
+    // Then delete the record
+    await Record.findByIdAndDelete(req.params.id);
 
     res.redirect('/records');
 }));

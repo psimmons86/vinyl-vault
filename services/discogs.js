@@ -1,13 +1,19 @@
-// Initialize Discogs API client
 const Discogs = require('disconnect').Client;
+
+// Check if required environment variables are set
+if (!process.env.DISCOGS_KEY || !process.env.DISCOGS_SECRET) {
+    console.error('Missing required Discogs API credentials in environment variables');
+    console.error('Please set DISCOGS_KEY and DISCOGS_SECRET');
+}
 
 // Create database connection with API credentials
 const discogs = new Discogs({
    consumerKey: process.env.DISCOGS_KEY,
    consumerSecret: process.env.DISCOGS_SECRET,
+   userAgent: 'VinylVault/1.0' // Adding a user agent is recommended
 });
 
-// Get database instance
+// Get database instance with better error handling
 const db = discogs.database();
 
 // Get user instance for collection access
@@ -40,8 +46,13 @@ async function searchRecords(query) {
            year: result.year,
            // Use default image if none provided
            thumb: result.thumb || '/images/default-album.png',
-           // Get first format or default to LP
-           format: Array.isArray(result.format) ? result.format[0] : 'LP'
+           // Map Discogs format to our enum values
+           format: (() => {
+               const discogsFormat = Array.isArray(result.format) ? result.format[0]?.toLowerCase() : '';
+               if (discogsFormat.includes('single')) return 'Single';
+               if (discogsFormat.includes('ep')) return 'EP';
+               return 'LP';
+           })()
        }));
    } catch (error) {
        // Handle rate limiting by waiting and retrying
@@ -63,20 +74,35 @@ async function getRecordDetails(releaseId) {
        // Fetch specific release from Discogs
        const release = await db.getRelease(releaseId);
 
+       // Process tags: combine genres and styles, limit length and split if needed
+       const tags = [...new Set([
+           ...(release.genres || []),
+           ...(release.styles || [])
+       ])].flatMap(tag => 
+           // Split long tags on commas or spaces
+           tag.length > 50 
+               ? tag.split(/[,\s]+/).map(t => t.substring(0, 50))
+               : [tag]
+       );
+
+       // Map Discogs format to our enum values
+       let format = 'LP';
+       if (release.formats && release.formats.length > 0) {
+           const discogsFormat = release.formats[0].name?.toLowerCase() || '';
+           if (discogsFormat.includes('single')) {
+               format = 'Single';
+           } else if (discogsFormat.includes('ep')) {
+               format = 'EP';
+           }
+       }
+
        return {
-           // Parse title and artist from release data
            title: release.title.split(' - ')[1]?.trim() || release.title.trim(),
            artist: release.artists?.[0]?.name || release.title.split(' - ')[0]?.trim(),
            year: release.year,
-           // Get format or default to LP
-           format: release.formats?.[0]?.name || 'LP',
-           // Get image URL with fallbacks
+           format: format,
            imageUrl: release.images?.[0]?.resource_url || release.thumb || '/images/default-album.png',
-           // Combine and deduplicate genres and styles into tags
-           tags: [...new Set([
-               ...(release.genres || []),
-               ...(release.styles || [])
-           ])].join(',')
+           tags: tags
        };
    } catch (error) {
        // Handle rate limiting
@@ -139,7 +165,12 @@ async function searchStoreInventory(query, labelId) {
             artist: result.title.split(' - ')[0]?.trim() || 'Unknown Artist',
             year: result.year,
             thumb: result.thumb || '/images/default-album.png',
-            format: Array.isArray(result.format) ? result.format[0] : 'LP',
+            format: (() => {
+                const discogsFormat = Array.isArray(result.format) ? result.format[0]?.toLowerCase() : '';
+                if (discogsFormat.includes('single')) return 'Single';
+                if (discogsFormat.includes('ep')) return 'EP';
+                return 'LP';
+            })(),
             url: `https://www.discogs.com/release/${result.id}`
         }));
     } catch (error) {
@@ -199,11 +230,23 @@ async function getUserCollection(username, page = 1) {
             artist: item.basic_information.artists[0].name,
             year: item.basic_information.year,
             imageUrl: item.basic_information.cover_image || '/images/default-album.png',
-            format: item.basic_information.formats[0].name || 'LP',
-            tags: [
+            // Map Discogs format to our enum values
+            format: (() => {
+                const discogsFormat = item.basic_information.formats?.[0]?.name?.toLowerCase() || '';
+                if (discogsFormat.includes('single')) return 'Single';
+                if (discogsFormat.includes('ep')) return 'EP';
+                return 'LP';
+            })(),
+            // Process tags: combine genres and styles, limit length and split if needed
+            tags: [...new Set([
                 ...(item.basic_information.genres || []),
                 ...(item.basic_information.styles || [])
-            ].join(',')
+            ])].flatMap(tag => 
+                // Split long tags on commas or spaces
+                tag.length > 50 
+                    ? tag.split(/[,\s]+/).map(t => t.substring(0, 50))
+                    : [tag]
+            )
         }));
     } catch (error) {
         if (error.statusCode === 429) {
