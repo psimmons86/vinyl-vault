@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressBars = document.querySelectorAll('[data-width]');
     progressBars.forEach(bar => {
         const width = bar.getAttribute('data-width');
-        bar.style.setProperty('--progress-width', `${width}%`);
+        if (width) {
+            bar.style.width = width + '%';
+        }
     });
 });
