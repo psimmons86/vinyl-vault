@@ -1,0 +1,72 @@
+<%- include('../partials/header.ejs') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-primary">Manage Heavy Rotation</h1>
+        <a href="/admin" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light">
+            <span class="material-icons">arrow_back</span>
+            Back to Analytics
+        </a>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300">Record</th>
+                            <th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300">Artist</th>
+                            <th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300">Owner</th>
+                            <th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300">Plays</th>
+                            <th class="px-4 py-3 text-left text-gray-600 dark:text-gray-300">Status</th>
+                            <th class="px-4 py-3 text-right text-gray-600 dark:text-gray-300">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <% records.forEach(record => { %>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center space-x-3">
+                                        <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
+                                             alt="<%= record.title %>"
+                                             class="w-10 h-10 rounded object-cover">
+                                        <span class="font-medium text-gray-900 dark:text-gray-100">
+                                            <%= record.title %>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
+                                    <%= record.artist %>
+                                </td>
+                                <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
+                                    <%= record.owner.username %>
+                                </td>
+                                <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
+                                    <%= record.plays %>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <% if (record.inHeavyRotation) { %>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary dark:bg-primary-light/10 dark:text-primary-light">
+                                            Featured
+                                        </span>
+                                    <% } %>
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    <form action="/admin/heavy-rotation/<%= record._id %>" method="POST" class="inline-block">
+                                        <button type="submit" 
+                                                class="text-sm font-medium <%= record.inHeavyRotation ? 'text-red-600 dark:text-red-400 hover:text-red-700' : 'text-primary dark:text-primary-light hover:text-primary-dark' %>">
+                                            <%= record.inHeavyRotation ? 'Remove' : 'Add' %>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer.ejs') %>
