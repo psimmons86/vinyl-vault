@@ -208,20 +208,22 @@
 
 <!-- Mount React Social Feed Component -->
 <script type="text/babel">
-  try {
-    const container = document.getElementById('social-feed-root');
-    if (container) {
-      const root = ReactDOM.createRoot(container);
-      const props = {
-        currentUser: JSON.parse('<%- JSON.stringify(currentUser) %>')
-      };
-      root.render(React.createElement(window.SocialFeed, props));
-    } else {
-      console.error('Social feed root element not found');
+  document.addEventListener('DOMContentLoaded', function() {
+    try {
+      const container = document.getElementById('social-feed-root');
+      if (container) {
+        const root = ReactDOM.createRoot(container);
+        const props = {
+          currentUser: JSON.parse('<%- JSON.stringify(currentUser || null) %>')
+        };
+        root.render(React.createElement(window.SocialFeed, props));
+      } else {
+        console.error('Social feed root element not found');
+      }
+    } catch (error) {
+      console.error('Error mounting Social Feed component:', error);
     }
-  } catch (error) {
-    console.error('Error mounting Social Feed component:', error);
-  }
+  });
 </script>
 
 <%- include('../partials/footer.ejs') %>
