@@ -2,108 +2,80 @@
 <%- include('../partials/header.ejs') %>
 
 <!-- Main container -->
-<div class="container">
+<div class="container mx-auto px-4">
    <!-- Page header -->
-   <div class="collection-header">
-       <h1 class="collection-title">Search Discogs</h1>
+   <div class="mb-8">
+       <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Search Discogs</h1>
    </div>
 
-   <!-- Search form row -->
-   <div class="row">
-       <!-- Centered search form with responsive width -->
-       <div class="col s12 m8 offset-m2">
-           <!-- Search form that submits to /records/search -->
-           <form action="/records/search" method="GET" class="search-form">
-               <div class="input-field">
-                   <!-- Search input with previous query value if it exists -->
-                   <input type="search"
-                          id="search"
-                          name="q"
-                          value="<%= locals.query || '' %>"
-                          placeholder="Search by artist or album"
-                          class="search-input"
-                          required>
-               </div>
-               <div class="center-align">
-                   <button type="submit" class="btn">
-                       Search Discogs
-                   </button>
-               </div>
-           </form>
-       </div>
-   </div>
-
-   <!-- Loading spinner (hidden by default) -->
-   <div id="searchLoading" class="hidden center-align">
-       <!-- Materialize preloader component -->
-       <div class="preloader-wrapper small active">
-           <div class="spinner-layer spinner-green-only">
-               <div class="circle-clipper left">
-                   <div class="circle"></div>
-               </div>
-               <div class="gap-patch">
-                   <div class="circle"></div>
-               </div>
-               <div class="circle-clipper right">
-                   <div class="circle"></div>
-               </div>
+   <!-- Search form -->
+   <div class="max-w-lg mx-auto mb-8">
+       <form action="/records/search" method="GET" class="space-y-4">
+           <div>
+               <input type="search"
+                      id="search"
+                      name="q"
+                      value="<%= locals.query || '' %>"
+                      placeholder="Search by artist or album"
+                      class="form-input w-full"
+                      required>
            </div>
-       </div>
-       <p>Searching Discogs...</p>
+           <div class="text-center">
+               <button type="submit" class="btn btn-primary">
+                   Search Discogs
+               </button>
+           </div>
+       </form>
    </div>
 
-   <!-- Error message display if there's an error -->
+   <!-- Loading spinner -->
+   <div id="searchLoading" class="hidden text-center space-y-2">
+       <div class="inline-block animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+       <p class="text-gray-600 dark:text-gray-300">Searching Discogs...</p>
+   </div>
+
+   <!-- Error message -->
    <% if (locals.error) { %>
-       <div class="row">
-           <div class="col s12">
-               <div class="card-panel red lighten-4 red-text text-darken-4">
-                   <%= error %>
-               </div>
+       <div class="max-w-lg mx-auto mb-8">
+           <div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
+               <%= error %>
            </div>
        </div>
    <% } %>
 
-   <!-- Search results display -->
+   <!-- Search results -->
    <% if (locals.results && results.length > 0) { %>
-       <div class="row">
-           <!-- Loop through each search result -->
+       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
            <% results.forEach(result => { %>
-               <!-- Responsive grid column for each record -->
-               <div class="col s12 m6 l3">
-                   <div class="record-card">
-                       <div class="record-artwork">
-                           <!-- Record image with fallback -->
-                           <img src="<%= result.thumb %>"
-                                alt="Album artwork for <%= result.title %>"
-                                class="record-img"
-                                onerror="this.src='/images/default-album.png'">
-                           <!-- Record information overlay -->
-                           <div class="record-overlay">
-                               <h3 class="record-title truncate"><%= result.title %></h3>
-                               <p class="record-artist"><%= result.artist %></p>
-                               <!-- Optional year and label display -->
-                               <% if (result.year || result.label) { %>
-                                   <p class="record-details">
-                                       <%= result.year ? result.year : '' %>
-                                       <%= result.year && result.label ? ' • ' : '' %>
-                                       <%= result.label ? result.label : '' %>
-                                   </p>
-                               <% } %>
-                               <!-- Add to collection button -->
-                               <a href="/records/add-from-discogs/<%= result.id %>" class="btn">
-                                   Add to Collection
-                               </a>
-                           </div>
+               <div class="record-card group overflow-hidden">
+                   <div class="relative aspect-square">
+                       <img src="<%= result.thumb %>"
+                            alt="Album artwork for <%= result.title %>"
+                            class="w-full h-full object-cover"
+                            onerror="this.src='/images/default-album.png'">
+                       <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                           <h3 class="text-white font-semibold truncate"><%= result.title %></h3>
+                           <p class="text-white/90"><%= result.artist %></p>
+                           <% if (result.year || result.label) { %>
+                               <p class="text-white/90 text-sm">
+                                   <%= result.year ? result.year : '' %>
+                                   <%= result.year && result.label ? ' • ' : '' %>
+                                   <%= result.label ? result.label : '' %>
+                               </p>
+                           <% } %>
+                           <a href="/records/add-from-discogs/<%= result.id %>" 
+                              class="btn btn-primary mt-2">
+                               Add to Collection
+                           </a>
                        </div>
                    </div>
                </div>
            <% }) %>
        </div>
-   <!-- No results message -->
    <% } else if (locals.query) { %>
-       <div class="center-align">
-           <p>No records found matching "<%= query %>"</p>
-           <p class="grey-text">Try adjusting your search terms or check the spelling.</p>
+       <div class="text-center">
+           <p class="text-gray-700 dark:text-gray-300">No records found matching "<%= query %>"</p>
+           <p class="text-gray-500 dark:text-gray-400">Try adjusting your search terms or check the spelling.</p>
        </div>
    <% } %>
 </div>

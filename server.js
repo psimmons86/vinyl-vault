@@ -10,6 +10,7 @@ const flash = require('connect-flash');
 const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const expressLayouts = require('express-ejs-layouts');
 const compression = require('compression');
 
@@ -58,6 +59,14 @@ app.use(express.static('public', {
 app.use(express.urlencoded({ extended: false }));   // Parse form data
 app.use(express.json());                           // Parse JSON requests
 app.use(methodOverride("_method"));                 // Support PUT/DELETE methods
+// Configure session store
+SESSION_CONFIG.store = MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    ttl: 24 * 60 * 60, // Session TTL in seconds (24 hours)
+    autoRemove: 'native',
+    touchAfter: 24 * 3600 // Only update session every 24 hours unless data changes
+});
+
 app.use(session(SESSION_CONFIG));                   // Session management
 
 // Set up flash messages

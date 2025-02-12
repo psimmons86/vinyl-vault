@@ -29,6 +29,8 @@ module.exports = {
             maxAge: 24 * 60 * 60 * 1000, // 24 hours
             sameSite: 'lax'
         },
-        proxy: true
+        proxy: true,
+        rolling: true, // Refresh session with each request
+        store: null // This will be set in server.js with the MongoStore instance
     }
 };
