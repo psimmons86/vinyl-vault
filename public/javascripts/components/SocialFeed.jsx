@@ -62,6 +62,9 @@ window.SocialFeed = function SocialFeed() {
           case 'add_record':
             content = `added ${activity.record.title} by ${activity.record.artist} to their collection`;
             break;
+          case 'play_record':
+            content = `played ${activity.record.title} by ${activity.record.artist}`;
+            break;
           default:
             return null;
         }
