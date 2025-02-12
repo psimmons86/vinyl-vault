@@ -11,30 +11,7 @@ window.SocialFeed = function SocialFeed() {
     loadCurrentUser();
     loadFeed();
     loadUserRecords();
-    
-    // Initialize Materialize components
-    const selects = document.querySelectorAll('select');
-    const textareas = document.querySelectorAll('.materialize-textarea');
-    M.FormSelect.init(selects);
-    M.textareaAutoResize(textareas);
-    textareas.forEach(textarea => M.textareaAutoResize(textarea));
   }, []);
-
-  // Re-initialize components when records change
-  React.useEffect(() => {
-    const selects = document.querySelectorAll('select');
-    const textareas = document.querySelectorAll('.materialize-textarea');
-    M.FormSelect.init(selects);
-    textareas.forEach(textarea => M.textareaAutoResize(textarea));
-  }, [records]);
-
-  // Initialize textarea when post content changes
-  React.useEffect(() => {
-    const textarea = document.getElementById('post-content');
-    if (textarea) {
-      M.textareaAutoResize(textarea);
-    }
-  }, [newPost]);
 
   const loadCurrentUser = async () => {
     try {
@@ -152,11 +129,9 @@ window.SocialFeed = function SocialFeed() {
 
       setNewPost('');
       setSelectedRecord(null);
-      loadFeed(); // Reload feed
-      M.toast({html: 'Post created successfully!'});
+      loadFeed();
     } catch (err) {
       console.error('Error creating post:', err);
-      M.toast({html: 'Error creating post'});
     }
   };
 
@@ -170,10 +145,9 @@ window.SocialFeed = function SocialFeed() {
       });
 
       if (!response.ok) throw new Error('Failed to toggle like');
-      loadFeed(); // Reload feed to update likes
+      loadFeed();
     } catch (err) {
       console.error('Error toggling like:', err);
-      M.toast({html: 'Error updating like'});
     }
   };
 
@@ -190,106 +164,101 @@ window.SocialFeed = function SocialFeed() {
       });
 
       if (!response.ok) throw new Error('Failed to add comment');
-      loadFeed(); // Reload feed to show new comment
-      M.toast({html: 'Comment added!'});
+      loadFeed();
     } catch (err) {
       console.error('Error adding comment:', err);
-      M.toast({html: 'Error adding comment'});
     }
   };
 
-  if (loading) return <div className="center-align"><div className="preloader-wrapper big active">
-    <div className="spinner-layer spinner-blue">
-      <div className="circle-clipper left"><div className="circle"></div></div>
-      <div className="gap-patch"><div className="circle"></div></div>
-      <div className="circle-clipper right"><div className="circle"></div></div>
+  if (loading) return (
+    <div className="flex justify-center items-center py-8">
+      <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
     </div>
-  </div></div>;
+  );
 
   if (error) return (
-    <div className="card-panel red lighten-4 red-text text-darken-4">
-      <i className="material-icons left">error</i>
-      {error}
+    <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg">
+      <div className="flex items-center">
+        <span className="material-icons mr-2">error_outline</span>
+        <p>{error}</p>
+      </div>
     </div>
   );
 
   if (feed.length === 0) return (
-    <div className="center-align">
-      <i className="material-icons large grey-text">people</i>
-      <p className="grey-text">Follow other users to see their posts here!</p>
-      <a href="/social/search" className="btn waves-effect waves-light">
-        <i className="material-icons left">search</i>
-        Find Users
+    <div className="text-center py-8">
+      <span className="material-icons text-4xl text-gray-400 dark:text-gray-600 mb-2">people</span>
+      <p className="text-gray-500 dark:text-gray-400 mb-4">Follow other users to see their posts here!</p>
+      <a href="/social/search" className="inline-flex items-center px-4 py-2 bg-primary text-white dark:bg-primary-light dark:text-gray-900 rounded-lg hover:bg-primary-dark dark:hover:bg-primary transition-colors">
+        <span className="material-icons mr-2">search</span>
+        <span>Find Users</span>
       </a>
     </div>
   );
 
   return (
-    <div className="social-feed">
+    <div className="space-y-4">
       {/* Create Post */}
-      <div className="card">
-        <div className="card-content">
-          <div className="input-field">
-            <textarea
-              id="post-content"
-              className="materialize-textarea"
-              value={newPost}
-              onChange={(e) => setNewPost(e.target.value)}
-              placeholder="Share something about music..."
-            />
-          </div>
-          
-          {/* Record Selection */}
-          <div className="input-field">
-            <select
-              value={selectedRecord || ''}
-              onChange={(e) => setSelectedRecord(e.target.value)}
-              className="browser-default"
-            >
-              <option value="">Link a record (optional)</option>
-              {records.map(record => (
-                <option key={record._id} value={record._id}>
-                  {record.title} - {record.artist}
-                </option>
-              ))}
-            </select>
-          </div>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+        <textarea
+          value={newPost}
+          onChange={(e) => setNewPost(e.target.value)}
+          placeholder="Share something about music..."
+          className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light resize-none mb-3"
+          rows="3"
+        />
+        
+        <div className="flex items-center justify-between">
+          <select
+            value={selectedRecord || ''}
+            onChange={(e) => setSelectedRecord(e.target.value)}
+            className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-1.5 text-sm"
+          >
+            <option value="">Link a record (optional)</option>
+            {records.map(record => (
+              <option key={record._id} value={record._id}>
+                {record.title} - {record.artist}
+              </option>
+            ))}
+          </select>
 
           <button
-            className="btn waves-effect waves-light right"
             onClick={createPost}
             disabled={!newPost.trim()}
+            className="inline-flex items-center px-4 py-2 bg-primary text-white dark:bg-primary-light dark:text-gray-900 rounded-lg hover:bg-primary-dark dark:hover:bg-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Post
-            <i className="material-icons right">send</i>
+            <span>Post</span>
+            <span className="material-icons ml-2">send</span>
           </button>
-          <div className="clearfix"></div>
         </div>
       </div>
 
       {/* Feed */}
-      {feed.map(item => (
-        <div key={item._id} className="card">
-            <div className="card-content">
+      <div className="space-y-4">
+        {feed.map(item => (
+          <div key={item._id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+            <div className="p-4">
               {/* Post Header */}
-              <div className="post-header">
+              <div className="flex items-center space-x-3 mb-3">
                 <img
                   src={item.user.profile?.avatarUrl || '/images/default-avatar.png'}
                   alt={item.user.profile?.name || item.user.username}
-                  className="circle responsive-img post-avatar"
+                  className="w-10 h-10 rounded-full object-cover"
                 />
-                <div className="post-user-info">
-                  <span className="post-name">{item.user.profile?.name || item.user.username}</span>
-                  <small className="post-time">
+                <div>
+                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                    {item.user.profile?.name || item.user.username}
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
                     {new Date(item.createdAt).toLocaleString()}
-                  </small>
+                  </div>
                 </div>
               </div>
 
               {/* Content */}
               {item.type === 'activity' ? (
-                <div className="activity-content">
-                  <p className="post-content">
+                <div>
+                  <p className="text-gray-700 dark:text-gray-300">
                     <span className="font-medium">{item.user.profile?.name || item.user.username}</span>
                     {' '}{item.content}
                   </p>
@@ -297,80 +266,87 @@ window.SocialFeed = function SocialFeed() {
                     <img 
                       src={item.data.imageUrl} 
                       alt="Activity" 
-                      className="activity-image rounded-lg mt-2"
+                      className="mt-3 rounded-lg max-h-48 w-full object-cover"
                     />
                   )}
                 </div>
               ) : (
                 <>
-                  <p className="post-content">{item.content}</p>
+                  <p className="text-gray-700 dark:text-gray-300 mb-3">{item.content}</p>
                   {item.recordRef && (
-                    <div className="linked-record">
-                      <i className="material-icons">album</i>
-                      <span>
-                        {item.recordRef.title} - {item.recordRef.artist}
-                      </span>
+                    <div className="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg mb-3">
+                      <img 
+                        src={item.recordRef.imageUrl || '/images/default-album.png'} 
+                        alt={item.recordRef.title}
+                        className="w-12 h-12 rounded-lg object-cover"
+                      />
+                      <div className="ml-3">
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.recordRef.title}</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">{item.recordRef.artist}</div>
+                      </div>
                     </div>
                   )}
-                  <div className="post-actions">
+                  <div className="flex items-center space-x-4 text-gray-600 dark:text-gray-400">
                     <button
-                      className={`btn-flat waves-effect waves-light ${
-                        currentUser && item.likes?.includes(currentUser._id) ? 'red-text' : ''
-                      }`}
                       onClick={() => toggleLike(item.user._id, item._id, currentUser && item.likes?.includes(currentUser._id))}
+                      className={`flex items-center space-x-1 ${
+                        currentUser && item.likes?.includes(currentUser._id) ? 'text-red-500' : ''
+                      }`}
                     >
-                      <i className="material-icons left">favorite</i>
-                      {item.likes?.length || 0}
+                      <span className="material-icons text-sm">favorite</span>
+                      <span>{item.likes?.length || 0}</span>
                     </button>
-                    <button className="btn-flat waves-effect waves-light">
-                      <i className="material-icons left">comment</i>
-                      {item.comments?.length || 0}
-                    </button>
+                    <div className="flex items-center space-x-1">
+                      <span className="material-icons text-sm">comment</span>
+                      <span>{item.comments?.length || 0}</span>
+                    </div>
                   </div>
 
                   {/* Comments */}
-                  <div className="comments-section">
-                    {item.comments?.map(comment => (
-                      <div key={comment._id} className="comment">
-                        <img
-                          src={comment.user.profile?.avatarUrl || '/images/default-avatar.png'}
-                          alt={comment.user.profile?.name || comment.user.username}
-                          className="circle responsive-img comment-avatar"
-                        />
-                        <div className="comment-content">
-                          <span className="comment-name">
-                            {comment.user.profile?.name || comment.user.username}
-                          </span>
-                          <p>{comment.content}</p>
-                          <small className="comment-time">
-                            {new Date(comment.createdAt).toLocaleString()}
-                          </small>
+                  {item.comments?.length > 0 && (
+                    <div className="mt-4 space-y-3">
+                      {item.comments.map(comment => (
+                        <div key={comment._id} className="flex items-start space-x-3">
+                          <img
+                            src={comment.user.profile?.avatarUrl || '/images/default-avatar.png'}
+                            alt={comment.user.profile?.name || comment.user.username}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                          <div className="flex-1 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                            <div className="font-medium text-sm text-gray-900 dark:text-gray-100">
+                              {comment.user.profile?.name || comment.user.username}
+                            </div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">{comment.content}</p>
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {new Date(comment.createdAt).toLocaleString()}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-
-                    {/* Add Comment */}
-                    <div className="add-comment">
-                      <div className="input-field">
-                        <textarea
-                          className="materialize-textarea"
-                          placeholder="Add a comment..."
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault();
-                              addComment(item.user._id, item._id, e.target.value);
-                              e.target.value = '';
-                            }
-                          }}
-                        />
-                      </div>
+                      ))}
                     </div>
+                  )}
+
+                  {/* Add Comment */}
+                  <div className="mt-4">
+                    <textarea
+                      placeholder="Add a comment..."
+                      className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light resize-none"
+                      rows="1"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          addComment(item.user._id, item._id, e.target.value);
+                          e.target.value = '';
+                        }
+                      }}
+                    />
                   </div>
                 </>
               )}
             </div>
           </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

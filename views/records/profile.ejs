@@ -1,6 +1,6 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="container">
+<div class="container mx-auto px-4 py-6">
   <!-- Profile Header -->
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-6">
     <div class="flex items-center justify-between">
@@ -13,20 +13,20 @@
         <div class="flex items-center gap-4 text-sm">
           <% if (user.profile?.location) { %>
             <p class="flex items-center text-gray-600 dark:text-gray-400">
-              <i class="material-icons text-sm mr-1">location_on</i>
+              <span class="material-icons text-sm mr-1">location_on</span>
               <%= user.profile.location %>
             </p>
           <% } %>
 
           <% if (user.profile?.favoriteGenres?.length > 0) { %>
             <p class="flex items-center text-gray-600 dark:text-gray-400">
-              <i class="material-icons text-sm mr-1">album</i>
+              <span class="material-icons text-sm mr-1">album</span>
               <%= user.profile.favoriteGenres[0] %>
             </p>
           <% } %>
 
           <div class="flex items-center text-gray-600 dark:text-gray-400">
-            <i class="material-icons text-sm mr-1">library_music</i>
+            <span class="material-icons text-sm mr-1">library_music</span>
             <%= totalRecords || 0 %> records
           </div>
         </div>
@@ -36,14 +36,13 @@
         <% } %>
       </div>
 
-      <!-- Right Side: Avatar and Settings -->
+      <!-- Profile Avatar -->
       <div class="flex items-center space-x-2">
-        <!-- Profile Avatar -->
         <div class="relative shrink-0">
           <img
             src="<%= user.profile?.avatarUrl || '/images/default-avatar.png' %>"
             alt="<%= user.profile?.name || user.username %>'s profile picture"
-            class="w-8 h-8 rounded-full object-cover border border-gray-200 dark:border-gray-700"
+            class="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
             onerror="this.src='/images/default-avatar.png'"
           />
               
@@ -51,271 +50,150 @@
             <div class="absolute -bottom-1 -right-1">
               <a 
                 href="/records/settings" 
-                class="p-0.5 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                class="p-1.5 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 title="Edit Profile"
               >
-                <i class="material-icons text-gray-600 dark:text-gray-300 text-xs">edit</i>
+                <span class="material-icons text-gray-600 dark:text-gray-300 text-base">edit</span>
               </a>
             </div>
           <% } %>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- Settings Bar -->
-        <% if (user._id.toString() === currentUser?._id.toString()) { %>
-        <div class="flex space-x-1">
-          <!-- Theme Toggle -->
-          <button 
-            class="p-1 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-            onclick="toggleTheme()"
-            title="Toggle theme"
-          >
-            <i class="material-icons text-gray-600 dark:text-gray-300 text-sm">
-              <%= user.profile?.theme === 'dark' ? 'light_mode' : 'dark_mode' %>
-            </i>
-          </button>
-
-          <!-- Privacy Toggle -->
-          <button 
-            class="p-1 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-            onclick="togglePrivacy()"
-            title="<%= user.isPublic ? 'Make profile private' : 'Make profile public' %>"
-          >
-            <i class="material-icons text-gray-600 dark:text-gray-300 text-sm">
-              <%= user.isPublic ? 'public' : 'lock' %>
-            </i>
-          </button>
-
-          <!-- Stats Visibility Toggle -->
-          <button 
-            class="p-1 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-            onclick="toggleStats()"
-            title="<%= user.profile?.showStats ? 'Hide stats' : 'Show stats' %>"
-          >
-            <i class="material-icons text-gray-600 dark:text-gray-300 text-sm">
-              <%= user.profile?.showStats ? 'visibility' : 'visibility_off' %>
-            </i>
-          </button>
-
-          <% if (user.isAdmin) { %>
-            <!-- Admin Analytics Link -->
-            <a 
-              href="/admin/analytics" 
-              class="p-1 rounded-full bg-red-500 hover:bg-red-600 transition-colors"
-              title="Admin Analytics"
-            >
-              <i class="material-icons text-white text-sm">analytics</i>
-            </a>
-          <% } %>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column: Stats and Info -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Stats Summary -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 <%= !user.profile?.showStats ? 'hidden' : '' %>" id="stats-section">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
+          <div class="text-2xl font-bold text-primary dark:text-primary-light mb-1"><%= totalRecords || 0 %></div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">Records</div>
         </div>
-        <% } %>
-      </div>
-    </div>
-  </div>
-
-  <!-- Favorite Genres -->
-  <% if (user.profile?.favoriteGenres?.length > 0) { %>
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-      <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Favorite Genres</h3>
-      <div class="flex flex-wrap gap-2">
-        <% user.profile.favoriteGenres.forEach(genre => { %>
-          <span class="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">
-            <%= genre %>
-          </span>
-        <% }); %>
-      </div>
-    </div>
-  <% } %>
-
-  <!-- Stats Summary -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6 <%= !user.profile?.showStats ? 'hidden' : '' %>" id="stats-section">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 text-center hover:shadow-xl transition-shadow duration-200">
-      <h3 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2"><%= totalRecords || 0 %></h3>
-      <p class="text-sm text-gray-600 dark:text-gray-400">Records</p>
-    </div>
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 text-center hover:shadow-xl transition-shadow duration-200">
-      <h3 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2"><%= totalPlays || 0 %></h3>
-      <p class="text-sm text-gray-600 dark:text-gray-400">Total Plays</p>
-    </div>
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 text-center hover:shadow-xl transition-shadow duration-200">
-      <h3 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2"><%= user.followers?.length || 0 %></h3>
-      <p class="text-sm text-gray-600 dark:text-gray-400">Followers</p>
-    </div>
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 text-center hover:shadow-xl transition-shadow duration-200">
-      <h3 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2"><%= user.following?.length || 0 %></h3>
-      <p class="text-sm text-gray-600 dark:text-gray-400">Following</p>
-    </div>
-  </div>
-
-  <!-- Collection Stats -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-    <h3 class="text-lg font-semibold mb-6 text-gray-800 dark:text-gray-200">Collection Stats</h3>
-    
-    <!-- Genre Distribution -->
-    <div class="mb-8">
-      <h4 class="text-base font-medium mb-4 text-gray-700 dark:text-gray-300">Genre Distribution</h4>
-      <div class="space-y-4">
-        <% Object.entries(genreDistribution)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5)
-            .forEach(([genre, count]) => { %>
-          <div class="relative">
-            <div class="flex justify-between mb-1">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300"><%= genre %></span>
-              <span class="text-sm text-gray-600 dark:text-gray-400"><%= count %> records</span>
-            </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div class="bg-blue-500 h-2 rounded-full transition-all duration-300" 
-                   style="--w: <%= Math.round((count / totalRecords * 100)) %>%; width: var(--w)"></div>
-            </div>
-          </div>
-        <% }); %>
-      </div>
-    </div>
-
-    <!-- Decade Distribution -->
-    <div>
-      <h4 class="text-base font-medium mb-4 text-gray-700 dark:text-gray-300">Decade Distribution</h4>
-      <div class="space-y-4">
-        <% Object.entries(decadeDistribution)
-            .sort((a, b) => a[0].localeCompare(b[0]))
-            .forEach(([decade, count]) => { %>
-          <div class="relative">
-            <div class="flex justify-between mb-1">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300"><%= decade %></span>
-              <span class="text-sm text-gray-600 dark:text-gray-400"><%= count %> records</span>
-            </div>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div class="bg-blue-500 h-2 rounded-full transition-all duration-300" 
-                   style="--w: <%= Math.round((count / totalRecords * 100)) %>%; width: var(--w)"></div>
-            </div>
-          </div>
-        <% }); %>
-      </div>
-    </div>
-  </div>
-
-  <!-- Featured Post -->
-  <% if (featuredPost) { %>
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-      <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Featured Post</h3>
-      <div class="space-y-4">
-        <% if (featuredPost.imageUrl) { %>
-          <img 
-            src="<%= featuredPost.imageUrl %>" 
-            alt="Featured post image" 
-            class="w-full rounded-lg object-cover max-h-96"
-          >
-        <% } %>
-        <p class="text-gray-700 dark:text-gray-300 text-lg leading-relaxed"><%= featuredPost.content %></p>
-        <% if (featuredPost.recordRef) { %>
-          <div class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <img 
-              src="<%= featuredPost.recordRef.imageUrl || '/images/default-album.png' %>" 
-              alt="<%= featuredPost.recordRef.title %>"
-              class="w-12 h-12 rounded-lg object-cover"
-            >
-            <div class="ml-3">
-              <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100"><%= featuredPost.recordRef.title %></h4>
-              <p class="text-xs text-gray-600 dark:text-gray-400"><%= featuredPost.recordRef.artist %></p>
-            </div>
-          </div>
-        <% } %>
-        <div class="flex gap-4 text-gray-600 dark:text-gray-400">
-          <span class="flex items-center">
-            <i class="material-icons text-sm mr-1">favorite</i>
-            <%= featuredPost.likes?.length || 0 %>
-          </span>
-          <span class="flex items-center">
-            <i class="material-icons text-sm mr-1">comment</i>
-            <%= featuredPost.comments?.length || 0 %>
-          </span>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
+          <div class="text-2xl font-bold text-primary dark:text-primary-light mb-1"><%= totalPlays || 0 %></div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">Total Plays</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
+          <div class="text-2xl font-bold text-primary dark:text-primary-light mb-1"><%= user.followers?.length || 0 %></div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">Followers</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
+          <div class="text-2xl font-bold text-primary dark:text-primary-light mb-1"><%= user.following?.length || 0 %></div>
+          <div class="text-sm text-gray-600 dark:text-gray-400">Following</div>
         </div>
       </div>
-    </div>
-  <% } %>
 
-  <!-- Top 8 Records -->
-  <% if (user.profile?.top8Records?.length > 0) { %>
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-      <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Top 8 Records</h3>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <% top8Records.forEach(record => { %>
-          <div class="relative group">
-            <img
-              src="<%= record.imageUrl || '/images/default-album.png' %>"
-              alt="<%= record.title %> by <%= record.artist %>"
-              class="w-full h-32 object-cover rounded-lg shadow-md"
-              onerror="this.src='/images/default-album.png'"
-            />
-            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg flex flex-col justify-end p-2">
-              <h5 class="text-white text-sm font-medium truncate"><%= record.title %></h5>
-              <p class="text-gray-300 text-xs truncate"><%= record.artist %></p>
-            </div>
-          </div>
-        <% }); %>
-      </div>
-    </div>
-  <% } %>
-
-  <!-- Recent Activity Section -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Recently Added -->
-      <div>
-        <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Recently Added</h3>
-        <div class="space-y-3">
-          <% recentlyAdded.forEach(record => { %>
-            <a href="/records/<%= record._id %>" class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200">
-              <img 
-                src="<%= record.imageUrl || '/images/default-album.png' %>" 
-                alt="<%= record.title %>" 
-                class="w-12 h-12 rounded-lg object-cover"
-              >
-              <div class="ml-3 flex-grow">
-                <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100"><%= record.title %></h4>
-                <p class="text-xs text-gray-600 dark:text-gray-400">
-                  <%= record.artist %>
-                  <span class="mx-2">•</span>
-                  Added <%= new Date(record.createdAt).toLocaleDateString() %>
-                </p>
+      <!-- Collection Stats -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <h3 class="text-lg font-semibold mb-6 text-gray-800 dark:text-gray-200">Collection Stats</h3>
+        
+        <!-- Genre Distribution -->
+        <div class="mb-8">
+          <h4 class="text-base font-medium mb-4 text-gray-700 dark:text-gray-300">Genre Distribution</h4>
+          <div class="space-y-4">
+            <% Object.entries(genreDistribution)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .forEach(([genre, count]) => { %>
+              <div class="relative">
+                <div class="flex justify-between mb-1">
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300"><%= genre %></span>
+                  <span class="text-sm text-gray-600 dark:text-gray-400"><%= count %> records</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div class="bg-primary dark:bg-primary-light h-2 rounded-full transition-all duration-300" 
+                       style="width: <%= Math.round((count / totalRecords * 100)) %>%"></div>
+                </div>
               </div>
-              <i class="material-icons text-gray-400">chevron_right</i>
-            </a>
-          <% }); %>
+            <% }); %>
+          </div>
+        </div>
+
+        <!-- Decade Distribution -->
+        <div>
+          <h4 class="text-base font-medium mb-4 text-gray-700 dark:text-gray-300">Decade Distribution</h4>
+          <div class="space-y-4">
+            <% Object.entries(decadeDistribution)
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .forEach(([decade, count]) => { %>
+              <div class="relative">
+                <div class="flex justify-between mb-1">
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300"><%= decade %></span>
+                  <span class="text-sm text-gray-600 dark:text-gray-400"><%= count %> records</span>
+                </div>
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div class="bg-primary dark:bg-primary-light h-2 rounded-full transition-all duration-300" 
+                       style="width: <%= Math.round((count / totalRecords * 100)) %>%"></div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
         </div>
       </div>
 
-      <!-- Recently Played -->
-      <div>
-        <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Recently Played</h3>
-        <div class="space-y-3">
-          <% recentlyPlayed.forEach(record => { %>
-            <a href="/records/<%= record._id %>" class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200">
-              <img 
-                src="<%= record.imageUrl || '/images/default-album.png' %>" 
-                alt="<%= record.title %>" 
-                class="w-12 h-12 rounded-lg object-cover"
-              >
-              <div class="ml-3 flex-grow">
-                <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100"><%= record.title %></h4>
-                <p class="text-xs text-gray-600 dark:text-gray-400">
-                  <%= record.artist %>
-                  <span class="mx-2">•</span>
-                  Played <%= new Date(record.lastPlayed).toLocaleDateString() %>
-                </p>
-              </div>
-              <i class="material-icons text-gray-400">chevron_right</i>
-            </a>
-          <% }); %>
+      <!-- Recent Activity -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <!-- Recently Added -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Recently Added</h3>
+          <div class="space-y-3">
+            <% recentlyAdded.forEach(record => { %>
+              <a href="/records/<%= record._id %>" class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200">
+                <img 
+                  src="<%= record.imageUrl || '/images/default-album.png' %>" 
+                  alt="<%= record.title %>" 
+                  class="w-12 h-12 rounded-lg object-cover"
+                >
+                <div class="ml-3 flex-grow">
+                  <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100"><%= record.title %></h4>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">
+                    <%= record.artist %>
+                    <span class="mx-2">•</span>
+                    Added <%= new Date(record.createdAt).toLocaleDateString() %>
+                  </p>
+                </div>
+                <span class="material-icons text-gray-400">chevron_right</span>
+              </a>
+            <% }); %>
+          </div>
+        </div>
+
+        <!-- Recently Played -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+          <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Recently Played</h3>
+          <div class="space-y-3">
+            <% recentlyPlayed.forEach(record => { %>
+              <a href="/records/<%= record._id %>" class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200">
+                <img 
+                  src="<%= record.imageUrl || '/images/default-album.png' %>" 
+                  alt="<%= record.title %>" 
+                  class="w-12 h-12 rounded-lg object-cover"
+                >
+                <div class="ml-3 flex-grow">
+                  <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100"><%= record.title %></h4>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">
+                    <%= record.artist %>
+                    <span class="mx-2">•</span>
+                    Played <%= new Date(record.lastPlayed).toLocaleDateString() %>
+                  </p>
+                </div>
+                <span class="material-icons text-gray-400">chevron_right</span>
+              </a>
+            <% }); %>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Social Feed Section -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
-    <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Social Feed</h3>
-    <div id="social-feed-root"></div>
+    <!-- Right Column: Social Feed -->
+    <div class="lg:col-span-1">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 sticky top-24">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Social Feed</h3>
+        <div id="social-feed-root"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -343,103 +221,6 @@
   } catch (error) {
     console.error('Error mounting Social Feed component:', error);
   }
-</script>
-
-<!-- Social Feed Styles -->
-<link rel="stylesheet" href="/stylesheets/social.css">
-
-<!-- AJAX Functions -->
-<script>
-  async function togglePrivacy() {
-    try {
-      const response = await fetch('/api/profile/privacy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const icon = document.querySelector('.privacy-toggle i');
-        icon.textContent = data.isPublic ? 'public' : 'lock';
-        
-        // Update button title
-        const button = document.querySelector('.privacy-toggle');
-        button.title = data.isPublic ? 'Make profile private' : 'Make profile public';
-        
-        M.toast({html: `Profile is now ${data.isPublic ? 'public' : 'private'}`});
-      }
-    } catch (error) {
-      console.error('Error toggling privacy:', error);
-      M.toast({html: 'Error updating privacy settings'});
-    }
-  }
-
-  async function toggleStats() {
-    try {
-      const response = await fetch('/api/profile/stats', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        const icon = document.querySelector('.stats-toggle i');
-        icon.textContent = data.showStats ? 'visibility' : 'visibility_off';
-        
-        // Update button title
-        const button = document.querySelector('.stats-toggle');
-        button.title = data.showStats ? 'Hide stats' : 'Show stats';
-        
-        // Toggle stats section visibility
-        const statsSection = document.getElementById('stats-section');
-        statsSection.classList.toggle('hidden', !data.showStats);
-        
-        M.toast({html: `Stats are now ${data.showStats ? 'visible' : 'hidden'}`});
-      }
-    } catch (error) {
-      console.error('Error toggling stats:', error);
-      M.toast({html: 'Error updating stats visibility'});
-    }
-  }
-
-  function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    fetch('/api/profile/theme', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ theme: newTheme })
-    })
-    .then(response => response.json())
-    .then(data => {
-      document.documentElement.setAttribute('data-theme', data.theme);
-      const icon = document.querySelector('.theme-toggle i');
-      icon.textContent = data.theme === 'dark' ? 'light_mode' : 'dark_mode';
-      M.toast({html: `Theme switched to ${data.theme} mode`});
-    })
-    .catch(error => {
-      console.error('Error toggling theme:', error);
-      M.toast({html: 'Error updating theme'});
-    });
-  }
-</script>
-
-<!-- Set Banner Image -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const banner = document.querySelector('[data-banner-url]');
-    if (banner) {
-      const url = banner.getAttribute('data-banner-url');
-      banner.style.backgroundImage = `url('${url}')`;
-    }
-  });
 </script>
 
 <%- include('../partials/footer.ejs') %>
