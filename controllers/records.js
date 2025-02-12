@@ -682,26 +682,47 @@ router.get('/:id/edit', asyncHandler(async (req, res) => {
 
 // Track record play
 router.post('/:id/play', asyncHandler(async (req, res) => {
-    const record = await validateOwnership(req.params.id, req.user._id, req.user.isAdmin);
-    
-    // Increment plays and update last played date
-    record.plays = (record.plays || 0) + 1;
-    record.lastPlayed = new Date();
-    await record.save();
+    try {
+        const record = await Record.findById(req.params.id);
+        if (!record) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Record not found' 
+            });
+        }
 
-    // Create activity for play
-    await Activity.create({
-        user: req.user._id,
-        record: record._id,
-        activityType: 'play_record'
-    });
+        if (record.owner.toString() !== req.user._id.toString() && !req.user.isAdmin) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Unauthorized' 
+            });
+        }
+        
+        // Increment plays and update last played date
+        record.plays = (record.plays || 0) + 1;
+        record.lastPlayed = new Date();
+        await record.save();
 
-    // Return JSON response for AJAX request
-    res.json({ 
-        success: true, 
-        plays: record.plays,
-        message: 'Play tracked successfully'
-    });
+        // Create activity for play
+        await Activity.create({
+            user: req.user._id,
+            record: record._id,
+            activityType: 'play_record'
+        });
+
+        // Return JSON response for AJAX request
+        res.json({ 
+            success: true, 
+            plays: record.plays,
+            message: 'Play tracked successfully'
+        });
+    } catch (error) {
+        console.error('Play tracking error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Failed to track play' 
+        });
+    }
 }));
 
 // Update record
