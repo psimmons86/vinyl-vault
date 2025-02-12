@@ -58,8 +58,8 @@ const albumArtUpload = multer({
 
 // Utility function to validate record ownership
 const validateOwnership = async (recordId, userId, isAdmin = false) => {
-    const record = await Record.findById(recordId);
-    if (!record || (!isAdmin && record.owner.toString() !== userId.toString())) {
+    const record = await Record.findOne({ _id: recordId, owner: userId });
+    if (!record && !isAdmin) {
         throw new Error('Record not found or unauthorized');
     }
     return record;
