@@ -397,7 +397,7 @@ router.post('/import-discogs', asyncHandler(async (req, res) => {
         await Activity.create({
             user: req.user._id,
             activityType: 'add_record',
-            details: { 
+            details: {
                 action: 'import',
                 source: 'Discogs',
                 count: createdRecords.length
@@ -786,11 +786,11 @@ router.delete('/:id', asyncHandler(async (req, res) => {
         user: req.user._id,
         activityType: 'play_record',
         record: record._id,
-        details: { 
-            action: 'delete',
-            recordTitle: record.title,
-            recordArtist: record.artist
-        }
+                details: {
+                    action: 'delete',
+                    recordTitle: record.title,
+                    recordArtist: record.artist
+                }
     });
 
     // Then delete the record
