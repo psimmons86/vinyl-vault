@@ -1,231 +1,88 @@
 <%- include('../partials/header') %>
 
-<div class="container section">
-    <div class="row">
-        <div class="col s12">
-            <div class="search-header">
-                <div class="search-bar">
-                    <div class="input-field">
-                        <i class="fas fa-search prefix"></i>
-                        <input type="text" id="search" value="<%= query %>" 
-                               autocomplete="off" placeholder="Search users...">
-                        <div class="search-suggestions"></div>
-                    </div>
-                </div>
-                
-                <div class="search-filters">
-                    <div class="input-field">
-                        <select id="filter">
-                            <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All Users</option>
-                            <option value="collectors" <%= filter === 'collectors' ? 'selected' : '' %>>Collectors (50+ Records)</option>
-                            <option value="active" <%= filter === 'active' ? 'selected' : '' %>>Recently Active</option>
-                            <option value="new" <%= filter === 'new' ? 'selected' : '' %>>New Users</option>
-                        </select>
-                        <label>Filter Results</label>
-                    </div>
-                </div>
+<div class="container mx-auto px-4 py-6">
+    <!-- Search Header -->
+    <div class="sticky top-16 bg-white dark:bg-gray-800 z-30 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <!-- Search Bar -->
+        <div class="relative mb-4">
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <span class="material-icons">search</span>
+                </span>
+                <input type="text" 
+                       id="search" 
+                       value="<%= query %>" 
+                       class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light"
+                       placeholder="Search users by username, name, or bio..."
+                       autocomplete="off">
             </div>
+            <!-- Search Suggestions -->
+            <div class="search-suggestions absolute w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden divide-y divide-gray-200 dark:divide-gray-700"></div>
+        </div>
 
-            <div id="searchResults"></div>
-            <div id="pagination" class="center-align"></div>
+        <!-- Filters -->
+        <div class="flex items-center space-x-4">
+            <select id="filter" class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-4 py-2">
+                <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All Users</option>
+                <option value="collectors" <%= filter === 'collectors' ? 'selected' : '' %>>Collectors (50+ Records)</option>
+                <option value="active" <%= filter === 'active' ? 'selected' : '' %>>Recently Active</option>
+                <option value="new" <%= filter === 'new' ? 'selected' : '' %>>New Users</option>
+            </select>
         </div>
     </div>
+
+    <!-- Results -->
+    <div id="searchResults" class="mt-6"></div>
+    
+    <!-- Pagination -->
+    <div id="pagination" class="flex justify-center mt-8 space-x-1"></div>
 </div>
 
 <template id="userCardTemplate">
-    <div class="user-card card hoverable">
-        <div class="card-content">
-            <div class="user-info">
-                <div class="user-avatar">
-                    <img src="" alt="" class="circle responsive-img">
-                </div>
-                <div class="user-details">
-                    <div class="user-header">
-                        <span class="username"></span>
-                        <span class="admin-badge blue white-text" style="display: none">Admin</span>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden mb-4">
+        <div class="p-4">
+            <!-- User Info -->
+            <div class="flex items-start space-x-4">
+                <img src="" alt="" class="w-16 h-16 rounded-full flex-shrink-0">
+                <div class="flex-grow min-w-0">
+                    <div class="flex items-center space-x-2 mb-1">
+                        <h3 class="text-lg font-medium truncate"></h3>
+                        <span class="hidden px-2 py-0.5 text-xs font-medium bg-primary text-white dark:bg-primary-light dark:text-gray-900 rounded-full admin-badge">Admin</span>
                     </div>
-                    <p class="bio grey-text"></p>
-                    <div class="user-stats">
-                        <span class="stat">
-                            <i class="fas fa-record-vinyl"></i>
-                            <span class="record-count"></span> records
+                    <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-2 bio"></p>
+                    <div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                        <span class="flex items-center space-x-1">
+                            <span class="material-icons text-sm">album</span>
+                            <span class="record-count"></span>
+                            <span>records</span>
                         </span>
-                        <span class="stat">
-                            <i class="fas fa-clock"></i>
+                        <span class="flex items-center space-x-1">
+                            <span class="material-icons text-sm">calendar_today</span>
                             <span class="joined-date"></span>
                         </span>
                     </div>
                 </div>
             </div>
-            <div class="recent-records">
-                <h6>Recent Records</h6>
-                <div class="records-grid"></div>
+            
+            <!-- Recent Records -->
+            <div class="mt-4">
+                <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Recent Records</h4>
+                <div class="grid grid-cols-3 gap-2 records-grid"></div>
             </div>
         </div>
-        <div class="card-action">
-            <a href="" class="view-profile blue-text">View Profile</a>
+        
+        <!-- Actions -->
+        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
+            <a href="" class="inline-flex items-center text-primary dark:text-primary-light hover:text-primary-dark dark:hover:text-primary view-profile">
+                <span>View Profile</span>
+                <span class="material-icons ml-1 text-sm">arrow_forward</span>
+            </a>
         </div>
     </div>
 </template>
 
-<style>
-.search-header {
-    margin-bottom: 2rem;
-    position: sticky;
-    top: 0;
-    background: white;
-    padding: 1rem 0;
-    z-index: 100;
-    border-bottom: 1px solid #eee;
-}
-
-.search-bar {
-    margin-bottom: 1rem;
-}
-
-.search-bar .input-field {
-    position: relative;
-}
-
-.search-suggestions {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    display: none;
-    z-index: 1000;
-}
-
-.suggestion-item {
-    padding: 0.5rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    cursor: pointer;
-}
-
-.suggestion-item:hover {
-    background: #f5f5f5;
-}
-
-.suggestion-item img {
-    width: 30px;
-    height: 30px;
-}
-
-.user-card {
-    margin: 1rem 0;
-}
-
-.user-info {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.user-avatar {
-    flex-shrink: 0;
-}
-
-.user-avatar img {
-    width: 80px;
-    height: 80px;
-}
-
-.user-details {
-    flex-grow: 1;
-}
-
-.user-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.username {
-    font-size: 1.2rem;
-    font-weight: 500;
-}
-
-.admin-badge {
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-}
-
-.bio {
-    margin: 0.5rem 0;
-    line-height: 1.4;
-}
-
-.user-stats {
-    display: flex;
-    gap: 1.5rem;
-    margin-top: 1rem;
-}
-
-.stat {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #666;
-}
-
-.records-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.record-thumb {
-    aspect-ratio: 1;
-    overflow: hidden;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.record-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-#pagination {
-    margin: 2rem 0;
-}
-
-.pagination-btn {
-    margin: 0 0.25rem;
-}
-
-@media (max-width: 600px) {
-    .user-info {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    .user-stats {
-        justify-content: center;
-    }
-
-    .records-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-</style>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Materialize components
-    M.FormSelect.init(document.querySelectorAll('select'));
-    
     const searchInput = document.getElementById('search');
     const filterSelect = document.getElementById('filter');
     const resultsContainer = document.getElementById('searchResults');
@@ -279,10 +136,11 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (users.length > 0) {
                 suggestionsContainer.innerHTML = users.map(user => `
-                    <div class="suggestion-item" data-username="${user.username}">
+                    <div class="flex items-center space-x-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer suggestion-item" data-username="${user.username}">
                         <img src="${user.avatar || '/images/default-avatar.png'}" 
-                             alt="${user.username}" class="circle">
-                        <span>${user.username}</span>
+                             alt="${user.username}" 
+                             class="w-8 h-8 rounded-full">
+                        <span class="text-gray-900 dark:text-gray-100">${user.username}</span>
                     </div>
                 `).join('');
                 
@@ -320,8 +178,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error performing search:', error);
             resultsContainer.innerHTML = `
-                <div class="card-panel red white-text">
-                    Error performing search. Please try again.
+                <div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg text-center">
+                    <span class="material-icons mb-2">error_outline</span>
+                    <p>Error performing search. Please try again.</p>
                 </div>
             `;
         }
@@ -331,7 +190,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function displayResults(users) {
         if (users.length === 0) {
             resultsContainer.innerHTML = `
-                <div class="card-panel">No users found matching your search.</div>
+                <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <span class="material-icons text-4xl mb-2">search_off</span>
+                    <p>No users found matching your search.</p>
+                </div>
             `;
             return;
         }
@@ -343,9 +205,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const card = template.content.cloneNode(true);
             
             // Set user info
-            card.querySelector('.user-avatar img').src = user.avatar || '/images/default-avatar.png';
-            card.querySelector('.user-avatar img').alt = user.username;
-            card.querySelector('.username').textContent = user.username;
+            const img = card.querySelector('img');
+            img.src = user.avatar || '/images/default-avatar.png';
+            img.alt = user.username;
+            card.querySelector('h3').textContent = user.username;
             card.querySelector('.bio').textContent = user.bio || 'No bio provided';
             card.querySelector('.record-count').textContent = user.recordCount || 0;
             card.querySelector('.joined-date').textContent = 
@@ -356,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Show admin badge if applicable
             if (user.isAdmin) {
-                card.querySelector('.admin-badge').style.display = 'inline-block';
+                card.querySelector('.admin-badge').classList.remove('hidden');
             }
             
             // Set profile link
@@ -365,28 +228,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add recent records
             const recordsGrid = card.querySelector('.records-grid');
             if (user.recentRecords && user.recentRecords.length > 0) {
-                user.recentRecords.forEach(record => {
-                    const thumb = document.createElement('div');
-                    thumb.className = 'record-thumb tooltipped';
-                    thumb.setAttribute('data-position', 'top');
-                    thumb.setAttribute('data-tooltip', `${record.title} - ${record.artist}`);
-                    
-                    const img = document.createElement('img');
-                    img.src = record.imageUrl || '/images/default-album.png';
-                    img.alt = record.title;
-                    
-                    thumb.appendChild(img);
-                    recordsGrid.appendChild(thumb);
-                });
+                recordsGrid.innerHTML = user.recentRecords.map(record => `
+                    <div class="aspect-square rounded overflow-hidden bg-gray-100 dark:bg-gray-900" title="${record.title} - ${record.artist}">
+                        <img src="${record.imageUrl || '/images/default-album.png'}" 
+                             alt="${record.title}"
+                             class="w-full h-full object-cover">
+                    </div>
+                `).join('');
             } else {
-                recordsGrid.innerHTML = '<p class="grey-text">No records yet</p>';
+                recordsGrid.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">No records yet</p>';
             }
             
             resultsContainer.appendChild(card);
         });
-        
-        // Initialize tooltips
-        M.Tooltip.init(document.querySelectorAll('.tooltipped'));
     }
 
     // Update pagination
@@ -396,17 +250,16 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        let paginationHtml = '<ul class="pagination">';
+        const pages = [];
         
         // Previous button
-        paginationHtml += `
-            <li class="${currentPage === 1 ? 'disabled' : 'waves-effect'}">
-                <a href="#!" data-page="${currentPage - 1}" 
-                   class="${currentPage === 1 ? 'disabled' : ''}">
-                    <i class="fas fa-chevron-left"></i>
-                </a>
-            </li>
-        `;
+        pages.push(`
+            <button data-page="${currentPage - 1}" 
+                    class="p-2 rounded-lg ${currentPage === 1 ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}"
+                    ${currentPage === 1 ? 'disabled' : ''}>
+                <span class="material-icons">chevron_left</span>
+            </button>
+        `);
         
         // Page numbers
         for (let i = 1; i <= totalPages; i++) {
@@ -415,37 +268,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 i === totalPages || 
                 (i >= currentPage - 2 && i <= currentPage + 2)
             ) {
-                paginationHtml += `
-                    <li class="${i === currentPage ? 'active blue' : 'waves-effect'}">
-                        <a href="#!" data-page="${i}">${i}</a>
-                    </li>
-                `;
+                pages.push(`
+                    <button data-page="${i}" 
+                            class="px-3 py-1 rounded-lg ${i === currentPage 
+                                ? 'bg-primary text-white dark:bg-primary-light dark:text-gray-900' 
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}">
+                        ${i}
+                    </button>
+                `);
             } else if (
                 i === currentPage - 3 || 
                 i === currentPage + 3
             ) {
-                paginationHtml += '<li class="disabled"><a href="#!">...</a></li>';
+                pages.push(`
+                    <span class="px-2 text-gray-400 dark:text-gray-600">...</span>
+                `);
             }
         }
         
         // Next button
-        paginationHtml += `
-            <li class="${currentPage === totalPages ? 'disabled' : 'waves-effect'}">
-                <a href="#!" data-page="${currentPage + 1}" 
-                   class="${currentPage === totalPages ? 'disabled' : ''}">
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-            </li>
-        `;
+        pages.push(`
+            <button data-page="${currentPage + 1}" 
+                    class="p-2 rounded-lg ${currentPage === totalPages ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}"
+                    ${currentPage === totalPages ? 'disabled' : ''}>
+                <span class="material-icons">chevron_right</span>
+            </button>
+        `);
         
-        paginationHtml += '</ul>';
-        paginationContainer.innerHTML = paginationHtml;
+        paginationContainer.innerHTML = pages.join('');
         
         // Add click handlers
-        paginationContainer.querySelectorAll('a[data-page]').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (!this.classList.contains('disabled')) {
+        paginationContainer.querySelectorAll('button[data-page]').forEach(button => {
+            button.addEventListener('click', function(e) {
+                if (!this.hasAttribute('disabled')) {
                     currentPage = parseInt(this.dataset.page);
                     performSearch();
                     window.scrollTo({ top: 0, behavior: 'smooth' });
