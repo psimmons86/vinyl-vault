@@ -2,6 +2,35 @@
 const ActivityCard = ({ activity }) => {
     const renderContent = () => {
         switch (activity.activityType) {
+            case 'signup':
+                return (
+                    <div>
+                        <p>joined Vinyl Vault!</p>
+                    </div>
+                );
+            case 'update_profile_picture':
+                return (
+                    <div>
+                        <p>updated their profile picture</p>
+                        {activity.details?.imageUrl && (
+                            <div className="card">
+                                <div className="card-image">
+                                    <img 
+                                        src={activity.details.imageUrl} 
+                                        alt="New profile picture"
+                                        className="responsive-img"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                );
+            case 'update_location':
+                return (
+                    <div>
+                        <p>updated their location to {activity.details?.location}</p>
+                    </div>
+                );
             case 'add_record':
                 return (
                     <div>
