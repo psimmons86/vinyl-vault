@@ -1,48 +1,16 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="container mx-auto px-4 py-6">
+<div class="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
   <!-- Profile Header -->
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-6">
-    <div class="flex items-center justify-between">
-      <!-- Profile Info -->
-      <div class="flex-grow">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          <%= user.profile?.name || user.username %>
-        </h2>
-        
-        <div class="flex items-center gap-4 text-sm">
-          <% if (user.profile?.location) { %>
-            <p class="flex items-center text-gray-600 dark:text-gray-400">
-              <span class="material-icons text-sm mr-1">location_on</span>
-              <%= user.profile.location %>
-            </p>
-          <% } %>
-
-          <% if (user.profile?.favoriteGenres?.length > 0) { %>
-            <p class="flex items-center text-gray-600 dark:text-gray-400">
-              <span class="material-icons text-sm mr-1">album</span>
-              <%= user.profile.favoriteGenres[0] %>
-            </p>
-          <% } %>
-
-          <div class="flex items-center text-gray-600 dark:text-gray-400">
-            <span class="material-icons text-sm mr-1">library_music</span>
-            <%= totalRecords || 0 %> records
-          </div>
-        </div>
-
-        <% if (user.profile?.bio) { %>
-          <p class="text-gray-700 dark:text-gray-300 mt-3"><%= user.profile.bio %></p>
-        <% } %>
-      </div>
-
-      <!-- Profile Avatar -->
-      <div class="flex items-center space-x-2">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 sm:p-4 mb-4 sm:mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
+      <!-- Profile Avatar (Shown first on mobile) -->
+      <div class="flex justify-center sm:justify-start sm:order-2">
         <div class="relative shrink-0">
           <img
             src="<%= user.profile?.avatarUrl || '/images/default-avatar.png' %>"
             alt="<%= user.profile?.name || user.username %>'s profile picture"
-            class="w-24 h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
+            class="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
             onerror="this.src='/images/default-avatar.png'"
           />
               
@@ -59,51 +27,83 @@
           <% } %>
         </div>
       </div>
+
+      <!-- Profile Info -->
+      <div class="flex-grow text-center sm:text-left sm:order-1">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <%= user.profile?.name || user.username %>
+        </h2>
+        
+        <div class="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-4 text-xs sm:text-sm">
+          <% if (user.profile?.location) { %>
+            <p class="flex items-center text-gray-600 dark:text-gray-400">
+              <span class="material-icons text-base sm:text-lg mr-1">location_on</span>
+              <%= user.profile.location %>
+            </p>
+          <% } %>
+
+          <% if (user.profile?.favoriteGenres?.length > 0) { %>
+            <p class="flex items-center text-gray-600 dark:text-gray-400">
+              <span class="material-icons text-base sm:text-lg mr-1">album</span>
+              <%= user.profile.favoriteGenres[0] %>
+            </p>
+          <% } %>
+
+          <div class="flex items-center text-gray-600 dark:text-gray-400">
+            <span class="material-icons text-base sm:text-lg mr-1">library_music</span>
+            <%= totalRecords || 0 %> records
+          </div>
+        </div>
+
+        <% if (user.profile?.bio) { %>
+          <p class="text-sm sm:text-base text-gray-700 dark:text-gray-300 mt-3"><%= user.profile.bio %></p>
+        <% } %>
+      </div>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Left Column: Stats and Info -->
-    <div class="lg:col-span-2 space-y-6">
-      <!-- Stats Summary -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 <%= !user.profile?.showStats ? 'hidden' : '' %>" id="stats-section">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
-          <div class="text-2xl font-bold text-primary dark:text-primary-light mb-1"><%= totalRecords || 0 %></div>
-          <div class="text-sm text-gray-600 dark:text-gray-400">Records</div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
-          <div class="text-2xl font-bold text-primary dark:text-primary-light mb-1"><%= totalPlays || 0 %></div>
-          <div class="text-sm text-gray-600 dark:text-gray-400">Total Plays</div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
-          <div class="text-2xl font-bold text-primary dark:text-primary-light mb-1"><%= user.followers?.length || 0 %></div>
-          <div class="text-sm text-gray-600 dark:text-gray-400">Followers</div>
-        </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
-          <div class="text-2xl font-bold text-primary dark:text-primary-light mb-1"><%= user.following?.length || 0 %></div>
-          <div class="text-sm text-gray-600 dark:text-gray-400">Following</div>
-        </div>
-      </div>
+  <!-- Stats Summary -->
+  <div class="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-4 mb-4 sm:mb-6 <%= !user.profile?.showStats ? 'hidden' : '' %>" id="stats-section">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 text-center">
+      <div class="text-xl sm:text-2xl font-bold text-primary dark:text-primary-light mb-1"><%= totalRecords || 0 %></div>
+      <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Records</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 text-center">
+      <div class="text-xl sm:text-2xl font-bold text-primary dark:text-primary-light mb-1"><%= totalPlays || 0 %></div>
+      <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total Plays</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 text-center">
+      <div class="text-xl sm:text-2xl font-bold text-primary dark:text-primary-light mb-1"><%= user.followers?.length || 0 %></div>
+      <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Followers</div>
+    </div>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-3 sm:p-4 text-center">
+      <div class="text-xl sm:text-2xl font-bold text-primary dark:text-primary-light mb-1"><%= user.following?.length || 0 %></div>
+      <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Following</div>
+    </div>
+  </div>
 
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+    <!-- Left Column: Stats and Info -->
+    <div class="lg:col-span-2 space-y-4 sm:space-y-6">
       <!-- Collection Stats -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <h3 class="text-lg font-semibold mb-6 text-gray-800 dark:text-gray-200">Collection Stats</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6">
+        <h3 class="text-base sm:text-lg font-semibold mb-4 sm:mb-6 text-gray-800 dark:text-gray-200">Collection Stats</h3>
         
         <!-- Genre Distribution -->
-        <div class="mb-8">
-          <h4 class="text-base font-medium mb-4 text-gray-700 dark:text-gray-300">Genre Distribution</h4>
-          <div class="space-y-4">
+        <div class="mb-6 sm:mb-8">
+          <h4 class="text-sm sm:text-base font-medium mb-3 sm:mb-4 text-gray-700 dark:text-gray-300">Genre Distribution</h4>
+          <div class="space-y-3 sm:space-y-4">
             <% Object.entries(genreDistribution)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 5)
                 .forEach(([genre, count]) => { %>
               <div class="relative">
                 <div class="flex justify-between mb-1">
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300"><%= genre %></span>
-                  <span class="text-sm text-gray-600 dark:text-gray-400"><%= count %> records</span>
+                  <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300"><%= genre %></span>
+                  <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400"><%= count %> records</span>
                 </div>
-                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div class="bg-primary dark:bg-primary-light h-2 rounded-full transition-all duration-300" 
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 sm:h-2">
+                  <div class="bg-primary dark:bg-primary-light h-1.5 sm:h-2 rounded-full transition-all duration-300" 
                        style="width: <%= Math.round((count / totalRecords * 100)) %>%"></div>
                 </div>
               </div>
@@ -113,18 +113,18 @@
 
         <!-- Decade Distribution -->
         <div>
-          <h4 class="text-base font-medium mb-4 text-gray-700 dark:text-gray-300">Decade Distribution</h4>
-          <div class="space-y-4">
+          <h4 class="text-sm sm:text-base font-medium mb-3 sm:mb-4 text-gray-700 dark:text-gray-300">Decade Distribution</h4>
+          <div class="space-y-3 sm:space-y-4">
             <% Object.entries(decadeDistribution)
                 .sort((a, b) => a[0].localeCompare(b[0]))
                 .forEach(([decade, count]) => { %>
               <div class="relative">
                 <div class="flex justify-between mb-1">
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300"><%= decade %></span>
-                  <span class="text-sm text-gray-600 dark:text-gray-400"><%= count %> records</span>
+                  <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300"><%= decade %></span>
+                  <span class="text-xs sm:text-sm text-gray-600 dark:text-gray-400"><%= count %> records</span>
                 </div>
-                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div class="bg-primary dark:bg-primary-light h-2 rounded-full transition-all duration-300" 
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 sm:h-2">
+                  <div class="bg-primary dark:bg-primary-light h-1.5 sm:h-2 rounded-full transition-all duration-300" 
                        style="width: <%= Math.round((count / totalRecords * 100)) %>%"></div>
                 </div>
               </div>
@@ -134,52 +134,52 @@
       </div>
 
       <!-- Recent Activity -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
         <!-- Recently Added -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-          <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Recently Added</h3>
-          <div class="space-y-3">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6">
+          <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-gray-200">Recently Added</h3>
+          <div class="space-y-2 sm:space-y-3">
             <% recentlyAdded.forEach(record => { %>
               <a href="/records/<%= record._id %>" class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200">
                 <img 
                   src="<%= record.imageUrl || '/images/default-album.png' %>" 
                   alt="<%= record.title %>" 
-                  class="w-12 h-12 rounded-lg object-cover"
+                  class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover"
                 >
-                <div class="ml-3 flex-grow">
-                  <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100"><%= record.title %></h4>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">
+                <div class="ml-2 sm:ml-3 flex-grow min-w-0">
+                  <h4 class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate"><%= record.title %></h4>
+                  <p class="text-xs text-gray-600 dark:text-gray-400 truncate">
                     <%= record.artist %>
-                    <span class="mx-2">•</span>
+                    <span class="mx-1 sm:mx-2">•</span>
                     Added <%= new Date(record.createdAt).toLocaleDateString() %>
                   </p>
                 </div>
-                <span class="material-icons text-gray-400">chevron_right</span>
+                <span class="material-icons text-gray-400 text-base sm:text-lg ml-1">chevron_right</span>
               </a>
             <% }); %>
           </div>
         </div>
 
         <!-- Recently Played -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-          <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Recently Played</h3>
-          <div class="space-y-3">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6">
+          <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-gray-200">Recently Played</h3>
+          <div class="space-y-2 sm:space-y-3">
             <% recentlyPlayed.forEach(record => { %>
               <a href="/records/<%= record._id %>" class="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200">
                 <img 
                   src="<%= record.imageUrl || '/images/default-album.png' %>" 
                   alt="<%= record.title %>" 
-                  class="w-12 h-12 rounded-lg object-cover"
+                  class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover"
                 >
-                <div class="ml-3 flex-grow">
-                  <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100"><%= record.title %></h4>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">
+                <div class="ml-2 sm:ml-3 flex-grow min-w-0">
+                  <h4 class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate"><%= record.title %></h4>
+                  <p class="text-xs text-gray-600 dark:text-gray-400 truncate">
                     <%= record.artist %>
-                    <span class="mx-2">•</span>
+                    <span class="mx-1 sm:mx-2">•</span>
                     Played <%= new Date(record.lastPlayed).toLocaleDateString() %>
                   </p>
                 </div>
-                <span class="material-icons text-gray-400">chevron_right</span>
+                <span class="material-icons text-gray-400 text-base sm:text-lg ml-1">chevron_right</span>
               </a>
             <% }); %>
           </div>
@@ -189,8 +189,8 @@
 
     <!-- Right Column: Social Feed -->
     <div class="lg:col-span-1">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 sticky top-24">
-        <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Social Feed</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6 lg:sticky lg:top-24">
+        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800 dark:text-gray-200">Social Feed</h3>
         <div id="social-feed-root"></div>
       </div>
     </div>
