@@ -288,21 +288,49 @@ document.addEventListener('DOMContentLoaded', function() {
     
     searchInput.addEventListener('input', (e) => {
         clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
+        searchTimeout = setTimeout(async () => {
             const query = e.target.value.trim();
-            if (query.length > 0) {
-                // Show loading state
-                container.classList.add('hidden');
-                loadingState.classList.remove('hidden');
+            
+            // Show loading state
+            container.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            
+            try {
+                // Make API request
+                const response = await fetch(`/records?search=${encodeURIComponent(query)}&json=true`, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
                 
-                // Simulate search delay
-                setTimeout(() => {
-                    // Hide loading state
-                    container.classList.remove('hidden');
-                    loadingState.classList.add('hidden');
-                    
-                    console.log('Searching for:', query);
-                }, 1000);
+                if (!response.ok) throw new Error('Search failed');
+                
+                const data = await response.json();
+                
+                // Update records container
+                container.innerHTML = data.records.map(record => `
+                    <div class="record-card group ${container.dataset.view === 'list' ? 'flex items-center gap-4' : ''}">
+                        <a href="/records/${record._id}" class="block active:opacity-75">
+                            <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 
+                                      ${container.dataset.view === 'list' ? 'w-20 h-20 flex-shrink-0' : ''}">
+                                <img src="${record.artwork || record.imageUrl || '/images/default-album.png'}"
+                                     alt="${record.title}"
+                                     loading="lazy"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            </div>
+                            <div class="mt-2">
+                                <h3 class="font-medium line-clamp-1">${record.title}</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-1">${record.artist}</p>
+                            </div>
+                        </a>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Search error:', error);
+            } finally {
+                // Hide loading state
+                container.classList.remove('hidden');
+                loadingState.classList.add('hidden');
             }
         }, 300);
     });

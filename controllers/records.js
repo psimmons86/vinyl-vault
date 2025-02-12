@@ -85,7 +85,7 @@ async function cleanupFiles(files) {
 router.get('/', asyncHandler(async (req, res) => {
     const query = { owner: req.user._id };
     const page = parseInt(req.query.page) || 1;
-    const limit = 50; // Number of records per page
+    const limit = 1000; // Increased limit to show more records
     const skip = (page - 1) * limit;
     
     // Add tag filter if provided
@@ -128,8 +128,8 @@ router.get('/', asyncHandler(async (req, res) => {
         Record.distinct('artist', { owner: req.user._id })
     ]);
 
-    // Return JSON if requested
-    if (req.headers.accept?.includes('application/json')) {
+    // Return JSON if requested or if json=true query param
+    if (req.headers.accept?.includes('application/json') || req.query.json === 'true') {
         return res.json({
             records,
             total,
