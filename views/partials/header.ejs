@@ -3,8 +3,8 @@
         <div class="flex items-center justify-between h-16">
             <!-- Logo -->
             <div class="flex items-center">
-                <a href="/" class="flex items-center space-x-3">
-                    <div class="w-10 h-10 relative animate-spin-slow">
+                <a href="/" class="flex items-center space-x-2">
+                    <div class="w-8 h-8 md:w-10 md:h-10 relative animate-spin-slow">
                         <!-- Outer ring (record) -->
                         <div class="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 dark:from-gray-700 dark:to-gray-800 rounded-full shadow-lg">
                             <!-- Label -->
@@ -22,7 +22,7 @@
                         <div class="absolute inset-[10%] border border-gray-700/20 dark:border-gray-600/20 rounded-full"></div>
                         <div class="absolute inset-[20%] border border-gray-700/20 dark:border-gray-600/20 rounded-full"></div>
                     </div>
-                    <span class="text-xl font-bold text-white dark:text-gray-900">Vinyl Vault</span>
+                    <span class="text-lg md:text-xl font-bold text-white dark:text-gray-900">Vinyl Vault</span>
                 </a>
             </div>
 
@@ -100,8 +100,9 @@
     </div>
 
     <!-- Mobile Menu Drawer -->
-    <div id="menuDrawer" class="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 shadow-lg transform -translate-x-full transition-transform duration-300 ease-in-out z-50">
-        <div class="p-4">
+    <div id="menuDrawer" class="fixed inset-y-0 left-0 w-72 bg-white dark:bg-gray-800 shadow-lg transform -translate-x-full transition-transform duration-300 ease-in-out z-50">
+        <div class="flex flex-col h-full">
+            <div class="p-6">
             <% if (locals.user) { %>
                 <div class="flex items-center space-x-3 mb-6">
                     <img src="<%= user.profile?.avatarUrl || '/images/default-avatar.png' %>" alt="Profile" class="w-10 h-10 rounded-full">
@@ -110,32 +111,32 @@
                         <div class="text-sm text-gray-500 dark:text-gray-400"><%= user.profile?.name || 'Set up profile' %></div>
                     </div>
                 </div>
-                <nav class="space-y-1">
-                    <a href="/records" class="block px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <nav class="space-y-2">
+                    <a href="/records" class="block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-lg">
                         <span class="flex items-center space-x-3">
                             <span class="material-icons">album</span>
                             <span>Collection</span>
                         </span>
                     </a>
-                    <a href="/records/stats" class="block px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <a href="/records/stats" class="block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-lg">
                         <span class="flex items-center space-x-3">
                             <span class="material-icons">bar_chart</span>
                             <span>Collection Stats</span>
                         </span>
                     </a>
-                    <a href="/blog" class="block px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <a href="/blog" class="block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-lg">
                         <span class="flex items-center space-x-3">
                             <span class="material-icons">article</span>
                             <span>Blog</span>
                         </span>
                     </a>
-                    <a href="/search" class="block px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <a href="/search" class="block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-lg">
                         <span class="flex items-center space-x-3">
                             <span class="material-icons">group</span>
                             <span>Find Users</span>
                         </span>
                     </a>
-                    <a href="/notifications" class="block px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <a href="/notifications" class="block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-lg">
                         <span class="flex items-center space-x-3">
                             <span class="material-icons">notifications</span>
                             <span>Notifications</span>
@@ -144,22 +145,22 @@
                             <% } %>
                         </span>
                     </a>
-                    <a href="/users/<%= user.username %>" class="block px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <a href="/users/<%= user.username %>" class="block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-lg">
                         <span class="flex items-center space-x-3">
                             <span class="material-icons">person</span>
                             <span>Profile</span>
                         </span>
                     </a>
                     <% if (user.isAdmin) { %>
-                        <a href="/admin" class="block px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <a href="/admin" class="block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-lg">
                             <span class="flex items-center space-x-3">
                                 <span class="material-icons">admin_panel_settings</span>
                                 <span>Admin</span>
                             </span>
                         </a>
                     <% } %>
-                    <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
-                    <a href="/auth/sign-out" class="block px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <div class="border-t border-gray-200 dark:border-gray-700 my-4"></div>
+                    <a href="/auth/sign-out" class="block px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-lg">
                         <span class="flex items-center space-x-3">
                             <span class="material-icons">logout</span>
                             <span>Logout</span>
