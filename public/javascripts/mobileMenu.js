@@ -20,12 +20,14 @@ document.addEventListener('DOMContentLoaded', function() {
         menuButton.addEventListener('click', () => {
             menuDrawer.classList.remove('-translate-x-full');
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            menuOverlay.classList.remove('pointer-events-none', 'opacity-0');
         });
 
         // Close menu
         const closeMenu = () => {
             menuDrawer.classList.add('-translate-x-full');
             document.body.style.overflow = '';
+            menuOverlay.classList.add('pointer-events-none', 'opacity-0');
         };
 
         menuOverlay.addEventListener('click', closeMenu);
