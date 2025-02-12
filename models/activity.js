@@ -45,9 +45,8 @@ const activitySchema = new Schema({
         }
     },
     details: {
-        type: Map,
-        of: Schema.Types.Mixed,
-        default: new Map()
+        type: Object,
+        default: {}
     }
 }, {
     timestamps: true
