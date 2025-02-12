@@ -206,24 +206,12 @@
 <!-- Progress Bar Script -->
 <script src="/javascripts/progressBar.js"></script>
 
-<!-- Mount React Social Feed Component -->
-<script type="text/babel">
-  document.addEventListener('DOMContentLoaded', function() {
-    try {
-      const container = document.getElementById('social-feed-root');
-      if (container) {
-        const root = ReactDOM.createRoot(container);
-        const props = {
-          currentUser: JSON.parse('<%- JSON.stringify(currentUser || null) %>')
-        };
-        root.render(React.createElement(window.SocialFeed, props));
-      } else {
-        console.error('Social feed root element not found');
-      }
-    } catch (error) {
-      console.error('Error mounting Social Feed component:', error);
-    }
-  });
+<!-- Set current user data -->
+<script>
+  window.CURRENT_USER = JSON.parse('<%- JSON.stringify(currentUser || null) %>');
 </script>
+
+<!-- Initialize Social Feed -->
+<script src="/javascripts/initSocialFeed.js"></script>
 
 <%- include('../partials/footer.ejs') %>
