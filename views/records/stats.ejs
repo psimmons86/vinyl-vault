@@ -1,207 +1,163 @@
 <%- include('../partials/header.ejs') %>
 
 <div class="container">
-  <div class="collection-header">
-    <h1 class="collection-title">Collection Stats</h1>
-  </div>
-
-  <!-- Stats Summary Row -->
-  <div class="row">
-    <div class="col s6 center-align">
-      <div class="card">
-        <div class="card-content">
-          <span class="card-title"><%= totalRecords %></span>
-          <p>Total Records</p>
-        </div>
+  <!-- Stats Header -->
+  <header class="mb-6">
+    <h1 class="text-2xl font-bold mb-2">Collection Stats</h1>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
+        <div class="text-3xl font-bold text-primary dark:text-primary-light mb-1"><%= totalRecords %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">Total Records</div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
+        <div class="text-3xl font-bold text-primary dark:text-primary-light mb-1"><%= totalPlays %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">Total Plays</div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
+        <div class="text-3xl font-bold text-primary dark:text-primary-light mb-1"><%= mostValuableRecords.length %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">Most Valuable</div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 text-center">
+        <div class="text-3xl font-bold text-primary dark:text-primary-light mb-1"><%= topPlayedRecords.length %></div>
+        <div class="text-sm text-gray-600 dark:text-gray-400">Most Played</div>
       </div>
     </div>
+  </header>
 
-    <div class="col s6 center-align">
-      <div class="card">
-        <div class="card-content">
-          <span class="card-title"><%= totalPlays %></span>
-          <p>Total Plays</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Top Played Records Grid -->
-  <div class="row">
-    <div class="col s12">
-      <h4 class="header">Top 10 Most Played Records</h4>
-    </div>
-    <% topPlayedRecords.forEach(record => { %>
-    <div class="col s6 m4 l3 xl2">
-      <div class="card">
-        <div class="card-image">
-          <img
-            src="<%= record.imageUrl || '/images/default-album.png' %>"
-            alt="Album art for <%= record.title %>"
-            class="responsive-img activator"
-          />
-        </div>
-        <div class="card-content">
-          <span class="card-title activator grey-text text-darken-4 truncate">
-            <%= record.title %>
-          </span>
-          <p class="artist truncate grey-text"><%= record.artist %></p>
-          <p class="plays"><%= record.plays %> plays</p>
-        </div>
-        <div class="card-reveal">
-          <span class="card-title grey-text text-darken-4">
-            <%= record.title %>
-            <i class="material-icons right">close</i>
-          </span>
-          <p><%= record.artist %></p>
-          <p><strong><%= record.plays %> plays</strong></p>
-          <a
-            href="/records/<%= record._id %>"
-            class="btn waves-effect waves-light"
-            >View Record</a
-          >
-        </div>
-      </div>
-    </div>
-    <% }); %>
-  </div>
-
-  <!-- Recently Played Records Grid -->
-  <div class="row">
-    <div class="col s12">
-      <h4 class="header">Last 10 Played Records</h4>
-    </div>
-    <% recentlyPlayedRecords.forEach(record => { %>
-    <div class="col s6 m4 l3 xl2">
-      <div class="card">
-        <div class="card-image">
-          <img
-            src="<%= record.imageUrl || '/images/default-album.png' %>"
-            alt="Album art for <%= record.title %>"
-            class="responsive-img activator"
-          />
-        </div>
-        <div class="card-content">
-          <span class="card-title activator grey-text text-darken-4 truncate">
-            <%= record.title %>
-          </span>
-          <p class="artist truncate grey-text"><%= record.artist %></p>
-          <p class="played-date">
-            Played <%= new Date(record.lastPlayed).toLocaleDateString() %>
-          </p>
-        </div>
-        <div class="card-reveal">
-          <span class="card-title grey-text text-darken-4">
-            <%= record.title %>
-            <i class="material-icons right">close</i>
-          </span>
-          <p><%= record.artist %></p>
-          <p>
-            <strong
-              >Played <%= new Date(record.lastPlayed).toLocaleDateString()
-              %></strong
-            >
-          </p>
-          <a
-            href="/records/<%= record._id %>"
-            class="btn waves-effect waves-light"
-            >View Record</a
-          >
-        </div>
-      </div>
-    </div>
-    <% }); %>
-  </div>
-
-  <!-- Existing Statistics -->
-  <div class="row">
-    <div class="col s12 m6">
-      <div class="card">
-        <div class="card-content">
-          <span class="card-title">Top 10 Artists by Collection Size</span>
-          <div class="collection">
-            <% topArtists.forEach(artist => { %>
-            <div class="collection-item">
-              <span class="badge"><%= artist.count %> records</span>
-              <%= artist._id %>
+  <!-- Top Played Records -->
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold mb-4">Most Played Records</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <% topPlayedRecords.forEach(record => { %>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden group">
+          <div class="aspect-square">
+            <img src="<%= record.imageUrl || '/images/default-album.png' %>"
+                 alt="Album art for <%= record.title %>"
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+          <div class="p-3">
+            <h3 class="font-medium line-clamp-1"><%= record.title %></h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-1"><%= record.artist %></p>
+            <div class="mt-2 flex items-center text-sm text-primary dark:text-primary-light">
+              <span class="material-icons text-sm mr-1">play_circle</span>
+              <%= record.plays %> plays
             </div>
-            <% }) %>
           </div>
         </div>
+      <% }); %>
+    </div>
+  </section>
+
+  <!-- Recently Played Records -->
+  <section class="mb-8">
+    <h2 class="text-xl font-semibold mb-4">Recently Played Records</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <% recentlyPlayedRecords.forEach(record => { %>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden group">
+          <div class="aspect-square">
+            <img src="<%= record.imageUrl || '/images/default-album.png' %>"
+                 alt="Album art for <%= record.title %>"
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+          <div class="p-3">
+            <h3 class="font-medium line-clamp-1"><%= record.title %></h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-1"><%= record.artist %></p>
+            <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <span class="material-icons text-sm mr-1 align-text-bottom">schedule</span>
+              <%= new Date(record.lastPlayed).toLocaleDateString() %>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
+  <!-- Artist Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <!-- Top Artists -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+      <h2 class="text-xl font-semibold mb-4">Top Artists by Collection Size</h2>
+      <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% topArtists.forEach(artist => { %>
+          <div class="flex items-center justify-between py-3">
+            <span class="font-medium"><%= artist._id %></span>
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+              <%= artist.count %> records
+            </span>
+          </div>
+        <% }) %>
       </div>
     </div>
 
-    <div class="col s12 m6">
-      <div class="card">
-        <div class="card-content">
-          <span class="card-title">Most Played Artists</span>
-          <div class="collection">
-            <% topPlayedArtists.forEach(artist => { %>
-            <div class="collection-item">
-              <span class="new badge" data-badge-caption="plays"
-                ><%= artist.totalPlays %></span
-              >
-              <span class="badge" data-badge-caption="records"
-                ><%= artist.recordCount %></span
-              >
-              <%= artist._id %>
+    <!-- Most Played Artists -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+      <h2 class="text-xl font-semibold mb-4">Most Played Artists</h2>
+      <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% topPlayedArtists.forEach(artist => { %>
+          <div class="flex items-center justify-between py-3">
+            <span class="font-medium"><%= artist._id %></span>
+            <div class="flex items-center gap-4">
+              <span class="text-sm text-gray-600 dark:text-gray-400">
+                <%= artist.recordCount %> records
+              </span>
+              <span class="text-sm text-primary dark:text-primary-light">
+                <%= artist.totalPlays %> plays
+              </span>
             </div>
-            <% }) %>
           </div>
-        </div>
+        <% }) %>
       </div>
     </div>
   </div>
 
-  <div class="row">
-    <div class="col s12 m6">
-      <div class="card">
-        <div class="card-content">
-          <span class="card-title">Top Tags</span>
-          <% if (topTags.length > 0) { %>
-          <div class="collection">
-            <% topTags.forEach(tag => { %>
-            <a href="/records?tag=<%= tag._id %>" class="collection-item">
-              <span class="badge"><%= tag.count %></span>
-              <%= tag._id %>
+  <!-- Additional Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Top Tags -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+      <h2 class="text-xl font-semibold mb-4">Top Tags</h2>
+      <% if (topTags.length > 0) { %>
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+          <% topTags.forEach(tag => { %>
+            <a href="/records?tag=<%= tag._id %>" 
+               class="flex items-center justify-between py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <span class="font-medium"><%= tag._id %></span>
+              <span class="text-sm text-gray-600 dark:text-gray-400">
+                <%= tag.count %> records
+              </span>
             </a>
-            <% }) %>
-          </div>
-          <% } else { %>
-          <p class="center-align">No tags added yet</p>
-          <% } %>
+          <% }) %>
         </div>
-      </div>
+      <% } else { %>
+        <p class="text-center text-gray-500 dark:text-gray-400">No tags added yet</p>
+      <% } %>
     </div>
 
-    <div class="col s12 m6">
-      <div class="card">
-        <div class="card-content">
-          <span class="card-title">Records by Decade</span>
-          <% if (recordsByYear.length > 0) { %>
-          <div class="collection">
-            <% const decades = {}; recordsByYear.forEach(year => { const decade
-            = Math.floor(year._id / 10) * 10; decades[decade] = (decades[decade]
-            || 0) + year.count; }); Object.entries(decades).sort((a, b) => b[0]
-            - a[0]).forEach(([decade, count]) => { %>
-            <div class="collection-item">
-              <span class="badge"><%= count %></span>
-              <%= decade %>s
+    <!-- Records by Decade -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+      <h2 class="text-xl font-semibold mb-4">Records by Decade</h2>
+      <% if (decadeStats && decadeStats.length > 0) { %>
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+          <% decadeStats.forEach(({decade, count}) => { %>
+            <div class="flex items-center justify-between py-3">
+              <span class="font-medium"><%= decade %></span>
+              <span class="text-sm text-gray-600 dark:text-gray-400">
+                <%= count %> records
+              </span>
             </div>
-            <% }) %>
-          </div>
-          <% } else { %>
-          <p class="center-align">No years added yet</p>
-          <% } %>
+          <% }) %>
         </div>
-      </div>
+      <% } else { %>
+        <p class="text-center text-gray-500 dark:text-gray-400">No years added yet</p>
+      <% } %>
     </div>
   </div>
 </div>
 
 <%- include('../partials/share-buttons', {
     shareText: `Check out my vinyl collection stats on Vinyl Vault! I have ${totalRecords} records in my collection.`,
-    shareUrl: `${process.env.BASE_URL}/users/${user.username}`
+    shareUrl: `/records/profile`
 }) %>
 
 <%- include('../partials/footer.ejs') %>

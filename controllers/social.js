@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const Activity = require('../models/activity');
 const asyncHandler = require('../middleware/async-handler');
 
 // Search users
@@ -168,6 +169,28 @@ router.get('/feed', asyncHandler(async (req, res) => {
     ]);
 
     res.json(feed);
+}));
+
+// Get recent activities
+router.get('/activities', asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id)
+        .populate('following');
+
+    const followedUsers = user.following.map(u => u._id);
+    followedUsers.push(req.user._id); // Include user's own activities
+
+    const activities = await Activity.find({
+        user: { $in: followedUsers },
+        activityType: {
+            $in: ['signup', 'update_profile_picture', 'update_location', 'add_record']
+        }
+    })
+    .sort('-createdAt')
+    .limit(50)
+    .populate('user', 'username profile')
+    .populate('record', 'title artist imageUrl');
+
+    res.json(activities);
 }));
 
 module.exports = router;

@@ -50,14 +50,66 @@ window.SocialFeed = function SocialFeed() {
 
   const loadFeed = async () => {
     try {
-      const response = await fetch('/social/feed');
-      if (response.status === 401) {
+      const [feedResponse, activitiesResponse] = await Promise.all([
+        fetch('/social/feed'),
+        fetch('/api/activities')
+      ]);
+
+      if (feedResponse.status === 401 || activitiesResponse.status === 401) {
         setError('Please sign in to view the social feed');
         return;
       }
-      if (!response.ok) throw new Error('Failed to load feed');
-      const data = await response.json();
-      setFeed(data);
+
+      if (!feedResponse.ok || !activitiesResponse.ok) {
+        throw new Error('Failed to load feed data');
+      }
+
+      const [feedData, activities] = await Promise.all([
+        feedResponse.json(),
+        activitiesResponse.json()
+      ]);
+
+      // Process activities into feed format
+      const activityItems = activities.map(activity => {
+        let content = '';
+        switch (activity.activityType) {
+          case 'signup':
+            content = 'joined Vinyl Vault!';
+            break;
+          case 'update_profile_picture':
+            content = 'updated their profile picture';
+            break;
+          case 'update_location':
+            content = `updated their location to ${activity.details.get('location')}`;
+            break;
+          case 'add_record':
+            content = `added ${activity.record.title} by ${activity.record.artist} to their collection`;
+            break;
+          default:
+            return null;
+        }
+        
+        return {
+          _id: activity._id,
+          user: activity.user,
+          content,
+          type: 'activity',
+          createdAt: activity.createdAt,
+          data: {
+            imageUrl: activity.activityType === 'update_profile_picture' ? activity.details.get('imageUrl') : 
+                     activity.activityType === 'add_record' ? activity.record.imageUrl : null,
+            title: activity.record?.title,
+            artist: activity.record?.artist,
+            location: activity.details?.get('location')
+          }
+        };
+      }).filter(Boolean);
+
+      // Combine and sort all items by date
+      const combinedFeed = [...feedData, ...activityItems]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      setFeed(combinedFeed);
     } catch (err) {
       setError('Failed to load social feed');
       console.error(err);
@@ -216,96 +268,108 @@ window.SocialFeed = function SocialFeed() {
       </div>
 
       {/* Feed */}
-      {feed.map(user => (
-        user.posts.map(post => (
-          <div key={post._id} className="card">
+      {feed.map(item => (
+        <div key={item._id} className="card">
             <div className="card-content">
               {/* Post Header */}
               <div className="post-header">
                 <img
-                  src={user.profile?.avatarUrl || '/images/default-avatar.png'}
-                  alt={user.profile?.name || user.username}
+                  src={item.user.profile?.avatarUrl || '/images/default-avatar.png'}
+                  alt={item.user.profile?.name || item.user.username}
                   className="circle responsive-img post-avatar"
                 />
                 <div className="post-user-info">
-                  <span className="post-name">{user.profile?.name || user.username}</span>
+                  <span className="post-name">{item.user.profile?.name || item.user.username}</span>
                   <small className="post-time">
-                    {new Date(post.createdAt).toLocaleString()}
+                    {new Date(item.createdAt).toLocaleString()}
                   </small>
                 </div>
               </div>
 
-              {/* Post Content */}
-              <p className="post-content">{post.content}</p>
-
-              {/* Linked Record */}
-              {post.recordRef && (
-                <div className="linked-record">
-                  <i className="material-icons">album</i>
-                  <span>
-                    {post.recordRef.title} - {post.recordRef.artist}
-                  </span>
-                </div>
-              )}
-
-              {/* Post Actions */}
-              <div className="post-actions">
-                <button
-                  className={`btn-flat waves-effect waves-light ${
-                    currentUser && post.likes?.includes(currentUser._id) ? 'red-text' : ''
-                  }`}
-                  onClick={() => toggleLike(user._id, post._id, currentUser && post.likes?.includes(currentUser._id))}
-                >
-                  <i className="material-icons left">favorite</i>
-                  {post.likes?.length || 0}
-                </button>
-                <button className="btn-flat waves-effect waves-light">
-                  <i className="material-icons left">comment</i>
-                  {post.comments?.length || 0}
-                </button>
-              </div>
-
-              {/* Comments */}
-              <div className="comments-section">
-                {post.comments?.map(comment => (
-                  <div key={comment._id} className="comment">
-                    <img
-                      src={comment.user.profile?.avatarUrl || '/images/default-avatar.png'}
-                      alt={comment.user.profile?.name || comment.user.username}
-                      className="circle responsive-img comment-avatar"
+              {/* Content */}
+              {item.type === 'activity' ? (
+                <div className="activity-content">
+                  <p className="post-content">
+                    <span className="font-medium">{item.user.profile?.name || item.user.username}</span>
+                    {' '}{item.content}
+                  </p>
+                  {item.data?.imageUrl && (
+                    <img 
+                      src={item.data.imageUrl} 
+                      alt="Activity" 
+                      className="activity-image rounded-lg mt-2"
                     />
-                    <div className="comment-content">
-                      <span className="comment-name">
-                        {comment.user.profile?.name || comment.user.username}
+                  )}
+                </div>
+              ) : (
+                <>
+                  <p className="post-content">{item.content}</p>
+                  {item.recordRef && (
+                    <div className="linked-record">
+                      <i className="material-icons">album</i>
+                      <span>
+                        {item.recordRef.title} - {item.recordRef.artist}
                       </span>
-                      <p>{comment.content}</p>
-                      <small className="comment-time">
-                        {new Date(comment.createdAt).toLocaleString()}
-                      </small>
+                    </div>
+                  )}
+                  <div className="post-actions">
+                    <button
+                      className={`btn-flat waves-effect waves-light ${
+                        currentUser && item.likes?.includes(currentUser._id) ? 'red-text' : ''
+                      }`}
+                      onClick={() => toggleLike(item.user._id, item._id, currentUser && item.likes?.includes(currentUser._id))}
+                    >
+                      <i className="material-icons left">favorite</i>
+                      {item.likes?.length || 0}
+                    </button>
+                    <button className="btn-flat waves-effect waves-light">
+                      <i className="material-icons left">comment</i>
+                      {item.comments?.length || 0}
+                    </button>
+                  </div>
+
+                  {/* Comments */}
+                  <div className="comments-section">
+                    {item.comments?.map(comment => (
+                      <div key={comment._id} className="comment">
+                        <img
+                          src={comment.user.profile?.avatarUrl || '/images/default-avatar.png'}
+                          alt={comment.user.profile?.name || comment.user.username}
+                          className="circle responsive-img comment-avatar"
+                        />
+                        <div className="comment-content">
+                          <span className="comment-name">
+                            {comment.user.profile?.name || comment.user.username}
+                          </span>
+                          <p>{comment.content}</p>
+                          <small className="comment-time">
+                            {new Date(comment.createdAt).toLocaleString()}
+                          </small>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Add Comment */}
+                    <div className="add-comment">
+                      <div className="input-field">
+                        <textarea
+                          className="materialize-textarea"
+                          placeholder="Add a comment..."
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              addComment(item.user._id, item._id, e.target.value);
+                              e.target.value = '';
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
-                ))}
-
-                {/* Add Comment */}
-                <div className="add-comment">
-                  <div className="input-field">
-                    <textarea
-                      className="materialize-textarea"
-                      placeholder="Add a comment..."
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          addComment(user._id, post._id, e.target.value);
-                          e.target.value = '';
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
+                </>
+              )}
             </div>
           </div>
-        ))
       ))}
     </div>
   );

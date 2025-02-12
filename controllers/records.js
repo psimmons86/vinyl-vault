@@ -432,7 +432,6 @@ router.get('/stats', asyncHandler(async (req, res) => {
             topPlayedArtists,
             collectionValue,
             mostValuableRecords,
-            // Add these new queries
             topPlayedRecords,
             recentlyPlayedRecords
         ] = await Promise.all([
@@ -493,6 +492,21 @@ router.get('/stats', asyncHandler(async (req, res) => {
                 .select('title artist lastPlayed imageUrl _id')
         ]);
 
+        // Process recordsByYear into decades
+        const decades = recordsByYear.reduce((acc, year) => {
+            const decade = Math.floor(year._id / 10) * 10;
+            acc[decade] = (acc[decade] || 0) + year.count;
+            return acc;
+        }, {});
+
+        // Sort decades by year descending
+        const decadeStats = Object.entries(decades)
+            .sort((a, b) => b[0] - a[0])
+            .map(([decade, count]) => ({
+                decade: `${decade}s`,
+                count
+            }));
+
         res.render('records/stats', {
             title: 'Collection Stats',
             totalRecords,
@@ -500,13 +514,13 @@ router.get('/stats', asyncHandler(async (req, res) => {
             totalPlays: totalPlays[0]?.total || 0,
             topArtists,
             topTags,
-            recordsByYear,
+            decadeStats,
             topPlayedArtists,
             collectionValue: collectionValue[0]?.total || 0,
             mostValuableRecords,
-            // Add new data to template
             topPlayedRecords,
-            recentlyPlayedRecords
+            recentlyPlayedRecords,
+            user: req.user
         });
 }));
 

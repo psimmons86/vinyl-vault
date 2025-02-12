@@ -1,327 +1,164 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="container admin-dashboard">
-    <div class="dashboard-header">
-        <h1 class="admin-title">Admin Analytics Dashboard</h1>
-        <div class="date-range">Last 6 months of data</div>
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-primary">Admin Analytics Dashboard</h1>
+        <div class="text-gray-600 dark:text-gray-400">Last 6 months of data</div>
     </div>
 
     <!-- Overview Stats -->
-    <div class="row">
-        <div class="col s12 m3">
-            <div class="stat-card z-depth-1">
-                <i class="material-icons">people</i>
-                <div class="stat-content">
-                    <h3><%= stats.totalUsers %></h3>
-                    <p>Total Users</p>
-                    <small><%= stats.userStats.totalPublicProfiles %> public profiles</small>
-                </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex items-center space-x-4">
+            <span class="material-icons text-primary text-4xl">people</span>
+            <div>
+                <h3 class="text-2xl font-bold mb-1"><%= stats.totalUsers %></h3>
+                <p class="text-gray-600 dark:text-gray-400">Total Users</p>
+                <small class="text-gray-500 dark:text-gray-500"><%= stats.userStats.totalPublicProfiles %> public profiles</small>
             </div>
         </div>
-        <div class="col s12 m3">
-            <div class="stat-card z-depth-1">
-                <i class="material-icons">album</i>
-                <div class="stat-content">
-                    <h3><%= stats.totalRecords %></h3>
-                    <p>Total Records</p>
-                    <small>~<%= Math.round(stats.userStats.avgRecordsPerUser) %> per user</small>
-                </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex items-center space-x-4">
+            <span class="material-icons text-primary text-4xl">album</span>
+            <div>
+                <h3 class="text-2xl font-bold mb-1"><%= stats.totalRecords %></h3>
+                <p class="text-gray-600 dark:text-gray-400">Total Records</p>
+                <small class="text-gray-500 dark:text-gray-500">~<%= Math.round(stats.userStats.avgRecordsPerUser) %> per user</small>
             </div>
         </div>
-        <div class="col s12 m3">
-            <div class="stat-card z-depth-1">
-                <i class="material-icons">play_circle</i>
-                <div class="stat-content">
-                    <h3><%= stats.totalPlays %></h3>
-                    <p>Total Plays</p>
-                    <small>~<%= Math.round(stats.totalPlays / stats.totalRecords) %> per record</small>
-                </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex items-center space-x-4">
+            <span class="material-icons text-primary text-4xl">play_circle</span>
+            <div>
+                <h3 class="text-2xl font-bold mb-1"><%= stats.totalPlays %></h3>
+                <p class="text-gray-600 dark:text-gray-400">Total Plays</p>
+                <small class="text-gray-500 dark:text-gray-500">~<%= Math.round(stats.totalPlays / stats.totalRecords) %> per record</small>
             </div>
         </div>
-        <div class="col s12 m3">
-            <div class="stat-card z-depth-1">
-                <i class="material-icons">trending_up</i>
-                <div class="stat-content">
-                    <h3><%= stats.userStats.maxRecordsPerUser %></h3>
-                    <p>Largest Collection</p>
-                    <small>records in one collection</small>
-                </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex items-center space-x-4">
+            <span class="material-icons text-primary text-4xl">trending_up</span>
+            <div>
+                <h3 class="text-2xl font-bold mb-1"><%= stats.userStats.maxRecordsPerUser %></h3>
+                <p class="text-gray-600 dark:text-gray-400">Largest Collection</p>
+                <small class="text-gray-500 dark:text-gray-500">records in one collection</small>
             </div>
         </div>
     </div>
 
     <!-- Growth Charts -->
-    <div class="row">
-        <div class="col s12 m6">
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">User Growth</span>
-                    <div class="chart-container">
-                        <canvas id="userGrowthChart"></canvas>
-                    </div>
-                </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">User Growth</h2>
+            <div class="h-[300px]">
+                <canvas id="userGrowthChart"></canvas>
             </div>
         </div>
-        <div class="col s12 m6">
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">Record Growth</span>
-                    <div class="chart-container">
-                        <canvas id="recordGrowthChart"></canvas>
-                    </div>
-                </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Record Growth</h2>
+            <div class="h-[300px]">
+                <canvas id="recordGrowthChart"></canvas>
             </div>
         </div>
     </div>
 
     <!-- Genre Analysis -->
-    <div class="row">
-        <div class="col s12 m6">
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">Top Genres</span>
-                    <div class="chart-container">
-                        <canvas id="genresChart"></canvas>
-                    </div>
-                </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Top Genres</h2>
+            <div class="h-[300px]">
+                <canvas id="genresChart"></canvas>
             </div>
         </div>
-        <div class="col s12 m6">
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">Genre Trends</span>
-                    <div class="chart-container">
-                        <canvas id="genreTrendsChart"></canvas>
-                    </div>
-                </div>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Genre Trends</h2>
+            <div class="h-[300px]">
+                <canvas id="genreTrendsChart"></canvas>
             </div>
         </div>
     </div>
 
     <!-- User Engagement -->
-    <div class="row">
-        <div class="col s12 m6">
-            <!-- Most Active Users -->
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">Most Active Users</span>
-                    <table class="highlight responsive-table">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Records</th>
-                                <th>Total Plays</th>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Most Active Users</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-gray-600 dark:text-gray-300">User</th>
+                            <th class="px-4 py-2 text-left text-gray-600 dark:text-gray-300">Records</th>
+                            <th class="px-4 py-2 text-left text-gray-600 dark:text-gray-300">Total Plays</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <% stats.activeUsers.forEach(user => { %>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-4 py-2"><%= user.username %></td>
+                                <td class="px-4 py-2"><%= user.recordCount %></td>
+                                <td class="px-4 py-2"><%= user.totalPlays %></td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <% stats.activeUsers.forEach(user => { %>
-                                <tr>
-                                    <td><%= user.username %></td>
-                                    <td><%= user.recordCount %></td>
-                                    <td><%= user.totalPlays %></td>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                </div>
+                        <% }); %>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div class="col s12 m6">
-            <!-- Popular Records -->
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">Most Popular Records</span>
-                    <table class="highlight responsive-table">
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Artist</th>
-                                <th>Owner</th>
-                                <th>Plays</th>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">Most Popular Records</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-gray-600 dark:text-gray-300">Title</th>
+                            <th class="px-4 py-2 text-left text-gray-600 dark:text-gray-300">Artist</th>
+                            <th class="px-4 py-2 text-left text-gray-600 dark:text-gray-300">Owner</th>
+                            <th class="px-4 py-2 text-left text-gray-600 dark:text-gray-300">Plays</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <% stats.popularRecords.forEach(record => { %>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                <td class="px-4 py-2"><%= record.title %></td>
+                                <td class="px-4 py-2"><%= record.artist %></td>
+                                <td class="px-4 py-2"><%= record.owner.username %></td>
+                                <td class="px-4 py-2"><%= record.plays %></td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <% stats.popularRecords.forEach(record => { %>
-                                <tr>
-                                    <td><%= record.title %></td>
-                                    <td><%= record.artist %></td>
-                                    <td><%= record.owner.username %></td>
-                                    <td><%= record.plays %></td>
-                                </tr>
-                            <% }); %>
-                        </tbody>
-                    </table>
-                </div>
+                        <% }); %>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <!-- Recent Activity -->
-    <div class="row">
-        <div class="col s12">
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">Recent Activity</span>
-                    <div class="activity-feed">
-                        <% stats.userActivity.forEach(activity => { %>
-                            <div class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="material-icons">
-                                        <% if (activity.activityType === 'play_record') { %>
-                                            play_circle
-                                        <% } else if (activity.activityType === 'comment') { %>
-                                            comment
-                                        <% } else if (activity.activityType === 'update') { %>
-                                            edit
-                                        <% } else { %>
-                                            info
-                                        <% } %>
-                                    </i>
-                                </div>
-                                <div class="activity-content">
-                                    <span class="activity-text">
-                                        <strong><%= activity.user.username %></strong>
-                                        <%= activity.activityType.replace('_', ' ') %>
-                                    </span>
-                                    <span class="activity-time">
-                                        <%= new Date(activity.createdAt).toLocaleString() %>
-                                    </span>
-                                </div>
-                            </div>
-                        <% }); %>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Recent Activity</h2>
+        <div class="space-y-4 max-h-[500px] overflow-y-auto">
+            <% stats.userActivity.forEach(activity => { %>
+                <div class="flex items-start space-x-4 p-4 border-b dark:border-gray-700 last:border-0">
+                    <div class="text-primary">
+                        <span class="material-icons">
+                            <% if (activity.activityType === 'play_record') { %>
+                                play_circle
+                            <% } else if (activity.activityType === 'comment') { %>
+                                comment
+                            <% } else if (activity.activityType === 'update') { %>
+                                edit
+                            <% } else { %>
+                                info
+                            <% } %>
+                        </span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-gray-900 dark:text-gray-100">
+                            <span class="font-semibold"><%= activity.user.username %></span>
+                            <%= activity.activityType.replace('_', ' ') %>
+                        </div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                            <%= new Date(activity.createdAt).toLocaleString() %>
+                        </div>
                     </div>
                 </div>
-            </div>
+            <% }); %>
         </div>
     </div>
 </div>
-
-<style>
-.admin-dashboard {
-    padding: 2rem 0;
-}
-
-.dashboard-header {
-    margin-bottom: 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.admin-title {
-    font-size: 2rem;
-    margin: 0;
-    color: var(--primary);
-}
-
-.date-range {
-    color: #666;
-    font-size: 1rem;
-}
-
-.stat-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    height: 100%;
-}
-
-.stat-card i {
-    font-size: 2.5rem;
-    color: var(--primary);
-}
-
-.stat-content {
-    flex: 1;
-}
-
-.stat-content h3 {
-    font-size: 2rem;
-    margin: 0;
-    line-height: 1;
-}
-
-.stat-content p {
-    margin: 0.25rem 0;
-    color: #666;
-}
-
-.stat-content small {
-    color: #999;
-    font-size: 0.875rem;
-}
-
-.chart-container {
-    position: relative;
-    height: 300px;
-    margin-top: 1rem;
-}
-
-.activity-feed {
-    max-height: 500px;
-    overflow-y: auto;
-}
-
-.activity-item {
-    display: flex;
-    align-items: flex-start;
-    padding: 1rem;
-    border-bottom: 1px solid #eee;
-}
-
-.activity-item:last-child {
-    border-bottom: none;
-}
-
-.activity-icon {
-    margin-right: 1rem;
-}
-
-.activity-icon i {
-    color: var(--primary);
-}
-
-.activity-content {
-    flex: 1;
-}
-
-.activity-text {
-    display: block;
-    margin-bottom: 0.25rem;
-}
-
-.activity-time {
-    font-size: 0.875rem;
-    color: #999;
-}
-
-/* Dark theme support */
-[data-theme="dark"] .stat-card,
-[data-theme="dark"] .card {
-    background: rgba(30, 30, 30, 0.98);
-}
-
-[data-theme="dark"] .stat-content p,
-[data-theme="dark"] .date-range {
-    color: #aaa;
-}
-
-[data-theme="dark"] .stat-content small,
-[data-theme="dark"] .activity-time {
-    color: #777;
-}
-
-[data-theme="dark"] .activity-item {
-    border-bottom-color: #333;
-}
-
-[data-theme="dark"] table.highlight > tbody > tr:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-</style>
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

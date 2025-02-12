@@ -1,378 +1,162 @@
-/* Profile Banner */
-.profile-banner {
-  height: 400px;
-  background-size: cover;
-  background-position: center;
-  position: relative;
-  border-radius: 16px;
-  margin: 20px 0 40px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+/* Social Feed Styles */
+.social-feed {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px 0;
 }
 
-.banner-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8));
-}
-
-.banner-content {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 40px;
-  color: white;
-  z-index: 2;
-}
-
-/* Profile Info */
-.profile-name {
-  color: white;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  margin-bottom: 10px;
-}
-
-.profile-location {
-  color: rgba(255,255,255,0.9) !important;
-  margin: 10px 0;
-}
-
-.profile-bio {
-  color: rgba(255,255,255,0.9);
-  margin: 15px 0;
-  font-size: 1.1em;
-  line-height: 1.5;
-}
-
-.profile-avatar {
-  border: 4px solid white !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
-}
-
-.profile-actions {
-  background: rgba(0,0,0,0.3);
-  padding: 8px;
+/* Post Creation Card */
+.social-feed .card {
+  margin-bottom: 25px;
   border-radius: 8px;
-  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.btn-floating {
-  background-color: rgba(255,255,255,0.2) !important;
+.social-feed .card .card-content {
+  padding: 24px;
 }
 
-.btn-floating:hover {
-  background-color: rgba(255,255,255,0.3) !important;
-}
-
-.social-links {
-  margin-top: 20px;
-}
-
-.social-links .btn-floating {
-  background-color: rgba(0,0,0,0.3) !important;
-}
-
-.profile-avatar {
-  width: 150px !important;
-  height: 150px !important;
-  border: 4px solid var(--surface-color);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.profile-header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
-}
-
-.profile-name {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 500;
-}
-
-.profile-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.profile-location {
+/* Post Header */
+.post-header {
   display: flex;
   align-items: center;
-  gap: 5px;
-  color: var(--secondary-text-color);
-  margin: 10px 0;
+  margin-bottom: 16px;
 }
 
-.profile-bio {
-  margin: 15px 0;
-  line-height: 1.5;
-}
-
-.social-links {
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-/* Stats Section */
-.stats-row {
-  transition: opacity 0.3s ease;
-}
-
-.stats-row.hidden {
-  display: none;
-  opacity: 0;
-}
-
-.stat-number {
-  font-size: 2.5rem;
-  margin: 0;
-  font-weight: 500;
-}
-
-.stat-label {
-  margin: 5px 0 0;
-  color: var(--secondary-text-color);
-}
-
-/* Collection Stats */
-.collection .progress {
-  margin: 5px 0 0;
-  height: 4px;
-}
-
-.collection .determinate {
-  background-color: var(--primary-color);
-}
-
-.collection-item .title {
-  font-weight: 500;
-}
-
-/* Featured Post */
-.featured-post {
-  padding: 15px 0;
-}
-
-.featured-post img {
-  max-height: 300px;
+.post-avatar {
+  width: 48px;
+  height: 48px;
+  margin-right: 12px;
   object-fit: cover;
-  margin-bottom: 15px;
-  border-radius: 8px;
 }
 
-.featured-post .flow-text {
-  margin: 15px 0;
+.post-user-info {
+  display: flex;
+  flex-direction: column;
 }
 
-.record-reference {
+.post-name {
+  font-weight: 500;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.post-time {
+  color: #757575;
+  font-size: 0.9rem;
+}
+
+/* Post Content */
+.post-content {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  margin: 16px 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Linked Record */
+.linked-record {
   display: flex;
   align-items: center;
-  padding: 10px;
-  background: var(--surface-color);
-  border-radius: 8px;
-  margin: 15px 0;
+  background: #f5f5f5;
+  padding: 12px;
+  border-radius: 4px;
+  margin: 12px 0;
 }
 
-.record-reference img {
-  width: 50px;
-  height: 50px;
-  margin: 0 15px 0 0;
+.linked-record i {
+  margin-right: 8px;
+  color: #666;
 }
 
-.record-reference .record-info {
+/* Post Actions */
+.post-actions {
+  display: flex;
+  gap: 16px;
+  padding: 8px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  margin: 16px 0;
+}
+
+.post-actions .btn-flat {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 20px;
+}
+
+.post-actions .btn-flat i {
+  margin-right: 4px;
+}
+
+/* Comments Section */
+.comments-section {
+  margin-top: 16px;
+}
+
+.comment {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  margin-right: 12px;
+}
+
+.comment-content {
   flex: 1;
+  background: #f5f5f5;
+  padding: 12px;
+  border-radius: 12px;
 }
 
-.record-reference .title {
+.comment-name {
   font-weight: 500;
   display: block;
+  margin-bottom: 4px;
 }
 
-.post-stats {
-  display: flex;
-  gap: 20px;
-  color: var(--secondary-text-color);
+.comment-time {
+  color: #757575;
+  font-size: 0.8rem;
+  display: block;
+  margin-top: 4px;
 }
 
-.post-stats span {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.add-comment {
+  margin-top: 16px;
 }
 
-/* Top 8 Grid */
-.top-8-grid .card {
-  margin: 0.5rem;
+.add-comment .materialize-textarea {
+  border-bottom: 1px solid #ddd !important;
+  margin: 0;
+  padding: 8px 0;
 }
 
-.top-8-grid .card-image {
-  position: relative;
-  padding-top: 100%;
+.add-comment .materialize-textarea:focus {
+  border-bottom: 1px solid #26a69a !important;
+  box-shadow: 0 1px 0 0 #26a69a !important;
 }
 
-.top-8-grid .card-image img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.card-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-  padding: 15px;
-  color: white;
-}
-
-.card-overlay h5,
-.card-overlay p {
-  margin: 5px 0;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-}
-
-/* Genres */
-.genres-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.chip {
-  background-color: var(--surface-color);
-  color: var(--text-color);
-}
-
-/* Section Titles */
-.section-title {
-  font-size: 1.5rem;
-  margin: 1rem 0;
-  font-weight: 500;
-}
-
-/* Responsive Adjustments */
+/* Responsive Design */
 @media (max-width: 600px) {
-  .profile-banner {
-    height: 300px;
-    margin: 0;
-    border-radius: 0;
+  .social-feed {
+    padding: 10px;
   }
-
-  .banner-content {
-    padding: 20px;
-  }
-
-  .profile-header-top {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .profile-actions {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: 0;
-    padding: 1rem;
-    background: white;
-    box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
-    z-index: 10;
-    display: flex;
-    justify-content: space-around;
-  }
-
-  .profile-actions .btn {
-    margin: 0;
-    flex: 1;
-    margin: 0 0.5rem;
-  }
-
-  .profile-avatar {
-    width: 100px !important;
-    height: 100px !important;
-    margin-bottom: 15px;
-  }
-
-  .profile-name {
-    font-size: 1.5rem;
-  }
-
-  .profile-bio {
-    font-size: 1rem;
-    margin: 10px 0;
-  }
-
-  .social-links {
-    justify-content: center;
-    margin-bottom: 70px;
-  }
-
-  .stats-row {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .stat-number {
-    font-size: 2rem;
-  }
-
-  .collection-item {
-    padding: 10px !important;
-  }
-
-  .collection-item .title {
+  
+  .post-content {
     font-size: 1rem;
   }
-
-  .featured-post img {
-    max-height: 200px;
-    border-radius: 0;
+  
+  .post-actions {
+    gap: 8px;
   }
-
-  .record-reference {
-    margin: 10px 0;
-    padding: 8px;
+  
+  .post-actions .btn-flat {
+    padding: 0 8px;
   }
-
-  .post-stats {
-    gap: 15px;
-    font-size: 0.875rem;
-  }
-
-  .top-8-grid {
-    margin: 0 -1rem;
-  }
-
-  .top-8-grid .card {
-    margin: 0;
-    border-radius: 0;
-  }
-
-  .genres-container {
-    margin: 5px 0;
-  }
-
-  .section-title {
-    font-size: 1.25rem;
-    margin: 1.5rem 0 1rem;
-    padding: 0 1rem;
-  }
-}
-
-[data-theme="dark"] .profile-actions {
-  background: #1e1e1e;
-  border-top: 1px solid #333;
 }

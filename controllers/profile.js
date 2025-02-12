@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const Record = require('../models/record');
+const Activity = require('../models/activity');
 const asyncHandler = require('../middleware/async-handler');
 const ensureSignedIn = require('../middleware/ensure-signed-in');
 
@@ -115,6 +116,44 @@ router.post('/theme', asyncHandler(async (req, res) => {
   user.profile.theme = req.body.theme;
   await user.save();
   res.json({ theme: user.profile.theme });
+}));
+
+// Update profile picture
+router.post('/avatar', asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (!user.profile) user.profile = {};
+  user.profile.avatarUrl = req.body.avatarUrl;
+  await user.save();
+
+  // Create activity
+  await Activity.create({
+    user: user._id,
+    activityType: 'update_profile_picture',
+    details: new Map([
+      ['imageUrl', req.body.avatarUrl]
+    ])
+  });
+
+  res.json({ avatarUrl: user.profile.avatarUrl });
+}));
+
+// Update location
+router.post('/location', asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (!user.profile) user.profile = {};
+  user.profile.location = req.body.location;
+  await user.save();
+
+  // Create activity
+  await Activity.create({
+    user: user._id,
+    activityType: 'update_location',
+    details: new Map([
+      ['location', req.body.location]
+    ])
+  });
+
+  res.json({ location: user.profile.location });
 }));
 
 module.exports = router;

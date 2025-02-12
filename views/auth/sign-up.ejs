@@ -1,26 +1,26 @@
 <%- include('../partials/header.ejs') %>
 
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 overflow-hidden">
-    <div class="relative min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-b from-primary/5 to-transparent">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 overflow-y-auto overflow-x-hidden">
+    <div class="min-h-screen flex flex-col justify-center px-4 py-8 bg-gradient-to-b from-primary/5 to-transparent">
         <!-- Background Pattern -->
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(216,27,96,0.05)_0%,transparent_70%)] pointer-events-none"></div>
 
-        <div class="w-full max-w-md relative z-10">
+        <div class="w-full max-w-md mx-auto relative z-10">
             <!-- Auth Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 backdrop-blur-lg border border-primary/10">
-                <h1 class="text-2xl font-bold text-center text-primary mb-6">Start Your Collection</h1>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8 backdrop-blur-lg border border-primary/10">
+                <h1 class="text-3xl sm:text-2xl font-bold text-center text-primary mb-8">Start Your Collection</h1>
                 
                 <% if (error) { %>
-                    <div class="flex items-center gap-2 p-3 mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm">
-                        <span class="material-icons text-xl">error</span>
+                    <div class="flex items-center gap-2 p-4 mb-6 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-base sm:text-sm">
+                        <span class="material-icons text-2xl sm:text-xl">error</span>
                         <%= error %>
                     </div>
                 <% } %>
 
-                <form action="/auth/sign-up" method="POST" class="space-y-6" novalidate>
-                    <div class="space-y-4">
+                <form action="/auth/sign-up" method="POST" class="space-y-8 sm:space-y-6" novalidate>
+                    <div class="space-y-6 sm:space-y-4">
                         <div>
-                            <label for="username" class="form-label">
+                            <label for="username" class="form-label text-base">
                                 Username
                             </label>
                             <input type="text" 
@@ -29,41 +29,52 @@
                                    pattern="[a-zA-Z0-9_\-]{3,20}"
                                    value="<%= locals.username || '' %>"
                                    autocomplete="username"
-                                   class="form-input"
+                                   class="form-input text-lg sm:text-base h-14 sm:h-12"
                                    required>
+                            <p class="mt-2 text-base sm:text-sm text-gray-500 dark:text-gray-400">
+                                3-20 characters, letters, numbers, underscores, and hyphens only
+                            </p>
                         </div>
 
                         <div>
-                            <label for="password" class="form-label">
+                            <label for="password" class="form-label text-base">
                                 Password
                             </label>
                             <input type="password" 
                                    id="password" 
                                    name="password" 
+                                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])(?!.*\s).{8,}$"
                                    autocomplete="new-password"
-                                   class="form-input"
+                                   class="form-input text-lg sm:text-base h-14 sm:h-12"
                                    required>
+                            <div class="mt-2 text-base sm:text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                                <p>Password must be at least 8 characters and include:</p>
+                                <p class="ml-2">• One uppercase letter</p>
+                                <p class="ml-2">• One lowercase letter</p>
+                                <p class="ml-2">• One number</p>
+                                <p class="ml-2">• One special character (!@#$%^&*)</p>
+                            </div>
                         </div>
 
                         <div>
-                            <label for="confirmPassword" class="form-label">
+                            <label for="confirmPassword" class="form-label text-base">
                                 Confirm Password
                             </label>
                             <input type="password" 
                                    id="confirmPassword" 
                                    name="confirmPassword" 
                                    autocomplete="new-password"
-                                   class="form-input"
+                                   class="form-input text-lg sm:text-base h-14 sm:h-12"
                                    required>
                         </div>
                     </div>
 
-                    <div class="space-y-4">
-                        <button type="submit" class="btn btn-primary w-full">
+                    <div class="space-y-6 sm:space-y-4">
+                        <button type="submit" class="btn btn-primary w-full h-14 sm:h-12 text-lg sm:text-base">
                             Create Account
                         </button>
 
-                        <p class="text-sm text-center text-gray-600 dark:text-gray-400">
+                        <p class="text-base sm:text-sm text-center text-gray-600 dark:text-gray-400">
                             Already have an account? 
                             <a href="/auth/sign-in" class="text-primary dark:text-primary-light hover:underline font-medium">
                                 Sign In
@@ -76,42 +87,42 @@
 
         <!-- Recent Albums Background -->
         <% if (recentRecords?.length > 0) { %>
-        <div class="absolute inset-0 overflow-hidden pointer-events-none">
-            <div class="absolute w-20 h-20 md:w-24 md:h-24 animate-float" style="left: 20%; top: 20%;">
+        <div class="fixed inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute w-24 h-24 animate-float opacity-20 sm:opacity-30" style="left: 20%; top: 20%;">
                 <img src="<%= recentRecords[0]?.imageUrl || '/images/default-album.png' %>"
                      alt="Album artwork"
                      loading="lazy"
-                     class="w-full h-full object-cover rounded-lg shadow-lg opacity-20">
+                     class="w-full h-full object-cover rounded-lg shadow-lg">
             </div>
-            <div class="absolute w-20 h-20 md:w-24 md:h-24 animate-float-delay-1" style="left: 80%; top: 30%;">
+            <div class="absolute w-24 h-24 animate-float-delay-1 opacity-20 sm:opacity-30" style="left: 80%; top: 30%;">
                 <img src="<%= recentRecords[1]?.imageUrl || '/images/default-album.png' %>"
                      alt="Album artwork"
                      loading="lazy"
-                     class="w-full h-full object-cover rounded-lg shadow-lg opacity-20">
+                     class="w-full h-full object-cover rounded-lg shadow-lg">
             </div>
-            <div class="absolute w-20 h-20 md:w-24 md:h-24 animate-float-delay-2" style="left: 40%; top: 70%;">
+            <div class="absolute w-24 h-24 animate-float-delay-2 opacity-20 sm:opacity-30" style="left: 40%; top: 70%;">
                 <img src="<%= recentRecords[2]?.imageUrl || '/images/default-album.png' %>"
                      alt="Album artwork"
                      loading="lazy"
-                     class="w-full h-full object-cover rounded-lg shadow-lg opacity-20">
+                     class="w-full h-full object-cover rounded-lg shadow-lg">
             </div>
-            <div class="absolute w-20 h-20 md:w-24 md:h-24 animate-float-delay-3" style="left: 70%; top: 60%;">
+            <div class="absolute w-24 h-24 animate-float-delay-3 opacity-20 sm:opacity-30" style="left: 70%; top: 60%;">
                 <img src="<%= recentRecords[3]?.imageUrl || '/images/default-album.png' %>"
                      alt="Album artwork"
                      loading="lazy"
-                     class="w-full h-full object-cover rounded-lg shadow-lg opacity-20">
+                     class="w-full h-full object-cover rounded-lg shadow-lg">
             </div>
-            <div class="absolute w-20 h-20 md:w-24 md:h-24 animate-float-delay-4" style="left: 10%; top: 50%;">
+            <div class="absolute w-24 h-24 animate-float-delay-4 opacity-20 sm:opacity-30" style="left: 10%; top: 50%;">
                 <img src="<%= recentRecords[4]?.imageUrl || '/images/default-album.png' %>"
                      alt="Album artwork"
                      loading="lazy"
-                     class="w-full h-full object-cover rounded-lg shadow-lg opacity-20">
+                     class="w-full h-full object-cover rounded-lg shadow-lg">
             </div>
-            <div class="absolute w-20 h-20 md:w-24 md:h-24 animate-float-delay-5" style="left: 90%; top: 80%;">
+            <div class="absolute w-24 h-24 animate-float-delay-5 opacity-20 sm:opacity-30" style="left: 90%; top: 80%;">
                 <img src="<%= recentRecords[5]?.imageUrl || '/images/default-album.png' %>"
                      alt="Album artwork"
                      loading="lazy"
-                     class="w-full h-full object-cover rounded-lg shadow-lg opacity-20">
+                     class="w-full h-full object-cover rounded-lg shadow-lg">
             </div>
         </div>
         <% } %>

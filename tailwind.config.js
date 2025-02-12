@@ -64,5 +64,13 @@ module.exports = {
     },
   },
   plugins: [],
-  darkMode: 'class'
+  darkMode: 'class',
+  safelist: [
+    'bg-opacity-10',
+    'bg-opacity-20',
+    'bg-opacity-50',
+    'bg-opacity-80',
+    'text-opacity-80',
+    'text-opacity-90'
+  ]
 }

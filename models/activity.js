@@ -17,7 +17,9 @@ const activitySchema = new Schema({
             'play_record',
             'like_record',
             'follow_user',
-            'comment'
+            'comment',
+            'update_profile_picture',
+            'update_location'
         ],
         required: true
     },
@@ -42,7 +44,11 @@ const activitySchema = new Schema({
             return this.activityType === 'comment';
         }
     },
-    details: Schema.Types.Mixed
+    details: {
+        type: Map,
+        of: Schema.Types.Mixed,
+        default: new Map()
+    }
 }, {
     timestamps: true
 });
