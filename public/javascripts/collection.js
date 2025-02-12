@@ -83,46 +83,67 @@ function initializeButtonStates() {
     }
 }
 
-function handleSearch(event) {
-    const searchTerm = event.target.value.toLowerCase();
-    const records = document.querySelectorAll('.record-card');
+let searchTimeout;
 
-    records.forEach(record => {
-        const title = record.querySelector('.card-title')?.textContent.toLowerCase() || '';
-        const artist = record.querySelector('.artist')?.textContent.toLowerCase() || '';
-        const isVisible = title.includes(searchTerm) || artist.includes(searchTerm);
-        const parentCol = record.closest('.col');
-        
-        if (isVisible) {
-            parentCol.style.display = '';
-            // Add a subtle animation
-            parentCol.style.opacity = '1';
-            parentCol.style.transform = 'scale(1)';
-        } else {
-            parentCol.style.opacity = '0';
-            parentCol.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                if (!title.includes(searchTerm) && !artist.includes(searchTerm)) {
-                    parentCol.style.display = 'none';
-                }
-            }, 200);
-        }
-    });
-
-    // Show/hide empty state
+async function handleSearch(event) {
+    const searchTerm = event.target.value.trim();
+    const container = document.querySelector('.records-container');
     const emptyState = document.querySelector('.empty-state');
-    const visibleRecords = Array.from(records).filter(r => r.closest('.col').style.display !== 'none');
     
-    if (emptyState) {
-        if (visibleRecords.length === 0 && searchTerm) {
-            emptyState.style.display = 'block';
-            emptyState.querySelector('h4').textContent = 'No matches found';
-            emptyState.querySelector('p').textContent = 'Try adjusting your search terms';
-            emptyState.querySelector('a')?.style.display = 'none';
-        } else {
-            emptyState.style.display = records.length === 0 ? 'block' : 'none';
+    clearTimeout(searchTimeout);
+    
+    // Show loading state
+    container.style.opacity = '0.5';
+    
+    searchTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`/records?search=${encodeURIComponent(searchTerm)}&json=true`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) throw new Error('Search failed');
+            
+            const data = await response.json();
+            
+            // Update records container
+            container.innerHTML = data.records.map(record => `
+                <div class="col s12 m6 l3">
+                    <div class="record-card">
+                        <a href="/records/${record._id}" class="card hoverable">
+                            <div class="card-image">
+                                <img src="${record.artwork || record.imageUrl || '/images/default-album.png'}" 
+                                     alt="${record.title}"
+                                     loading="lazy">
+                            </div>
+                            <div class="card-content">
+                                <span class="card-title truncate">${record.title}</span>
+                                <p class="artist truncate">${record.artist}</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Show/hide empty state
+            if (emptyState) {
+                if (data.records.length === 0 && searchTerm) {
+                    emptyState.style.display = 'block';
+                    emptyState.querySelector('h4').textContent = 'No matches found';
+                    emptyState.querySelector('p').textContent = 'Try adjusting your search terms';
+                    emptyState.querySelector('a').style.display = 'none';
+                } else {
+                    emptyState.style.display = 'none';
+                }
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+            M.toast({html: 'Search failed. Please try again.', classes: 'red'});
+        } finally {
+            container.style.opacity = '1';
         }
-    }
+    }, 300);
 }
 
 function toggleView(viewType) {
