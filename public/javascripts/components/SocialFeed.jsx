@@ -5,8 +5,10 @@ window.SocialFeed = function SocialFeed() {
   const [newPost, setNewPost] = React.useState('');
   const [selectedRecord, setSelectedRecord] = React.useState(null);
   const [records, setRecords] = React.useState([]);
+  const [currentUser, setCurrentUser] = React.useState(null);
 
   React.useEffect(() => {
+    loadCurrentUser();
     loadFeed();
     loadUserRecords();
     
@@ -33,6 +35,18 @@ window.SocialFeed = function SocialFeed() {
       M.textareaAutoResize(textarea);
     }
   }, [newPost]);
+
+  const loadCurrentUser = async () => {
+    try {
+      const response = await fetch('/api/profile/current');
+      if (!response.ok) throw new Error('Failed to load current user');
+      const data = await response.json();
+      setCurrentUser(data);
+    } catch (err) {
+      console.error('Error loading current user:', err);
+      setError('Failed to load user data');
+    }
+  };
 
   const loadFeed = async () => {
     try {
@@ -238,9 +252,9 @@ window.SocialFeed = function SocialFeed() {
               <div className="post-actions">
                 <button
                   className={`btn-flat waves-effect waves-light ${
-                    post.likes?.includes(currentUser._id) ? 'red-text' : ''
+                    currentUser && post.likes?.includes(currentUser._id) ? 'red-text' : ''
                   }`}
-                  onClick={() => toggleLike(user._id, post._id, post.likes?.includes(currentUser._id))}
+                  onClick={() => toggleLike(user._id, post._id, currentUser && post.likes?.includes(currentUser._id))}
                 >
                   <i className="material-icons left">favorite</i>
                   {post.likes?.length || 0}
