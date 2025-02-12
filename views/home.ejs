@@ -1,142 +1,150 @@
-<!-- Hero Section -->
-<section class="relative -mt-6 px-4 py-12 bg-gradient-to-br from-primary to-primary-dark text-white">
-    <div class="max-w-lg mx-auto text-center">
-        <h1 class="text-3xl font-bold mb-4">Track Your Vinyl Journey</h1>
-        <p class="text-lg mb-8 text-white/90">Discover, collect, and share your vinyl records with a community of music lovers.</p>
-        <% if (!locals.user) { %>
-            <div class="space-y-4">
-                <a href="/auth/sign-up" class="block w-full btn bg-white text-primary hover:bg-gray-100">
-                    Start Your Collection
-                </a>
-                <a href="/auth/sign-in" class="block w-full btn border-2 border-white text-white hover:bg-white/10">
-                    Sign In
-                </a>
-            </div>
-        <% } else { %>
-            <div class="space-y-4">
-                <a href="/records" class="block w-full btn bg-white text-primary hover:bg-gray-100">
-                    View Your Collection
-                </a>
-                <a href="/records/new" class="block w-full btn border-2 border-white text-white hover:bg-white/10">
-                    Add New Record
-                </a>
-            </div>
-        <% } %>
-    </div>
-    
-    <!-- Recent Records -->
-    <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 flex -space-x-4">
-        <% if (locals.lastThreeRecords && lastThreeRecords.length > 0) { %>
-            <% lastThreeRecords.forEach((record, index) => { %>
-                <div class="w-16 h-16 rounded-full shadow-lg overflow-hidden transform <%= index === 0 ? '-rotate-12' : index === 2 ? 'rotate-12' : '' %>">
-                    <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
-                         alt="<%= record.title %>"
-                         class="w-full h-full object-cover"
-                         title="<%= record.title %> by <%= record.artist %>">
+<%- include('partials/header.ejs') %>
+
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+    <!-- User Stats Section (Only shown when logged in) -->
+    <% if (locals.user) { %>
+        <div class="px-4 py-6 bg-white dark:bg-gray-800 shadow-sm mb-4">
+            <div class="max-w-lg mx-auto">
+                <!-- User Profile Summary -->
+                <div class="flex items-center space-x-4 mb-6">
+                    <img src="<%= user.profile?.avatarUrl || '/images/default-avatar.png' %>" 
+                         alt="Profile" 
+                         class="w-16 h-16 rounded-full object-cover">
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">
+                            <%= user.profile?.name || user.username %>
+                        </h2>
+                        <% if (user.profile?.location) { %>
+                            <p class="text-gray-600 dark:text-gray-400 flex items-center">
+                                <span class="material-icons text-sm mr-1">location_on</span>
+                                <%= user.profile.location %>
+                            </p>
+                        <% } %>
+                    </div>
                 </div>
-            <% }); %>
-        <% } else { %>
-            <div class="w-16 h-16 bg-black rounded-full shadow-lg transform -rotate-12"></div>
-            <div class="w-16 h-16 bg-black rounded-full shadow-lg"></div>
-            <div class="w-16 h-16 bg-black rounded-full shadow-lg transform rotate-12"></div>
-        <% } %>
-    </div>
-</section>
 
-<!-- Features Section -->
-<section class="px-4 py-16 bg-white dark:bg-gray-800">
-    <div class="max-w-lg mx-auto space-y-12">
-        <div class="text-center space-y-2">
-            <span class="material-icons text-4xl text-primary">album</span>
-            <h3 class="text-xl font-semibold">Track Collection</h3>
-            <p class="text-gray-600 dark:text-gray-400">Organize and manage your vinyl records with ease.</p>
-        </div>
-        
-        <div class="text-center space-y-2">
-            <span class="material-icons text-4xl text-primary">people</span>
-            <h3 class="text-xl font-semibold">Community</h3>
-            <p class="text-gray-600 dark:text-gray-400">Connect with fellow vinyl enthusiasts.</p>
-        </div>
-        
-        <div class="text-center space-y-2">
-            <span class="material-icons text-4xl text-primary">analytics</span>
-            <h3 class="text-xl font-semibold">Insights</h3>
-            <p class="text-gray-600 dark:text-gray-400">Get statistics and insights about your collection.</p>
-        </div>
-    </div>
-</section>
-
-<!-- Featured Records Section -->
-<section class="px-4 py-12 bg-gray-50 dark:bg-gray-900">
-    <div class="max-w-lg mx-auto">
-        <h2 class="text-2xl font-bold mb-6">Featured Records</h2>
-        <div class="grid grid-cols-2 gap-4">
-            <% if (locals.featuredRecords && featuredRecords.length > 0) { %>
-                <% featuredRecords.forEach(record => { %>
-                    <a href="/records/<%= record._id %>" class="block group">
-                        <div class="aspect-square rounded-lg overflow-hidden bg-white dark:bg-gray-800 shadow-sm">
-                            <img src="<%= record.artwork || '/images/default-album.png' %>" 
-                                 alt="<%= record.title %>"
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-primary dark:text-primary-light">
+                            <%= totalRecords || 0 %>
                         </div>
-                        <h4 class="mt-2 font-medium truncate"><%= record.title %></h4>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 truncate"><%= record.artist %></p>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">Records</div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-primary dark:text-primary-light">
+                            <%= totalPlays || 0 %>
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">Plays</div>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold text-primary dark:text-primary-light">
+                            <%= user.followers?.length || 0 %>
+                        </div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">Followers</div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="flex space-x-4">
+                    <a href="/records/new" class="flex-1 btn btn-primary">
+                        <span class="material-icons mr-2">add</span>
+                        Add Record
                     </a>
-                <% }) %>
-            <% } else { %>
-                <p class="col-span-2 text-center text-gray-600 dark:text-gray-400 py-8">No featured records yet.</p>
-            <% } %>
-        </div>
-    </div>
-</section>
-
-<!-- Community Section -->
-<section class="px-4 py-12 bg-white dark:bg-gray-800">
-    <div class="max-w-lg mx-auto text-center">
-        <h2 class="text-2xl font-bold mb-4">Join the Community</h2>
-        <p class="text-gray-600 dark:text-gray-400 mb-8">Connect with vinyl enthusiasts, share your collection, and discover new music.</p>
-        <% if (!locals.user) { %>
-            <a href="/auth/sign-up" class="btn btn-primary">Get Started</a>
-        <% } %>
-    </div>
-</section>
-
-<!-- App Install Banner -->
-<div id="installBanner" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 p-4 shadow-lg transform translate-y-full transition-transform duration-300 ease-in-out z-40">
-    <div class="flex items-center justify-between max-w-lg mx-auto">
-        <div class="flex items-center space-x-3">
-            <img src="/images/favicon.svg" alt="Vinyl Vault" class="w-12 h-12">
-            <div>
-                <h4 class="font-semibold">Install Vinyl Vault</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400">Add to Home Screen</p>
+                    <a href="/search" class="flex-1 btn bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                        <span class="material-icons mr-2">group_add</span>
+                        Find Users
+                    </a>
+                </div>
             </div>
         </div>
-        <button id="installButton" class="btn btn-primary">Install</button>
+    <% } else { %>
+        <!-- Welcome Banner for Non-Logged In Users -->
+        <div class="px-4 py-8 bg-gradient-to-br from-primary to-primary-dark text-white mb-4">
+            <div class="max-w-lg mx-auto text-center">
+                <h1 class="text-3xl font-bold mb-4">Track Your Vinyl Journey</h1>
+                <p class="text-lg mb-6 text-white/90">Join our community of vinyl enthusiasts.</p>
+                <div class="space-y-4">
+                    <a href="/auth/sign-up" class="block w-full btn bg-white text-primary hover:bg-gray-100">
+                        Start Your Collection
+                    </a>
+                    <a href="/auth/sign-in" class="block w-full btn border-2 border-white text-white hover:bg-white/10">
+                        Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Social Feed Section -->
+    <div class="max-w-lg mx-auto px-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Social Feed</h2>
+            </div>
+            
+            <!-- Social Feed Component -->
+            <div id="social-feed-root"></div>
+        </div>
+
+        <!-- Heavy Rotation -->
+        <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Heavy Rotation</h2>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <% if (locals.featuredRecords && featuredRecords.length > 0) { %>
+                        <% featuredRecords.forEach(record => { %>
+                            <a href="/records/<%= record._id %>" class="block group">
+                                <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
+                                    <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
+                                         alt="<%= record.title %>"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <h4 class="mt-2 font-medium text-gray-900 dark:text-gray-100 truncate">
+                                    <%= record.title %>
+                                </h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                    <%= record.artist %>
+                                </p>
+                            </a>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="col-span-2 text-center text-gray-600 dark:text-gray-400 py-8">
+                            No featured records yet.
+                        </p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<script>
-    // PWA Install Banner Logic
-    let deferredPrompt;
-    const installBanner = document.getElementById('installBanner');
-    const installButton = document.getElementById('installButton');
+<!-- React Dependencies -->
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installBanner.style.transform = 'translateY(0)';
-    });
+<!-- React Components -->
+<script type="text/babel" src="/javascripts/components/SocialFeed.jsx"></script>
 
-    installButton.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        
-        if (outcome === 'accepted') {
-            installBanner.style.transform = 'translateY(100%)';
-        }
-        
-        deferredPrompt = null;
-    });
+<!-- Mount React Social Feed Component -->
+<script type="text/babel">
+  try {
+    const container = document.getElementById('social-feed-root');
+    if (container) {
+      const root = ReactDOM.createRoot(container);
+      const props = {
+        currentUser: JSON.parse('<%- JSON.stringify(currentUser) %>')
+      };
+      root.render(React.createElement(window.SocialFeed, props));
+    } else {
+      console.error('Social feed root element not found');
+    }
+  } catch (error) {
+    console.error('Error mounting Social Feed component:', error);
+  }
 </script>
+
+<%- include('partials/footer.ejs') %>
