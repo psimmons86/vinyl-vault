@@ -2,7 +2,24 @@
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <style>
+        /* Base mobile-first font sizes */
+        :root {
+            font-size: 16px; /* Base size for mobile */
+        }
+        @media (max-width: 640px) {
+            body {
+                font-size: 1rem; /* 16px */
+                line-height: 1.5;
+            }
+            h1 { font-size: 1.5rem; } /* 24px */
+            h2 { font-size: 1.25rem; } /* 20px */
+            h3 { font-size: 1.125rem; } /* 18px */
+            .text-sm { font-size: 0.9375rem; } /* 15px */
+            .text-xs { font-size: 0.875rem; } /* 14px */
+        }
+    </style>
     <title>Vinyl Vault</title>
     
     <!-- PWA Meta Tags -->
