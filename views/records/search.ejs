@@ -1,69 +1,98 @@
-<!-- Main container -->
-<div class="container">
-    <h1>Search Discogs</h1>
+<%- include('../partials/header') %>
 
-    <div class="row">
-        <form action="/records/search" method="GET" class="col s12">
-            <div class="input-field col s12 m8 offset-m2">
-                <i class="material-icons prefix">search</i>
-                <input type="text" id="q" name="q" value="<%= locals.searchQuery || '' %>" required>
-                <label for="q">Search by Artist or Album</label>
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-2xl mx-auto">
+        <!-- Header -->
+        <h1 class="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">Search Discogs</h1>
+
+        <!-- Search Form -->
+        <form action="/records/search" method="GET" class="mb-8">
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    <span class="material-icons">search</span>
+                </span>
+                <input type="text" 
+                       id="q" 
+                       name="q" 
+                       value="<%= locals.searchQuery || '' %>" 
+                       class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light"
+                       placeholder="Search by Artist or Album"
+                       required>
             </div>
-            <div class="col s12 center-align">
-                <button type="submit" class="btn waves-effect waves-light">
-                    Search
-                    <i class="material-icons right">send</i>
+            <div class="mt-4 text-center">
+                <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary text-white dark:bg-primary-light dark:text-gray-900 rounded-lg hover:bg-primary-dark dark:hover:bg-primary transition-colors">
+                    <span>Search</span>
+                    <span class="material-icons ml-2">search</span>
                 </button>
             </div>
         </form>
-    </div>
 
-    <% if (locals.error) { %>
-        <div class="row">
-            <div class="col s12">
-                <div class="card-panel red lighten-4 red-text text-darken-4">
-                    <%= error %>
+        <!-- Error Message -->
+        <% if (locals.error) { %>
+            <div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg mb-6">
+                <div class="flex items-center">
+                    <span class="material-icons mr-2">error_outline</span>
+                    <p><%= error %></p>
                 </div>
             </div>
-        </div>
-    <% } %>
+        <% } %>
 
-    <% if (locals.results && results.length > 0) { %>
-        <div class="row">
-            <% results.forEach(record => { %>
-                <div class="col s12 m6 l4">
-                    <div class="card">
-                        <div class="card-image">
+        <!-- Results Grid -->
+        <% if (locals.results && results.length > 0) { %>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <% results.forEach(record => { %>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+                        <!-- Album Art -->
+                        <div class="aspect-square bg-gray-100 dark:bg-gray-900">
                             <img src="<%= record.thumb || '/images/default-album.png' %>" 
                                  alt="<%= record.title %>"
-                                 onerror="this.src='/images/default-album.png'">
+                                 onerror="this.src='/images/default-album.png'"
+                                 class="w-full h-full object-cover">
                         </div>
-                        <div class="card-content">
-                            <span class="card-title truncate"><%= record.title %></span>
-                            <p>
-                                <% if (record.year) { %>Year: <%= record.year %><br><% } %>
-                                <% if (record.genre) { %>Genre: <%= record.genre %><br><% } %>
-                                <% if (record.label) { %>Label: <%= record.label %><% } %>
-                            </p>
+                        
+                        <!-- Record Info -->
+                        <div class="p-4">
+                            <h3 class="font-medium text-gray-900 dark:text-gray-100 line-clamp-1 mb-2"><%= record.title %></h3>
+                            <div class="space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                                <% if (record.year) { %>
+                                    <p class="flex items-center">
+                                        <span class="material-icons text-sm mr-1">calendar_today</span>
+                                        <%= record.year %>
+                                    </p>
+                                <% } %>
+                                <% if (record.genre) { %>
+                                    <p class="flex items-center">
+                                        <span class="material-icons text-sm mr-1">category</span>
+                                        <%= record.genre %>
+                                    </p>
+                                <% } %>
+                                <% if (record.label) { %>
+                                    <p class="flex items-center">
+                                        <span class="material-icons text-sm mr-1">business</span>
+                                        <%= record.label %>
+                                    </p>
+                                <% } %>
+                            </div>
                         </div>
-                        <div class="card-action">
-                            <a href="/records/add-from-discogs/<%= record.id %>" class="btn waves-effect waves-light">
-                                Add to Collection
-                                <i class="material-icons right">add</i>
+
+                        <!-- Action -->
+                        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
+                            <a href="/records/add-from-discogs/<%= record.id %>" 
+                               class="inline-flex items-center text-primary dark:text-primary-light hover:text-primary-dark dark:hover:text-primary">
+                                <span>Add to Collection</span>
+                                <span class="material-icons ml-1">add</span>
                             </a>
                         </div>
                     </div>
-                </div>
-            <% }); %>
-        </div>
-    <% } else if (locals.searchQuery) { %>
-        <div class="row">
-            <div class="col s12 center-align">
+                <% }); %>
+            </div>
+        <% } else if (locals.searchQuery) { %>
+            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                <span class="material-icons text-4xl mb-2">search_off</span>
                 <p>No records found matching your search.</p>
             </div>
-        </div>
-    <% } %>
+        <% } %>
+    </div>
 </div>
 
-<!-- Include footer template -->
 <%- include('../partials/footer') %>
