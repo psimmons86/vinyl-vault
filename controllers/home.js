@@ -11,7 +11,7 @@ router.get('/', asyncHandler(async (req, res) => {
         return res.redirect('/records');
     }
 
-    // Get recent public records for homepage carousel
+    // Get last 3 public records for homepage circles
     const recentRecords = await Record.find()
         .populate({
             path: 'owner',               // Get owner details
@@ -19,15 +19,15 @@ router.get('/', asyncHandler(async (req, res) => {
             select: 'username'           // Just get username
         })
         .sort({ createdAt: -1 })        // Newest first
-        .limit(12)                       // Get 12 records
+        .limit(3)                        // Get 3 records
         .select('title artist imageUrl createdAt');  // Only needed fields
 
     // Filter out records where owner is private
-    const publicRecords = recentRecords.filter(record => record.owner);
+    const lastThreeRecords = recentRecords.filter(record => record.owner);
 
     res.render('home', {
         title: 'Welcome to Vinyl Vault',
-        recentRecords: publicRecords
+        lastThreeRecords
     });
 }));
 
@@ -103,7 +103,7 @@ router.get('/users/:username', asyncHandler(async (req, res) => {
             (current.likes?.length || 0) > (prev.likes?.length || 0) ? current : prev
         ) : null;
 
-    res.render('users/profile', {
+    res.render('records/profile', {
         title: `${user.username}'s Profile`,
         user: user,
         currentUser: req.user,

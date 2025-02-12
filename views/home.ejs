@@ -24,11 +24,22 @@
         <% } %>
     </div>
     
-    <!-- Decorative vinyl records -->
+    <!-- Recent Records -->
     <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 flex -space-x-4">
-        <div class="w-16 h-16 bg-black rounded-full shadow-lg transform -rotate-12"></div>
-        <div class="w-16 h-16 bg-black rounded-full shadow-lg"></div>
-        <div class="w-16 h-16 bg-black rounded-full shadow-lg transform rotate-12"></div>
+        <% if (locals.lastThreeRecords && lastThreeRecords.length > 0) { %>
+            <% lastThreeRecords.forEach((record, index) => { %>
+                <div class="w-16 h-16 rounded-full shadow-lg overflow-hidden transform <%= index === 0 ? '-rotate-12' : index === 2 ? 'rotate-12' : '' %>">
+                    <img src="<%= record.imageUrl || '/images/default-album.png' %>" 
+                         alt="<%= record.title %>"
+                         class="w-full h-full object-cover"
+                         title="<%= record.title %> by <%= record.artist %>">
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="w-16 h-16 bg-black rounded-full shadow-lg transform -rotate-12"></div>
+            <div class="w-16 h-16 bg-black rounded-full shadow-lg"></div>
+            <div class="w-16 h-16 bg-black rounded-full shadow-lg transform rotate-12"></div>
+        <% } %>
     </div>
 </section>
 
