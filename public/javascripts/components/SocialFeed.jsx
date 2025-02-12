@@ -57,7 +57,7 @@ window.SocialFeed = function SocialFeed() {
             content = 'updated their profile picture';
             break;
           case 'update_location':
-            content = `updated their location to ${activity.details.get('location')}`;
+            content = `updated their location to ${activity.details.location}`;
             break;
           case 'add_record':
             content = `added ${activity.record.title} by ${activity.record.artist} to their collection`;
@@ -73,11 +73,11 @@ window.SocialFeed = function SocialFeed() {
           type: 'activity',
           createdAt: activity.createdAt,
           data: {
-            imageUrl: activity.activityType === 'update_profile_picture' ? activity.details.get('imageUrl') : 
+            imageUrl: activity.activityType === 'update_profile_picture' ? activity.details.imageUrl : 
                      activity.activityType === 'add_record' ? activity.record.imageUrl : null,
             title: activity.record?.title,
             artist: activity.record?.artist,
-            location: activity.details?.get('location')
+            location: activity.details?.location
           }
         };
       }).filter(Boolean);
