@@ -145,27 +145,41 @@ router.get('/feed', asyncHandler(async (req, res) => {
         // Match users we're following
         { $match: { _id: { $in: followedUsers } } },
         // Unwind posts array
-        { $unwind: '$posts' },
+        { $unwind: { path: '$posts', preserveNullAndEmptyArrays: false } },
+        // Add user info to each post
+        {
+            $addFields: {
+                'posts.user': {
+                    _id: '$_id',
+                    username: '$username',
+                    profile: '$profile'
+                }
+            }
+        },
         // Sort by post date
         { $sort: { 'posts.createdAt': -1 } },
         // Limit to recent posts
         { $limit: 50 },
-        // Group back by user
+        // Project just the posts
         {
-            $group: {
-                _id: '$_id',
-                username: { $first: '$username' },
-                profile: { $first: '$profile' },
-                posts: { $push: '$posts' }
+            $project: {
+                _id: '$posts._id',
+                content: '$posts.content',
+                imageUrl: '$posts.imageUrl',
+                recordRef: '$posts.recordRef',
+                likes: '$posts.likes',
+                comments: '$posts.comments',
+                createdAt: '$posts.createdAt',
+                user: '$posts.user'
             }
         }
     ]);
 
     // Populate references
     await User.populate(feed, [
-        { path: 'posts.recordRef' },
-        { path: 'posts.likes', select: 'username profile.name profile.avatarUrl' },
-        { path: 'posts.comments.user', select: 'username profile.name profile.avatarUrl' }
+        { path: 'recordRef' },
+        { path: 'likes', select: 'username profile.name profile.avatarUrl' },
+        { path: 'comments.user', select: 'username profile.name profile.avatarUrl' }
     ]);
 
     res.json(feed);
