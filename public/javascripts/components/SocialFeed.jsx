@@ -78,9 +78,9 @@ window.SocialFeed = function SocialFeed() {
           data: {
             imageUrl: activity.activityType === 'update_profile_picture' ? activity.details.imageUrl : 
                      activity.activityType === 'add_record' ? activity.record.imageUrl : null,
-            title: activity.record?.title,
-            artist: activity.record?.artist,
-            location: activity.details?.location
+            title: activity.record && activity.record.title,
+            artist: activity.record && activity.record.artist,
+            location: activity.details && activity.details.location
           }
         };
       }).filter(Boolean);
@@ -244,13 +244,13 @@ window.SocialFeed = function SocialFeed() {
               {/* Post Header */}
               <div className="flex items-center space-x-3 mb-3">
                 <img
-                  src={item.user.profile?.avatarUrl || '/images/default-avatar.png'}
-                  alt={item.user.profile?.name || item.user.username}
+                  src={(item.user.profile && item.user.profile.avatarUrl) || '/images/default-avatar.png'}
+                  alt={(item.user.profile && item.user.profile.name) || item.user.username}
                   className="w-10 h-10 rounded-full object-cover"
                 />
                 <div>
                   <div className="font-medium text-gray-900 dark:text-gray-100">
-                    {item.user.profile?.name || item.user.username}
+                    {(item.user.profile && item.user.profile.name) || item.user.username}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     {new Date(item.createdAt).toLocaleString()}
@@ -262,7 +262,7 @@ window.SocialFeed = function SocialFeed() {
               {item.type === 'activity' ? (
                 <div>
                   <p className="text-gray-700 dark:text-gray-300">
-                    <span className="font-medium">{item.user.profile?.name || item.user.username}</span>
+                    <span className="font-medium">{(item.user.profile && item.user.profile.name) || item.user.username}</span>
                     {' '}{item.content}
                   </p>
                   {item.data?.imageUrl && (
@@ -291,33 +291,33 @@ window.SocialFeed = function SocialFeed() {
                   )}
                   <div className="flex items-center space-x-4 text-gray-600 dark:text-gray-400">
                     <button
-                      onClick={() => toggleLike(item.user._id, item._id, currentUser && item.likes?.includes(currentUser._id))}
+                      onClick={() => toggleLike(item.user._id, item._id, currentUser && item.likes && item.likes.includes(currentUser._id))}
                       className={`flex items-center space-x-1 ${
-                        currentUser && item.likes?.includes(currentUser._id) ? 'text-red-500' : ''
+                        currentUser && item.likes && item.likes.includes(currentUser._id) ? 'text-red-500' : ''
                       }`}
                     >
                       <span className="material-icons text-sm">favorite</span>
-                      <span>{item.likes?.length || 0}</span>
+                      <span>{(item.likes && item.likes.length) || 0}</span>
                     </button>
                     <div className="flex items-center space-x-1">
                       <span className="material-icons text-sm">comment</span>
-                      <span>{item.comments?.length || 0}</span>
+                      <span>{(item.comments && item.comments.length) || 0}</span>
                     </div>
                   </div>
 
                   {/* Comments */}
-                  {item.comments?.length > 0 && (
+                  {item.comments && item.comments.length > 0 && (
                     <div className="mt-4 space-y-3">
                       {item.comments.map(comment => (
                         <div key={comment._id} className="flex items-start space-x-3">
                           <img
-                            src={comment.user.profile?.avatarUrl || '/images/default-avatar.png'}
-                            alt={comment.user.profile?.name || comment.user.username}
+                            src={(comment.user.profile && comment.user.profile.avatarUrl) || '/images/default-avatar.png'}
+                            alt={(comment.user.profile && comment.user.profile.name) || comment.user.username}
                             className="w-8 h-8 rounded-full object-cover"
                           />
                           <div className="flex-1 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
                             <div className="font-medium text-sm text-gray-900 dark:text-gray-100">
-                              {comment.user.profile?.name || comment.user.username}
+                              {(comment.user.profile && comment.user.profile.name) || comment.user.username}
                             </div>
                             <p className="text-sm text-gray-700 dark:text-gray-300">{comment.content}</p>
                             <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">

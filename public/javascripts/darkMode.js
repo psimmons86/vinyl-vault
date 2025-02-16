@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const darkModeToggle = document.getElementById('darkModeToggle');
-    const darkModeIcon = darkModeToggle?.querySelector('.dark-mode-icon');
+    const darkModeIcon = darkModeToggle && darkModeToggle.querySelector('.dark-mode-icon');
     const html = document.documentElement;
     
     // Check system preference and localStorage
@@ -11,11 +11,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateTheme(isDark) {
         if (isDark) {
             html.classList.add('dark');
-            darkModeIcon?.textContent = 'dark_mode';
+            if (darkModeIcon) darkModeIcon.textContent = 'dark_mode';
             localStorage.setItem('theme', 'dark');
         } else {
             html.classList.remove('dark');
-            darkModeIcon?.textContent = 'light_mode';
+            if (darkModeIcon) darkModeIcon.textContent = 'light_mode';
             localStorage.setItem('theme', 'light');
         }
         
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Toggle theme on button click
-    darkModeToggle?.addEventListener('click', () => {
+    if (darkModeToggle) darkModeToggle.addEventListener('click', () => {
         const isDark = !html.classList.contains('dark');
         updateTheme(isDark);
         
