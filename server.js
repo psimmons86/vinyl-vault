@@ -48,7 +48,7 @@ app.use(express.static('public', {
     setHeaders: (res, path) => {
         // Set different cache times based on file type
         if (path.endsWith('.css') || path.endsWith('.js')) {
-            res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day
+            res.setHeader('Cache-Control', 'public, max-age=0'); // No cache for CSS/JS during development
         } else if (path.endsWith('.png') || path.endsWith('.jpg') || path.endsWith('.svg')) {
             res.setHeader('Cache-Control', 'public, max-age=604800'); // 1 week
         } else if (path.endsWith('.woff2') || path.endsWith('.woff') || path.endsWith('.ttf')) {
