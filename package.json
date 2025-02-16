@@ -9,7 +9,8 @@
     "seed": "node seed.js",
     "build:css": "./node_modules/.bin/tailwindcss -i ./public/stylesheets/tailwind.css -o ./public/stylesheets/style.css --watch",
     "build:css:prod": "./node_modules/.bin/tailwindcss -i ./public/stylesheets/tailwind.css -o ./public/stylesheets/style.css --minify",
-    "build": "npm run build:css:prod",
+    "build:js": "babel public/javascripts/components --out-dir public/javascripts/dist --presets=@babel/preset-react",
+    "build": "npm run build:css:prod && npm run build:js",
     "heroku-postbuild": "npm run build"
   },
   "keywords": [
@@ -28,6 +29,7 @@
     "node": "20.x"
   },
   "dependencies": {
+    "@babel/runtime": "^7.23.9",
     "autoprefixer": "^10.4.17",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.7.9",
@@ -57,6 +59,11 @@
     "tailwindcss": "^3.4.1"
   },
   "devDependencies": {
+    "@babel/cli": "^7.23.9",
+    "@babel/core": "^7.23.9",
+    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-react": "^7.23.9",
+    "@babel/plugin-transform-runtime": "^7.23.9",
     "nodemon": "^3.1.9",
     "postcss-import": "^16.0.1"
   }

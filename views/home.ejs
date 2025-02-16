@@ -122,19 +122,21 @@
 </div>
 
 <!-- React Dependencies -->
-<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
 <!-- React Components -->
-<script type="text/babel" src="/javascripts/components/SocialFeed.jsx"></script>
+<script src="/javascripts/dist/SocialFeed.js"></script>
 
 <!-- Initialize Social Feed -->
-<script type="text/babel">
+<script>
   const container = document.getElementById('social-feed-root');
   if (container) {
     const root = ReactDOM.createRoot(container);
-    root.render(React.createElement(window.SocialFeed));
+    const props = {
+      currentUser: JSON.parse('<%- JSON.stringify(locals.user || null) %>')
+    };
+    root.render(React.createElement(window.SocialFeed, props));
   }
 </script>
 
