@@ -5,6 +5,7 @@ const ensureAdmin = require('../middleware/ensure-admin');
 const Record = require('../models/record');
 const User = require('../models/user');
 const Activity = require('../models/activity');
+const FeaturedRecord = require('../models/featured');
 
 // Apply admin middleware to all routes
 router.use(ensureAdmin);
@@ -36,6 +37,35 @@ router.post('/heavy-rotation/:id', asyncHandler(async (req, res) => {
 
     record.inHeavyRotation = !record.inHeavyRotation;
     await record.save();
+
+    // Sync with FeaturedRecord
+    if (record.inHeavyRotation) {
+        // Get current count of featured records
+        const count = await FeaturedRecord.countDocuments();
+        if (count < 5) {
+            // Create new featured record
+            const featured = new FeaturedRecord({
+                title: record.title,
+                artist: record.artist,
+                albumArt: record.imageUrl,
+                order: count + 1
+            });
+            await featured.save();
+        }
+    } else {
+        // Remove from featured records
+        await FeaturedRecord.findOneAndDelete({
+            title: record.title,
+            artist: record.artist
+        });
+        
+        // Reorder remaining featured records
+        const remaining = await FeaturedRecord.find().sort('order');
+        for (let i = 0; i < remaining.length; i++) {
+            remaining[i].order = i + 1;
+            await remaining[i].save();
+        }
+    }
 
     req.flash('success', `${record.title} ${record.inHeavyRotation ? 'added to' : 'removed from'} heavy rotation`);
     res.redirect('/admin/heavy-rotation');
