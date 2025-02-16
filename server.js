@@ -13,6 +13,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const expressLayouts = require('express-ejs-layouts');
 const compression = require('compression');
+const csrf = require('csurf');
 
 // Initialize Express app and port
 const app = express();
@@ -68,6 +69,13 @@ SESSION_CONFIG.store = MongoStore.create({
 });
 
 app.use(session(SESSION_CONFIG));                   // Session management
+
+// Set up CSRF protection
+app.use(csrf());
+app.use((req, res, next) => {
+    res.locals.csrfToken = req.csrfToken();
+    next();
+});
 
 // Set up flash messages and session messages
 app.use(flash());

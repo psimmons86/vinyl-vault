@@ -54,6 +54,7 @@
                                 </td>
                                 <td class="px-4 py-3 text-right">
                                     <form action="/admin/heavy-rotation/<%= record._id %>" method="POST" class="inline-block">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                         <button type="submit" 
                                                 class="text-sm font-medium <%= record.inHeavyRotation ? 'text-red-600 dark:text-red-400 hover:text-red-700' : 'text-primary dark:text-primary-light hover:text-primary-dark' %>">
                                             <%= record.inHeavyRotation ? 'Remove' : 'Add' %>
