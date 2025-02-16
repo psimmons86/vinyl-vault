@@ -2,7 +2,10 @@
 module.exports = {
   content: [
     "./views/**/*.ejs",
+    "./views/**/*.html",
     "./public/**/*.{js,jsx}",
+    "./public/javascripts/**/*.{js,jsx}",
+    "./public/stylesheets/**/*.css"
   ],
   theme: {
     screens: {
