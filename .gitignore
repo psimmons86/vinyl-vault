@@ -30,5 +30,10 @@ coverage
 public/uploads/*
 !public/uploads/.gitkeep
 
+# Generated CSS
+public/stylesheets/*
+!public/stylesheets/.gitkeep
+!public/stylesheets/tailwind.css
+
 # macOS
 .DS_Store
