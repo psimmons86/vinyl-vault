@@ -129,9 +129,9 @@ router.post('/avatar', asyncHandler(async (req, res) => {
   await Activity.create({
     user: user._id,
     activityType: 'update_profile_picture',
-    details: new Map([
-      ['imageUrl', req.body.avatarUrl]
-    ])
+    details: {
+      imageUrl: req.body.avatarUrl
+    }
   });
 
   res.json({ avatarUrl: user.profile.avatarUrl });
@@ -148,9 +148,9 @@ router.post('/location', asyncHandler(async (req, res) => {
   await Activity.create({
     user: user._id,
     activityType: 'update_location',
-    details: new Map([
-      ['location', req.body.location]
-    ])
+    details: {
+      location: req.body.location
+    }
   });
 
   res.json({ location: user.profile.location });

@@ -42,12 +42,10 @@
                         <% } %>
                         
                         <div class="record-actions">
-                            <form action="/records/<%= record._id %>/play" method="POST" class="play-form">
-                                <button type="submit" class="btn waves-effect waves-light play-btn">
-                                    <i class="material-icons left">play_arrow</i>
-                                    Play
-                                </button>
-                            </form>
+                            <button onclick="trackPlay('<%= record._id %>')" class="btn waves-effect waves-light play-btn">
+                                <i class="material-icons left">play_arrow</i>
+                                Play
+                            </button>
 
                             <div class="management-buttons">
                                 <a href="/records/<%= record._id %>/edit" class="btn">
@@ -77,4 +75,5 @@
     </div>
 </div>
 
+<script src="/javascripts/record.js"></script>
 <%- include('../partials/footer.ejs') %>

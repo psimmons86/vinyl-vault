@@ -65,7 +65,12 @@ const recordSchema = new Schema({
         unique: true,
         sparse: true
     },
-    label: String
+    label: String,
+    inHeavyRotation: {
+        type: Boolean,
+        default: false,
+        index: true
+    }
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
@@ -80,6 +85,7 @@ recordSchema.index({ owner: 1, plays: -1, artist: 1 }); // For most played queri
 recordSchema.index({ owner: 1, lastPlayed: -1 }); // For recently played queries
 recordSchema.index({ owner: 1, year: 1 }); // For year-based queries
 recordSchema.index({ owner: 1, value: -1 }); // For value-based sorting
+recordSchema.index({ inHeavyRotation: 1, plays: -1 }); // For featured records queries
 
 // Text index for search functionality
 recordSchema.index(

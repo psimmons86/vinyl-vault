@@ -4,31 +4,70 @@ const Record = require('../models/record');
 const User = require('../models/user');
 const asyncHandler = require('../middleware/async-handler');
 
+// API endpoint to get current user data
+router.get('/api/current-user', asyncHandler(async (req, res) => {
+    if (!req.user) {
+        return res.json(null);
+    }
+    res.json(req.user);
+}));
+
 // Home page route
 router.get('/', asyncHandler(async (req, res) => {
-    // If user is logged in, redirect to their records
+    let pageData = {
+        title: 'Welcome to Vinyl Vault'
+    };
+
+    // Get featured records
+    const featuredRecords = await Record.find({ inHeavyRotation: true })
+        .populate('owner', 'username')
+        .sort('-plays')
+        .limit(6)
+        .select('title artist imageUrl plays');
+
+    pageData.featuredRecords = featuredRecords;
+
+    // If user is logged in, get their stats
     if (req.user) {
-        return res.redirect('/records');
+        const [
+            totalRecords,
+            totalPlays,
+            user
+        ] = await Promise.all([
+            Record.countDocuments({ owner: req.user._id }),
+            Record.aggregate([
+                { $match: { owner: req.user._id } },
+                { $group: { _id: null, total: { $sum: '$plays' } } }
+            ]),
+            User.findById(req.user._id)
+                .populate('followers')
+                .populate('following')
+                .populate('profile.top8Records')
+        ]);
+
+        pageData = {
+            ...pageData,
+            totalRecords,
+            totalPlays: totalPlays[0]?.total || 0,
+            user: user,
+            currentUser: req.user
+        };
+    } else {
+        // Get last 3 public records for homepage circles
+        const recentRecords = await Record.find()
+            .populate({
+                path: 'owner',
+                match: { isPublic: true },
+                select: 'username'
+            })
+            .sort({ createdAt: -1 })
+            .limit(3)
+            .select('title artist imageUrl createdAt');
+
+        pageData.lastThreeRecords = recentRecords.filter(record => record.owner);
     }
 
-    // Get last 3 public records for homepage circles
-    const recentRecords = await Record.find()
-        .populate({
-            path: 'owner',               // Get owner details
-            match: { isPublic: true },   // Only public profiles
-            select: 'username'           // Just get username
-        })
-        .sort({ createdAt: -1 })        // Newest first
-        .limit(3)                        // Get 3 records
-        .select('title artist imageUrl createdAt');  // Only needed fields
-
-    // Filter out records where owner is private
-    const lastThreeRecords = recentRecords.filter(record => record.owner);
-
-    res.render('home', {
-        title: 'Welcome to Vinyl Vault',
-        lastThreeRecords
-    });
+    res.render('home', pageData);
 }));
 
 // Public user profile route

@@ -14,6 +14,33 @@ router.get('/', (req, res) => {
     res.redirect('/admin/analytics');
 });
 
+// Heavy rotation management
+router.get('/heavy-rotation', asyncHandler(async (req, res) => {
+    const records = await Record.find()
+        .populate('owner', 'username')
+        .sort('-plays')
+        .limit(50);
+    
+    res.render('admin/heavy-rotation', {
+        title: 'Manage Heavy Rotation',
+        records
+    });
+}));
+
+router.post('/heavy-rotation/:id', asyncHandler(async (req, res) => {
+    const record = await Record.findById(req.params.id);
+    if (!record) {
+        req.flash('error', 'Record not found');
+        return res.redirect('/admin/heavy-rotation');
+    }
+
+    record.inHeavyRotation = !record.inHeavyRotation;
+    await record.save();
+
+    req.flash('success', `${record.title} ${record.inHeavyRotation ? 'added to' : 'removed from'} heavy rotation`);
+    res.redirect('/admin/heavy-rotation');
+}));
+
 router.get('/analytics', asyncHandler(async (req, res) => {
     const [
         totalUsers,

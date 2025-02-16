@@ -15,7 +15,7 @@ window.SocialFeed = function SocialFeed() {
 
   const loadCurrentUser = async () => {
     try {
-      const response = await fetch('/api/profile/current');
+      const response = await fetch('/api/current-user');
       if (!response.ok) throw new Error('Failed to load current user');
       const data = await response.json();
       setCurrentUser(data);

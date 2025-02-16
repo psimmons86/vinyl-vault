@@ -206,12 +206,7 @@
 <!-- Progress Bar Script -->
 <script src="/javascripts/progressBar.js"></script>
 
-<!-- Set current user data -->
-<script>
-  window.CURRENT_USER = JSON.parse('<%- JSON.stringify(currentUser || null) %>');
-</script>
-
 <!-- Initialize Social Feed -->
-<script src="/javascripts/initSocialFeed.js"></script>
+<div id="social-feed-root" data-user='<%- JSON.stringify(currentUser || null) %>'></div>
 
 <%- include('../partials/footer.ejs') %>
