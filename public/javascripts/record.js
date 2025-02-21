@@ -3,8 +3,8 @@ async function trackPlay(recordId) {
         const response = await fetch(`/records/${recordId}/play`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'csrf-token': window.csrfToken
             }
         });
         
@@ -35,6 +35,8 @@ async function trackPlay(recordId) {
         });
     } catch (error) {
         console.error('Error tracking play:', error);
+console.error('Response status:', response.status);
+console.error('Response body:', await response.text());
         
         // Show error message
         M.toast({

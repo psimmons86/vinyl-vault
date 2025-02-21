@@ -39,8 +39,8 @@ self.addEventListener('activate', event => {
 
 // Fetch event - network first, fallback to cache
 self.addEventListener('fetch', event => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return;
+  // Skip non-GET requests and play tracking requests
+  if (event.request.method !== 'GET' || event.request.url.match(/\/records\/.*\/play$/)) return;
 
   // Skip chrome-extension requests
   if (event.request.url.startsWith('chrome-extension://')) return;

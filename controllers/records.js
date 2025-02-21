@@ -665,7 +665,8 @@ router.get('/:id', asyncHandler(async (req, res) => {
     
     res.render('records/show', {
         title: `${record.title} by ${record.artist}`,
-        record
+        record,
+        baseUrl: process.env.BASE_URL || `${req.protocol}://${req.get('host')}`
     });
 }));
 

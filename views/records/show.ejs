@@ -75,5 +75,18 @@
     </div>
 </div>
 
+<script>
+    window.csrfToken = '<%= csrfToken %>';
+    window.baseUrl = '<%= baseUrl %>';
+</script>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+                registration.unregister();
+            }
+        });
+    }
+</script>
 <script src="/javascripts/record.js"></script>
 <%- include('../partials/footer.ejs') %>

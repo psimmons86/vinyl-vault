@@ -19,6 +19,9 @@ const csrf = require('csurf');
 const app = express();
 const port = process.env.PORT || "3000";
 
+// Trust proxy - required for Heroku
+app.set('trust proxy', 1);
+
 // Connect to MongoDB database with proper options
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
@@ -70,20 +73,53 @@ SESSION_CONFIG.store = MongoStore.create({
 
 app.use(session(SESSION_CONFIG));                   // Session management
 
+// Add user data and notifications to all requests
+app.use(require('./middleware/add-user-to-locals-and-req'));
+app.use(require('./middleware/add-notifications-to-locals'));
+
 // Set up CSRF protection
-app.use(csrf());
+const tokens = require('csrf')();
 app.use((req, res, next) => {
-    res.locals.csrfToken = req.csrfToken();
+    // Generate token if not exists
+    if (!req.session.csrfSecret) {
+        req.session.csrfSecret = tokens.secretSync();
+    }
+
+    // Create and expose token for all routes
+    res.locals.csrfToken = tokens.create(req.session.csrfSecret);
+
+    // Skip CSRF validation for non-mutating methods
+    if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
+        return next();
+    }
+
+    // Validate token from various locations
+    const token = (req.body && req.body._csrf) || 
+                 (req.query && req.query._csrf) || 
+                 (req.headers['csrf-token']) || 
+                 (req.headers['x-csrf-token']) || 
+                 (req.headers['x-xsrf-token']);
+
+    if (!token || !tokens.verify(req.session.csrfSecret, token)) {
+        if (req.path === '/auth/sign-in') {
+            // For sign-in, render the page with error
+            return res.render('auth/sign-in', {
+                title: 'Sign In',
+                error: 'Session expired. Please try again.',
+                recentRecords: []
+            });
+        }
+        // For other routes, return JSON error
+        res.status(403).json({ error: 'Invalid CSRF token' });
+        return;
+    }
+
     next();
 });
 
 // Set up flash messages and session messages
 app.use(flash());
 app.use(require('./middleware/add-messages-to-locals'));
-
-// Add user data and notifications to all requests
-app.use(require('./middleware/add-user-to-locals-and-req'));
-app.use(require('./middleware/add-notifications-to-locals'));
 
 // Mount route handlers
 app.use('/', require('./controllers/home'));                // Home routes
