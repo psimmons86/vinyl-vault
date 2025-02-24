@@ -24,13 +24,13 @@ module.exports = {
         saveUninitialized: false,
         name: '_sid',
         cookie: {
-            secure: process.env.NODE_ENV === 'production', // Require HTTPS in production
-            httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours
-            sameSite: 'strict'
-        },
-        proxy: false,
+        secure: process.env.NODE_ENV === 'production', // Require HTTPS in production
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'lax'
+    },
+    proxy: process.env.NODE_ENV === 'production', // Enable proxy in production for Heroku
         rolling: true, // Refresh session with each request
         store: null // This will be set in server.js with the MongoStore instance
     }
-};
+}
