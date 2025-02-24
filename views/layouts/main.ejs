@@ -54,8 +54,19 @@
     <link rel="stylesheet" href="/stylesheets/style.css?v=<%= Date.now() %>">
     
     <!-- Scripts -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <!-- CSRF Token -->
+    <script>
+        window.csrfToken = '<%= csrfToken %>';
+    </script>
+    
+    <!-- React Components -->
+    <script src="/javascripts/dist/SocialFeed.js"></script>
+    <script src="/javascripts/dist/ActivityCard.js"></script>
     
     <!-- Service Worker Registration -->
     <script>
