@@ -84,34 +84,28 @@ app.use(require('./middleware/add-user-to-locals-and-req'));
 app.use(require('./middleware/add-notifications-to-locals'));
 
 // Set up CSRF protection
-const tokens = require('csrf')();
+const csrfProtection = csrf({ cookie: false });
+
+// Skip CSRF for GET requests and apply it to others
 app.use((req, res, next) => {
-    // Generate token if not exists
-    if (!req.session.csrfSecret) {
-        req.session.csrfSecret = tokens.secretSync();
-    }
-
-    // Create and expose token for all routes
-    res.locals.csrfToken = tokens.create(req.session.csrfSecret);
-
-    // Skip CSRF validation for auth routes and non-mutating methods
-    if (req.path.startsWith('/auth/') || req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
+    if (req.method === 'GET') {
+        res.locals.csrfToken = '';
         return next();
     }
+    csrfProtection(req, res, next);
+});
 
-    // Validate token from various locations
-    const token = (req.body && req.body._csrf) || 
-                 (req.query && req.query._csrf) || 
-                 (req.headers['csrf-token']) || 
-                 (req.headers['x-csrf-token']) || 
-                 (req.headers['x-xsrf-token']);
-
-    if (!token || !tokens.verify(req.session.csrfSecret, token)) {
-        // Return JSON error
-        res.status(403).json({ error: 'Invalid CSRF token' });
-        return;
+// Generate CSRF token for forms
+app.use((req, res, next) => {
+    // Only generate token for GET requests that render forms
+    if (req.method === 'GET' && (
+        req.path.includes('/sign-in') || 
+        req.path.includes('/sign-up') ||
+        req.path.includes('/new') ||
+        req.path.includes('/edit')
+    )) {
+        res.locals.csrfToken = req.csrfToken();
     }
-
     next();
 });
 
