@@ -86,27 +86,41 @@ app.use(require('./middleware/add-notifications-to-locals'));
 // Set up CSRF protection
 const csrfProtection = csrf({ cookie: false });
 
-// Skip CSRF for GET requests and apply it to others
+// Initialize CSRF for all routes
 app.use((req, res, next) => {
+    // Skip CSRF for GET requests
     if (req.method === 'GET') {
         res.locals.csrfToken = '';
         return next();
     }
+
+    // Skip CSRF for auth routes
+    if (req.path.startsWith('/auth/')) {
+        res.locals.csrfToken = '';
+        return next();
+    }
+
+    // Apply CSRF protection to all other routes
     csrfProtection(req, res, next);
 });
 
 // Generate CSRF token for forms
 app.use((req, res, next) => {
-    // Only generate token for GET requests that render forms
-    if (req.method === 'GET' && (
-        req.path.includes('/sign-in') || 
-        req.path.includes('/sign-up') ||
-        req.path.includes('/new') ||
-        req.path.includes('/edit')
-    )) {
-        res.locals.csrfToken = req.csrfToken();
+    try {
+        if (req.method === 'GET' && (
+            req.path.includes('/sign-in') || 
+            req.path.includes('/sign-up') ||
+            req.path.includes('/new') ||
+            req.path.includes('/edit')
+        )) {
+            res.locals.csrfToken = req.csrfToken();
+        }
+        next();
+    } catch (err) {
+        // If csrfToken generation fails, continue without it
+        res.locals.csrfToken = '';
+        next();
     }
-    next();
 });
 
 // Set up flash messages and session messages
