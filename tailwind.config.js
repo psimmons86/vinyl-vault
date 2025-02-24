@@ -19,15 +19,24 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#D81B60',
-          dark: '#B0003A',
-          light: '#FF5C8D'
+          DEFAULT: '#2C382B', // Forest green
+          dark: '#1A231A',    // Darker forest green
+          light: '#45573C'    // Lighter forest green
         },
         secondary: {
           DEFAULT: '#45573C',
           dark: '#2C382B',
           light: '#556B4A'
         }
+      },
+      maxWidth: {
+        'container': '1000px' // More compact container
+      },
+      padding: {
+        'compact': '0.75rem'  // Smaller padding
+      },
+      margin: {
+        'compact': '0.75rem'  // Smaller margins
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
