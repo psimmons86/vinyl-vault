@@ -1,6 +1,7 @@
 async function trackPlay(recordId) {
+    let response;
     try {
-        const response = await fetch(`/records/${recordId}/play`, {
+        response = await fetch(`/records/${recordId}/play`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -27,22 +28,34 @@ async function trackPlay(recordId) {
             lastPlayedElement.textContent = `Last played: ${date}`;
         }
         
-        // Show success message with the server's message
-        M.toast({
-            html: data.message || 'Play tracked successfully!',
-            classes: 'rounded bg-primary text-white',
-            displayLength: 2000
-        });
+        // Show success message
+        showToast(data.message || 'Play tracked successfully!', 'success');
     } catch (error) {
         console.error('Error tracking play:', error);
-console.error('Response status:', response.status);
-console.error('Response body:', await response.text());
+        if (response) {
+            console.error('Response status:', response.status);
+            const text = await response.text().catch(() => 'No response body');
+            console.error('Response body:', text);
+        }
         
         // Show error message
-        M.toast({
-            html: error.message || 'Failed to track play',
-            classes: 'rounded bg-red-500 text-white',
-            displayLength: 3000
-        });
+        showToast(error.message || 'Failed to track play', 'error');
     }
+}
+
+// Custom toast function
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-lg text-white z-50 ${
+        type === 'success' ? 'bg-primary' : 'bg-red-500'
+    }`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Remove toast after 3 seconds
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 300ms ease-in-out';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }

@@ -24,10 +24,18 @@ module.exports = asyncHandler(async (req, res, next) => {
         const user = await User.findById(req.session.user._id)
             .select('username isAdmin profile.name profile.avatarUrl profile.theme notifications lastLoginAt')
             .lean();
+            
+        // Set default avatar if none exists
+        if (user && (!user.profile?.avatarUrl || user.profile.avatarUrl.includes('profilePicture-'))) {
+            user.profile = {
+                ...user.profile,
+                avatarUrl: '/images/default-avatar.png'
+            };
+        }
 
         if (!user) {
             console.error(`User not found for session ID: ${req.session.user._id}`);
-            req.session.destroy();
+            // Don't destroy session here as it may contain important data
             req.user = null;
             res.locals.user = null;
             return next();

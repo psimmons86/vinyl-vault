@@ -68,6 +68,8 @@ router.post('/sign-up', validateSignUp, asyncHandler(async (req, res) => {
         isAdmin: user.isAdmin
     };
     
+    // Wait for session to be saved before redirecting
+    await new Promise((resolve) => req.session.save(resolve));
     res.redirect('/records');
 }));
 
@@ -143,11 +145,14 @@ router.post('/sign-in', validateSignIn, asyncHandler(async (req, res) => {
         isAdmin: user.isAdmin
     };
     
-    // Record login activity
-    await Activity.create({
-        user: user._id,
-        activityType: 'login'
-    });
+    // Wait for both session save and activity creation
+    await Promise.all([
+        new Promise((resolve) => req.session.save(resolve)),
+        Activity.create({
+            user: user._id,
+            activityType: 'login'
+        })
+    ]);
     
     res.redirect('/records');
 }));

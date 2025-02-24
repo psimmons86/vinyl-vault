@@ -1,112 +1,118 @@
 <!-- Collection Header -->
-<header class="mb-4 sm:mb-6">
-    <div class="flex justify-between items-center mb-2">
-        <h1 class="text-xl sm:text-2xl font-bold">Your Collection</h1>
-        <a href="/records/stats" class="inline-flex items-center px-2 sm:px-3 py-2 rounded-lg bg-primary text-white hover:bg-primary-dark dark:bg-primary-light dark:hover:bg-primary transition-colors">
-            <span class="material-icons text-base sm:text-xl mr-1 sm:mr-2">bar_chart</span>
-            <span class="text-sm sm:text-base">View Stats</span>
-        </a>
-    </div>
-    <div class="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-        <div class="flex items-center">
-            <span class="material-icons text-base sm:text-xl mr-1">album</span>
-            <%= recordCount %> Records
-        </div>
-        <div class="flex items-center">
-            <span class="material-icons text-base sm:text-xl mr-1">category</span>
-            <%= genreCount %> Genres
-        </div>
-        <div class="flex items-center">
-            <span class="material-icons text-base sm:text-xl mr-1">person</span>
-            <%= artistCount %> Artists
+<header class="mb-6 relative max-w-container mx-auto px-4">
+    <div class="bg-primary dark:bg-primary-light rounded-lg p-4 shadow-md overflow-hidden">
+        <div class="relative z-10 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold text-white dark:text-gray-900">Your Collection</h1>
+                <div class="flex flex-wrap gap-3 mt-2 text-white/90 dark:text-gray-800/90 text-sm">
+                    <div class="flex items-center">
+                        <span class="material-icons text-lg mr-1">album</span>
+                        <%= recordCount %> Records
+                    </div>
+                    <div class="flex items-center">
+                        <span class="material-icons text-lg mr-1">category</span>
+                        <%= genreCount %> Genres
+                    </div>
+                    <div class="flex items-center">
+                        <span class="material-icons text-lg mr-1">person</span>
+                        <%= artistCount %> Artists
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="/records/discogs" class="inline-flex items-center px-3 py-2 rounded-lg bg-white/10 dark:bg-gray-900/10 text-white dark:text-gray-900 hover:bg-white/20 dark:hover:bg-gray-900/20 transition-colors">
+                    <span class="material-icons text-base mr-1">add</span>
+                    <span class="text-sm">Add from Discogs</span>
+                </a>
+                <a href="/records/stats" class="inline-flex items-center px-3 py-2 rounded-lg bg-white/10 dark:bg-gray-900/10 text-white dark:text-gray-900 hover:bg-white/20 dark:hover:bg-gray-900/20 transition-colors">
+                    <span class="material-icons text-base mr-1">bar_chart</span>
+                    <span class="text-sm">Stats</span>
+                </a>
+            </div>
         </div>
     </div>
 </header>
 
 <!-- Search and Filter Bar -->
-<div class="sticky top-16 -mx-4 px-3 sm:px-4 py-2 sm:py-3 bg-white dark:bg-gray-800 shadow-sm z-30">
-    <div class="flex items-center gap-2 sm:gap-3">
-        <div class="relative flex-1">
-            <span class="absolute inset-y-0 left-2 sm:left-3 flex items-center text-gray-400">
-                <span class="material-icons text-lg sm:text-xl">search</span>
-            </span>
-            <input type="search" 
-                   id="searchInput"
-                   placeholder="Search your collection..." 
-                   enterkeyhint="search"
-                   class="w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 text-sm sm:text-base rounded-lg border border-gray-200 dark:border-gray-700 
-                          bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light
-                          appearance-none">
+<div class="sticky top-16 bg-white dark:bg-gray-800 shadow-md z-30">
+    <div class="max-w-container mx-auto px-4 py-3">
+        <div class="flex items-center gap-2">
+            <div class="relative flex-1">
+                <span class="absolute inset-y-0 left-2 flex items-center text-gray-400">
+                    <span class="material-icons text-lg">search</span>
+                </span>
+                <input type="search" 
+                       id="searchInput"
+                       placeholder="Search your collection..." 
+                       enterkeyhint="search"
+                       class="w-full pl-8 pr-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 
+                              bg-gray-50 dark:bg-gray-900 focus:ring-2 focus:ring-primary dark:focus:ring-primary-light
+                              appearance-none">
+            </div>
+            <button id="filterButton" 
+                    class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <span class="material-icons text-lg">filter_list</span>
+            </button>
+            <button id="viewToggle" 
+                    class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <span class="material-icons text-lg view-icon">grid_view</span>
+            </button>
         </div>
-        <button id="filterButton" 
-                class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-            <span class="material-icons text-lg sm:text-xl">filter_list</span>
-        </button>
-        <button id="viewToggle" 
-                class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-            <span class="material-icons text-lg sm:text-xl view-icon">grid_view</span>
-        </button>
     </div>
 </div>
 
 <!-- Loading State -->
-<div id="loadingState" class="hidden mt-3 sm:mt-4 grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+<div id="loadingState" class="hidden mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-container mx-auto px-4">
     <% for(let i = 0; i < 8; i++) { %>
         <div class="animate-pulse">
             <div class="aspect-square rounded-lg bg-gray-200 dark:bg-gray-700"></div>
-            <div class="mt-2 space-y-1 sm:space-y-2">
-                <div class="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                <div class="h-2 sm:h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+            <div class="mt-2 space-y-1">
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
             </div>
         </div>
     <% } %>
 </div>
 
 <!-- Records Grid/List -->
-<div id="recordsContainer" class="mt-3 sm:mt-4 grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4" data-view="grid">
+<div id="recordsContainer" class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-w-container mx-auto px-4" data-view="grid">
     <% records.forEach(record => { %>
         <div class="record-card group">
-            <a href="/records/<%= record._id %>" class="block active:opacity-75">
-                <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+            <a href="/records/<%= record._id %>" class="block">
+                <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-md group-hover:shadow-lg transition-all duration-200">
                     <img src="<%= record.artwork || record.imageUrl || '/images/default-album.png' %>" 
                          alt="<%= record.title %>"
                          loading="lazy"
-                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200">
                 </div>
                 <div class="mt-2">
-                    <h3 class="text-sm sm:text-base font-medium line-clamp-1"><%= record.title %></h3>
-                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-1"><%= record.artist %></p>
+                    <h3 class="text-sm font-medium line-clamp-1 group-hover:text-primary dark:group-hover:text-primary-light transition-colors"><%= record.title %></h3>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-1"><%= record.artist %></p>
                 </div>
             </a>
         </div>
     <% }) %>
 </div>
 
-<!-- Filter Sheet Backdrop -->
-<div id="filterBackdrop"
-     class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-40">
-</div>
-
-<!-- Filter Bottom Sheet -->
+<!-- Filter Sheet -->
 <div id="filterSheet" 
      class="fixed inset-x-0 bottom-0 z-50 bg-white dark:bg-gray-800 rounded-t-2xl shadow-lg transform translate-y-full transition-transform duration-300">
-    <!-- Drag Handle -->
-    <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mt-3 mb-2"></div>
-    <div class="p-3 sm:p-4 max-h-[80vh] overflow-y-auto overscroll-contain">
-        <div class="flex items-center justify-between mb-4 sticky top-0 bg-white dark:bg-gray-800 py-2 -mt-2">
-            <h3 class="text-base sm:text-lg font-semibold">Filter Records</h3>
-            <button id="closeFilter" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full active:scale-95 transition-transform">
-                <span class="material-icons text-lg sm:text-xl">close</span>
+    <div class="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mt-3 mb-2"></div>
+    <div class="p-4 max-h-[80vh] overflow-y-auto overscroll-contain">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-medium">Filter Records</h3>
+            <button id="closeFilter" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
+                <span class="material-icons text-lg">close</span>
             </button>
         </div>
         
         <!-- Genre Filter -->
-        <div class="mb-4 sm:mb-6">
+        <div class="mb-4">
             <label class="block text-sm font-medium mb-2">Genres</label>
             <div class="flex flex-wrap gap-2">
                 <% genres.forEach(genre => { %>
-                    <button class="filter-chip px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm border border-gray-200 dark:border-gray-700
-                                 hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-transform"
+                    <button class="filter-chip px-3 py-1.5 rounded-full text-xs border border-gray-200 dark:border-gray-700
+                                 hover:bg-gray-50 dark:hover:bg-gray-700"
                             data-genre="<%= genre %>">
                         <%= genre %>
                     </button>
@@ -115,30 +121,30 @@
         </div>
         
         <!-- Year Filter -->
-        <div class="mb-4 sm:mb-6">
+        <div class="mb-4">
             <label class="block text-sm font-medium mb-2">Year Range</label>
-            <div class="flex items-center gap-3 sm:gap-4">
+            <div class="flex items-center gap-3">
                 <input type="number" 
                        inputmode="numeric"
                        pattern="[0-9]*"
                        placeholder="From" 
-                       class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-200 dark:border-gray-700
-                              bg-gray-50 dark:bg-gray-900 text-base sm:text-lg">
+                       class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700
+                              bg-gray-50 dark:bg-gray-900 text-sm">
                 <span>-</span>
                 <input type="number" 
                        inputmode="numeric"
                        pattern="[0-9]*"
                        placeholder="To" 
-                       class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-200 dark:border-gray-700
-                              bg-gray-50 dark:bg-gray-900 text-base sm:text-lg">
+                       class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700
+                              bg-gray-50 dark:bg-gray-900 text-sm">
             </div>
         </div>
         
         <!-- Sort Options -->
-        <div class="mb-4 sm:mb-6">
+        <div class="mb-4">
             <label class="block text-sm font-medium mb-2">Sort By</label>
-            <select class="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-200 dark:border-gray-700
-                          bg-gray-50 dark:bg-gray-900 text-base sm:text-lg">
+            <select class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700
+                          bg-gray-50 dark:bg-gray-900 text-sm">
                 <option value="title">Title (A-Z)</option>
                 <option value="-title">Title (Z-A)</option>
                 <option value="artist">Artist (A-Z)</option>
@@ -148,19 +154,24 @@
             </select>
         </div>
         
-        <div class="flex gap-2 sm:gap-3">
+        <div class="flex gap-2">
             <button id="resetFilters" 
-                    class="flex-1 py-2 sm:py-3 rounded-lg border border-gray-200 dark:border-gray-700
-                           hover:bg-gray-50 dark:hover:bg-gray-700 active:scale-95 transition-transform text-sm sm:text-base">
+                    class="flex-1 py-2 rounded-lg border border-gray-200 dark:border-gray-700
+                           hover:bg-gray-50 dark:hover:bg-gray-700 text-sm">
                 Reset
             </button>
             <button id="applyFilters" 
-                    class="flex-1 py-2 sm:py-3 rounded-lg bg-primary text-white hover:bg-primary-dark
-                           dark:bg-primary-light dark:hover:bg-primary active:scale-95 transition-transform text-sm sm:text-base">
+                    class="flex-1 py-2 rounded-lg bg-primary text-white hover:bg-primary-dark
+                           dark:bg-primary-light dark:hover:bg-primary text-sm">
                 Apply Filters
             </button>
         </div>
     </div>
+</div>
+
+<!-- Filter Backdrop -->
+<div id="filterBackdrop"
+     class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-40">
 </div>
 
 <script>
@@ -185,30 +196,26 @@ document.addEventListener('DOMContentLoaded', function() {
         const newView = currentView === 'grid' ? 'list' : 'grid';
         
         if (newView === 'list') {
-            [container, loadingState].forEach(el => {
-                el.classList.remove('grid-cols-1', 'xs:grid-cols-2', 'sm:grid-cols-3', 'md:grid-cols-4', 'gap-3', 'sm:gap-4');
-                el.classList.add('grid-cols-1', 'gap-2', 'sm:gap-3');
-            });
+            container.classList.remove('grid-cols-2', 'sm:grid-cols-3', 'md:grid-cols-4', 'gap-4');
+            container.classList.add('grid-cols-1', 'gap-3');
             viewIcon.textContent = 'view_list';
             
             // Update card layout
             document.querySelectorAll('.record-card').forEach(card => {
-                card.classList.add('flex', 'items-center', 'gap-3', 'sm:gap-4');
+                card.classList.add('flex', 'items-center', 'gap-3');
                 const imgContainer = card.querySelector('.aspect-square');
-                imgContainer.classList.add('w-16', 'h-16', 'sm:w-20', 'sm:h-20', 'flex-shrink-0');
+                imgContainer.classList.add('w-16', 'h-16', 'flex-shrink-0');
             });
         } else {
-            [container, loadingState].forEach(el => {
-                el.classList.remove('grid-cols-1', 'gap-2', 'sm:gap-3');
-                el.classList.add('grid-cols-1', 'xs:grid-cols-2', 'sm:grid-cols-3', 'md:grid-cols-4', 'gap-3', 'sm:gap-4');
-            });
+            container.classList.remove('grid-cols-1', 'gap-3');
+            container.classList.add('grid-cols-2', 'sm:grid-cols-3', 'md:grid-cols-4', 'gap-4');
             viewIcon.textContent = 'grid_view';
             
             // Reset card layout
             document.querySelectorAll('.record-card').forEach(card => {
-                card.classList.remove('flex', 'items-center', 'gap-3', 'sm:gap-4');
+                card.classList.remove('flex', 'items-center', 'gap-3');
                 const imgContainer = card.querySelector('.aspect-square');
-                imgContainer.classList.remove('w-16', 'h-16', 'sm:w-20', 'sm:h-20', 'flex-shrink-0');
+                imgContainer.classList.remove('w-16', 'h-16', 'flex-shrink-0');
             });
         }
         
@@ -242,9 +249,8 @@ document.addEventListener('DOMContentLoaded', function() {
             touchEndY = e.touches[0].clientY;
             const diff = touchEndY - touchStartY;
             
-            if (diff > 0) { // Only allow dragging down
+            if (diff > 0) {
                 filterSheet.style.transform = `translateY(${diff}px)`;
-                // Fade backdrop based on drag distance
                 const opacity = Math.max(0, 0.5 - (diff / 1000));
                 filterBackdrop.style.opacity = opacity;
             }
@@ -253,11 +259,11 @@ document.addEventListener('DOMContentLoaded', function() {
         el.addEventListener('touchend', () => {
             const diff = touchEndY - touchStartY;
             
-            if (diff > 100) { // If dragged down more than 100px, close the sheet
+            if (diff > 100) {
                 closeFilterSheet();
             } else {
-                filterSheet.style.transform = ''; // Reset position
-                filterBackdrop.style.opacity = ''; // Reset opacity
+                filterSheet.style.transform = '';
+                filterBackdrop.style.opacity = '';
             }
             
             touchStartY = 0;
@@ -278,7 +284,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let searchTimeout;
     const searchInput = document.getElementById('searchInput');
     
-    // Clear search when clicking the clear button (x) on search input
     searchInput.addEventListener('search', () => {
         if (searchInput.value === '') {
             container.classList.remove('hidden');
@@ -291,12 +296,10 @@ document.addEventListener('DOMContentLoaded', function() {
         searchTimeout = setTimeout(async () => {
             const query = e.target.value.trim();
             
-            // Show loading state
             container.classList.add('hidden');
             loadingState.classList.remove('hidden');
             
             try {
-                // Make API request
                 const response = await fetch(`/records?search=${encodeURIComponent(query)}&json=true`, {
                     headers: {
                         'Accept': 'application/json'
@@ -307,20 +310,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const data = await response.json();
                 
-                // Update records container
                 container.innerHTML = data.records.map(record => `
-                    <div class="record-card group ${container.dataset.view === 'list' ? 'flex items-center gap-3 sm:gap-4' : ''}">
-                        <a href="/records/${record._id}" class="block active:opacity-75">
+                    <div class="record-card group ${container.dataset.view === 'list' ? 'flex items-center gap-3' : ''}">
+                        <a href="/records/${record._id}" class="block">
                             <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 
-                                      ${container.dataset.view === 'list' ? 'w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0' : ''}">
+                                      ${container.dataset.view === 'list' ? 'w-16 h-16 flex-shrink-0' : ''}">
                                 <img src="${record.artwork || record.imageUrl || '/images/default-album.png'}"
                                      alt="${record.title}"
                                      loading="lazy"
-                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200">
                             </div>
                             <div class="mt-2">
-                                <h3 class="text-sm sm:text-base font-medium line-clamp-1">${record.title}</h3>
-                                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-1">${record.artist}</p>
+                                <h3 class="text-sm font-medium line-clamp-1 group-hover:text-primary dark:group-hover:text-primary-light">${record.title}</h3>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">${record.artist}</p>
                             </div>
                         </a>
                     </div>
@@ -328,7 +330,6 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (error) {
                 console.error('Search error:', error);
             } finally {
-                // Hide loading state
                 container.classList.remove('hidden');
                 loadingState.classList.add('hidden');
             }

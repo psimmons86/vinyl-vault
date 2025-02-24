@@ -638,7 +638,7 @@ router.get('/add-from-discogs/:id', asyncHandler(async (req, res) => {
         });
 
         req.session.message = { type: 'success', text: 'Record added successfully from Discogs' };
-        res.redirect('/records/discogs');
+        res.redirect('/records');
     } catch (err) {
         console.error('Error adding record from Discogs:', err);
         req.session.message = { type: 'error', text: err.message };

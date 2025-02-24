@@ -18,12 +18,19 @@ router.get('/', asyncHandler(async (req, res) => {
         title: 'Welcome to Vinyl Vault'
     };
 
-    // Get featured records
-    const featuredRecords = await Record.find({ inHeavyRotation: true })
-        .populate('owner', 'username')
-        .sort('-plays')
-        .limit(6)
-        .select('title artist imageUrl plays');
+    // Get featured records from public users
+    const featuredRecords = await Record.find({ 
+        inHeavyRotation: true 
+    })
+    .populate({
+        path: 'owner',
+        match: { isPublic: true },
+        select: 'username'
+    })
+    .sort('-plays')
+    .limit(6)
+    .select('title artist imageUrl plays')
+    .then(records => records.filter(record => record.owner)); // Only keep records with public owners
 
     pageData.featuredRecords = featuredRecords;
 

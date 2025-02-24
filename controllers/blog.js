@@ -41,6 +41,16 @@ router.use([
     '/*/delete'
 ], ensureSignedIn);
 
+// Ensure blog uploads directory exists
+async function ensureBlogUploadsDir() {
+    const dir = 'public/uploads/blog';
+    try {
+        await fs.access(dir);
+    } catch {
+        await fs.mkdir(dir, { recursive: true });
+    }
+}
+
 // Blog home page with posts and featured records
 router.get('/', asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
@@ -52,6 +62,9 @@ router.get('/', asyncHandler(async (req, res) => {
     if (category) {
         query.category = category;
     }
+
+    // Ensure uploads directory exists
+    await ensureBlogUploadsDir();
 
     const [posts, featured, total] = await Promise.all([
         Post.find(query)
@@ -84,6 +97,8 @@ router.get('/new', (req, res) => {
 
 // Create post
 router.post('/', upload.single('coverImage'), asyncHandler(async (req, res) => {
+    // Ensure uploads directory exists
+    await ensureBlogUploadsDir();
     const { title, content, tags, category } = req.body;
     
     const post = new Post({
@@ -147,6 +162,8 @@ router.get('/:slug/edit', asyncHandler(async (req, res) => {
 
 // Update post
 router.put('/:slug', upload.single('coverImage'), asyncHandler(async (req, res) => {
+    // Ensure uploads directory exists
+    await ensureBlogUploadsDir();
     const post = await Post.findOne({
         slug: req.params.slug,
         author: req.user._id
