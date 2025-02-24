@@ -1,10 +1,12 @@
 <%- include('partials/header.ejs') %>
 
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 pt-20">
     <!-- User Stats Section (Only shown when logged in) -->
     <% if (locals.user) { %>
-        <div class="px-4 py-6 bg-white dark:bg-gray-800 shadow-sm mb-4">
-            <div class="max-w-lg mx-auto">
+        <div class="px-4 py-8">
+            <div class="max-w-lg mx-auto relative">
+                <!-- Background Pattern -->
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(44,56,43,0.05)_0%,transparent_70%)] pointer-events-none"></div>
                 <!-- User Profile Summary -->
                 <div class="flex items-center space-x-4 mb-6">
                     <img src="<%= user.profile?.avatarUrl || '/images/default-avatar.png' %>" 
@@ -60,25 +62,58 @@
         </div>
     <% } else { %>
         <!-- Welcome Banner for Non-Logged In Users -->
-        <div class="px-4 py-8 bg-gradient-to-br from-primary to-primary-dark text-white mb-4">
-            <div class="max-w-lg mx-auto text-center">
-                <h1 class="text-3xl font-bold mb-4">Track Your Vinyl Journey</h1>
-                <p class="text-lg mb-6 text-white/90">Join our community of vinyl enthusiasts.</p>
-                <div class="space-y-4">
-                    <a href="/auth/sign-up" class="block w-full btn bg-white text-primary hover:bg-gray-100">
-                        Start Your Collection
-                    </a>
-                    <a href="/auth/sign-in" class="block w-full btn border-2 border-white text-white hover:bg-white/10">
-                        Sign In
-                    </a>
+        <div class="relative overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(44,56,43,0.15)_0%,transparent_70%)] pointer-events-none"></div>
+            
+            <!-- Content -->
+            <div class="px-4 py-16 sm:py-24 relative">
+                <div class="max-w-lg mx-auto text-center">
+                    <h1 class="text-4xl sm:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
+                        Track Your Vinyl Journey
+                    </h1>
+                    <p class="text-lg sm:text-xl mb-8 text-gray-600 dark:text-gray-300">
+                        Join our community of vinyl enthusiasts and discover new music together.
+                    </p>
+                    <div class="space-y-4 sm:space-y-0 sm:flex sm:space-x-4 justify-center">
+                        <a href="/auth/sign-up" 
+                           class="block sm:inline-block px-8 py-3 bg-primary hover:bg-primary-dark text-white rounded-xl transition-colors duration-200 transform hover:scale-105">
+                            Start Your Collection
+                        </a>
+                        <a href="/auth/sign-in" 
+                           class="block sm:inline-block px-8 py-3 border-2 border-primary text-primary hover:bg-primary hover:text-white rounded-xl transition-all duration-200 transform hover:scale-105">
+                            Sign In
+                        </a>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Floating Record Images -->
+            <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                <% if (locals.featuredRecords && featuredRecords.length > 0) { %>
+                    <% featuredRecords.slice(0, 6).forEach((record, index) => { %>
+                        <div class="absolute w-24 h-24 animate-float-delay-<%= index %> <%= 
+                            index === 0 ? 'left-[20%] top-[30%]' :
+                            index === 1 ? 'left-[35%] top-[50%]' :
+                            index === 2 ? 'left-[50%] top-[30%]' :
+                            index === 3 ? 'left-[65%] top-[50%]' :
+                            index === 4 ? 'left-[80%] top-[30%]' :
+                            'left-[35%] top-[70%]'
+                        %>">
+                            <img src="<%= record.imageUrl || '/images/default-album.png' %>"
+                                 alt="Album artwork"
+                                 loading="lazy"
+                                 class="w-full h-full object-cover rounded-lg shadow-lg opacity-20">
+                        </div>
+                    <% }); %>
+                <% } %>
             </div>
         </div>
     <% } %>
 
     <!-- Social Feed Section -->
-    <div class="max-w-lg mx-auto px-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+    <div class="max-w-lg mx-auto px-4 mt-8">
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Social Feed</h2>
             </div>
@@ -88,7 +123,7 @@
         </div>
 
         <!-- Heavy Rotation -->
-        <div class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+        <div class="mt-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">Heavy Rotation</h2>
             </div>

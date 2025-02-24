@@ -61,7 +61,7 @@
     
     <!-- CSRF Token -->
     <script>
-        window.csrfToken = '<%= csrfToken %>';
+        window.csrfToken = '<%= typeof csrfToken !== "undefined" ? csrfToken : "" %>';
     </script>
     
     <!-- React Components -->
