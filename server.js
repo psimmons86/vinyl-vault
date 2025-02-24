@@ -22,13 +22,8 @@ const port = process.env.PORT || "3000";
 // Trust proxy - required for Heroku
 app.set('trust proxy', 1);
 
-// Connect to MongoDB database with proper options
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-});
+// Connect to MongoDB database with minimal options
+mongoose.connect(process.env.MONGODB_URI);
 
 // Handle MongoDB connection events
 mongoose.connection
@@ -63,12 +58,23 @@ app.use(express.static('public', {
 app.use(express.urlencoded({ extended: false }));   // Parse form data
 app.use(express.json());                           // Parse JSON requests
 app.use(methodOverride("_method"));                 // Support PUT/DELETE methods
-// Configure session store
+
+// Configure session store with minimal options
 SESSION_CONFIG.store = MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
     ttl: 24 * 60 * 60, // Session TTL in seconds (24 hours)
-    autoRemove: 'native',
-    touchAfter: 24 * 3600 // Only update session every 24 hours unless data changes
+    crypto: {
+        secret: process.env.SESSION_SECRET
+    }
+});
+
+// Ensure session store is connected before starting server
+SESSION_CONFIG.store.on('connected', () => {
+    console.log('Session store connected');
+});
+
+SESSION_CONFIG.store.on('error', (error) => {
+    console.error('Session store error:', error);
 });
 
 app.use(session(SESSION_CONFIG));                   // Session management
@@ -88,8 +94,8 @@ app.use((req, res, next) => {
     // Create and expose token for all routes
     res.locals.csrfToken = tokens.create(req.session.csrfSecret);
 
-    // Skip CSRF validation for non-mutating methods
-    if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
+    // Skip CSRF validation for auth routes and non-mutating methods
+    if (req.path.startsWith('/auth/') || req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
         return next();
     }
 
@@ -101,15 +107,7 @@ app.use((req, res, next) => {
                  (req.headers['x-xsrf-token']);
 
     if (!token || !tokens.verify(req.session.csrfSecret, token)) {
-        if (req.path === '/auth/sign-in') {
-            // For sign-in, render the page with error
-            return res.render('auth/sign-in', {
-                title: 'Sign In',
-                error: 'Session expired. Please try again.',
-                recentRecords: []
-            });
-        }
-        // For other routes, return JSON error
+        // Return JSON error
         res.status(403).json({ error: 'Invalid CSRF token' });
         return;
     }
