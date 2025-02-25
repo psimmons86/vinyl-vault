@@ -8,6 +8,55 @@
             Back to Analytics
         </a>
     </div>
+    
+    <!-- Discogs Search Form -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg mb-8">
+        <div class="p-6">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Search Discogs for Albums</h2>
+            <form action="/admin/heavy-rotation/search" method="GET" class="flex gap-2">
+                <div class="flex-grow">
+                    <input type="text" 
+                           name="q" 
+                           placeholder="Search for albums on Discogs..." 
+                           value="<%= searchQuery %>"
+                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary dark:focus:ring-primary-light focus:border-transparent dark:bg-gray-700 dark:text-white">
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <span class="material-icons mr-1">search</span>
+                    Search
+                </button>
+            </form>
+        </div>
+        
+        <% if (searchResults && searchResults.length > 0) { %>
+        <div class="border-t border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Search Results</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <% searchResults.forEach(result => { %>
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 flex items-start gap-4">
+                    <img src="<%= result.thumb %>" alt="<%= result.title %>" class="w-16 h-16 object-cover rounded">
+                    <div class="flex-grow">
+                        <h4 class="font-medium text-gray-900 dark:text-gray-100"><%= result.title %></h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400"><%= result.artist %></p>
+                        <p class="text-xs text-gray-500 dark:text-gray-500 mb-2"><%= result.year || 'Unknown year' %></p>
+                        <form action="/admin/heavy-rotation/add-from-discogs" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <input type="hidden" name="releaseId" value="<%= result.id %>">
+                            <button type="submit" class="text-xs font-medium text-primary dark:text-primary-light hover:underline">
+                                Add to Heavy Rotation
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+        <% } else if (searchQuery && searchQuery.length > 0) { %>
+        <div class="border-t border-gray-200 dark:border-gray-700 p-6">
+            <p class="text-gray-600 dark:text-gray-400">No results found for "<%= searchQuery %>"</p>
+        </div>
+        <% } %>
+    </div>
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
         <div class="p-6">

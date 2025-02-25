@@ -6,6 +6,7 @@ const Record = require('../models/record');
 const User = require('../models/user');
 const Activity = require('../models/activity');
 const FeaturedRecord = require('../models/featured');
+const discogsService = require('../services/discogs');
 
 // Apply admin middleware to all routes
 router.use(ensureAdmin);
@@ -24,8 +25,101 @@ router.get('/heavy-rotation', asyncHandler(async (req, res) => {
     
     res.render('admin/heavy-rotation', {
         title: 'Manage Heavy Rotation',
-        records
+        records,
+        searchResults: null,
+        searchQuery: ''
     });
+}));
+
+// Search Discogs for heavy rotation
+router.get('/heavy-rotation/search', asyncHandler(async (req, res) => {
+    const query = req.query.q;
+    let searchResults = [];
+    
+    if (query && query.trim().length > 0) {
+        searchResults = await discogsService.searchRecords(query);
+    }
+    
+    const records = await Record.find()
+        .populate('owner', 'username')
+        .sort('-plays')
+        .limit(50);
+    
+    res.render('admin/heavy-rotation', {
+        title: 'Manage Heavy Rotation',
+        records,
+        searchResults,
+        searchQuery: query || ''
+    });
+}));
+
+// Add record from Discogs to heavy rotation
+router.post('/heavy-rotation/add-from-discogs', asyncHandler(async (req, res) => {
+    const { releaseId } = req.body;
+    
+    try {
+        // Get record details from Discogs
+        const recordDetails = await discogsService.getRecordDetails(releaseId);
+        
+        // Check if record already exists in the database
+        let record = await Record.findOne({
+            title: recordDetails.title,
+            artist: recordDetails.artist
+        });
+        
+        // If record doesn't exist, create it and assign to admin
+        if (!record) {
+            record = new Record({
+                title: recordDetails.title,
+                artist: recordDetails.artist,
+                year: recordDetails.year,
+                format: recordDetails.format,
+                imageUrl: recordDetails.imageUrl,
+                tags: recordDetails.tags,
+                owner: req.user._id,
+                plays: 0,
+                inHeavyRotation: true
+            });
+            
+            await record.save();
+            
+            // Create activity for the new record
+            const activity = new Activity({
+                user: req.user._id,
+                type: 'add_record',
+                data: {
+                    recordId: record._id,
+                    recordTitle: record.title,
+                    recordArtist: record.artist
+                }
+            });
+            
+            await activity.save();
+        } else {
+            // If record exists, update heavy rotation status
+            record.inHeavyRotation = true;
+            await record.save();
+        }
+        
+        // Sync with FeaturedRecord
+        const count = await FeaturedRecord.countDocuments();
+        if (count < 5) {
+            // Create new featured record
+            const featured = new FeaturedRecord({
+                title: record.title,
+                artist: record.artist,
+                albumArt: record.imageUrl,
+                order: count + 1
+            });
+            await featured.save();
+        }
+        
+        req.flash('success', `${record.title} added to heavy rotation`);
+        res.redirect('/admin/heavy-rotation');
+    } catch (error) {
+        req.flash('error', `Error adding record: ${error.message}`);
+        res.redirect('/admin/heavy-rotation');
+    }
 }));
 
 router.post('/heavy-rotation/:id', asyncHandler(async (req, res) => {
