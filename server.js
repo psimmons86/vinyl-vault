@@ -93,8 +93,8 @@ app.use((req, res, next) => {
         return next();
     }
 
-    // Skip CSRF for auth routes
-    if (req.path.startsWith('/auth/')) {
+    // Skip CSRF for auth routes and Discogs integration
+    if (req.path.startsWith('/auth/') || req.path.startsWith('/admin/heavy-rotation/add-from-discogs')) {
         res.locals.csrfToken = '';
         return next();
     }
