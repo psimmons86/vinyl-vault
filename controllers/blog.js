@@ -328,7 +328,19 @@ router.post('/admin/featured/add-from-discogs', ensureAdmin, asyncHandler(async 
         if (!featured) {
             const count = await FeaturedRecord.countDocuments();
             if (count >= 5) {
-                return res.status(400).json({ error: 'Maximum of 5 featured records allowed' });
+                // If we already have 5 records, replace the last one
+                const lastFeatured = await FeaturedRecord.findOne().sort('-order');
+                if (lastFeatured) {
+                    lastFeatured.title = recordDetails.title;
+                    lastFeatured.artist = recordDetails.artist;
+                    lastFeatured.albumArt = recordDetails.imageUrl;
+                    lastFeatured.link = record ? `/records/${record._id}` : undefined;
+                    await lastFeatured.save();
+                    
+                    return res.json({ success: true, message: 'Replaced existing featured record' });
+                } else {
+                    return res.status(400).json({ error: 'Maximum of 5 featured records allowed' });
+                }
             }
             
             featured = new FeaturedRecord({
@@ -397,6 +409,13 @@ router.post('/admin/featured', ensureAdmin, upload.single('albumArt'), asyncHand
     // Handle POST requests for new records
     if (!req.file) {
         throw new Error('Album art is required');
+    }
+
+    // Check if we already have 5 featured records
+    const count = await FeaturedRecord.countDocuments();
+    if (count >= 5) {
+        req.flash('error', 'Maximum of 5 featured records allowed. Please remove one first.');
+        return res.redirect('/blog/admin/featured');
     }
 
     const featured = new FeaturedRecord({

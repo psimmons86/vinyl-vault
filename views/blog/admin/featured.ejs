@@ -3,79 +3,84 @@
 <div class="container section">
     <div class="row">
         <div class="col s12">
-            <div class="header-section">
-                <h4>Heavy Rotation</h4>
-                <div class="action-buttons">
-                    <button class="btn waves-effect waves-light blue modal-trigger" 
-                            data-target="addRecordModal">
-                        <i class="fas fa-plus left"></i> Add Record
-                    </button>
-                    <button class="btn waves-effect waves-light green modal-trigger" 
-                            data-target="searchDiscogsModal">
-                        <i class="fas fa-search left"></i> Search Discogs
-                    </button>
+            <div class="card-panel">
+                <div class="header-section">
+                    <h4>Heavy Rotation</h4>
+                    <div class="action-buttons">
+                        <a class="btn waves-effect waves-light blue modal-trigger" 
+                           href="#addRecordModal">
+                            <i class="fas fa-plus left"></i> Add Record
+                        </a>
+                        <a class="btn waves-effect waves-light green modal-trigger" 
+                           href="#searchDiscogsModal">
+                            <i class="fas fa-search left"></i> Search Discogs
+                        </a>
+                    </div>
                 </div>
-            </div>
 
-            <% if (featured && featured.length > 0) { %>
-                <div class="featured-records">
-                    <% featured.forEach(record => { %>
-                        <div class="card horizontal" data-record-id="<%= record._id %>">
-                            <div class="card-image">
-                                <img src="<%= record.albumArt %>" alt="<%= record.title %>">
-                            </div>
-                            <div class="card-stacked">
-                                <div class="card-content">
-                                    <span class="card-title"><%= record.title %></span>
-                                    <p class="artist grey-text"><%= record.artist %></p>
-                                    <% if (record.description) { %>
-                                        <p class="description"><%= record.description %></p>
-                                    <% } %>
-                                    <% if (record.link) { %>
-                                        <p class="link">
-                                            <a href="<%= record.link %>" target="_blank" class="blue-text">
-                                                <i class="fas fa-external-link-alt"></i> View Record
-                                            </a>
-                                        </p>
-                                    <% } %>
+                <% if (featured && featured.length > 0) { %>
+                    <div class="featured-records">
+                        <% featured.forEach(record => { %>
+                            <div class="card horizontal" data-record-id="<%= record._id %>">
+                                <div class="card-image">
+                                    <img src="<%= record.albumArt %>" alt="<%= record.title %>">
                                 </div>
-                                <div class="card-action">
-                                    <div class="order-controls">
-                                        <select class="order-select browser-default" 
-                                                data-record-id="<%= record._id %>">
-                                            <% for(let i = 1; i <= 5; i++) { %>
-                                                <option value="<%= i %>" 
-                                                        <%= record.order === i ? 'selected' : '' %>>
-                                                    Position <%= i %>
-                                                </option>
-                                            <% } %>
-                                        </select>
+                                <div class="card-stacked">
+                                    <div class="card-content">
+                                        <span class="card-title"><%= record.title %></span>
+                                        <p class="artist grey-text"><%= record.artist %></p>
+                                        <% if (record.description) { %>
+                                            <p class="description"><%= record.description %></p>
+                                        <% } %>
+                                        <% if (record.link) { %>
+                                            <p class="link">
+                                                <a href="<%= record.link %>" target="_blank" class="blue-text">
+                                                    <i class="fas fa-external-link-alt"></i> View Record
+                                                </a>
+                                            </p>
+                                        <% } %>
                                     </div>
-                                    <div class="action-buttons">
-                                        <button class="btn-flat waves-effect waves-blue edit-btn" 
-                                                data-record-id="<%= record._id %>"
-                                                data-title="<%= record.title %>"
-                                                data-artist="<%= record.artist %>"
-                                                data-description="<%= record.description || '' %>"
-                                                data-link="<%= record.link || '' %>"
-                                                data-order="<%= record.order %>">
-                                            <i class="fas fa-edit blue-text"></i>
-                                        </button>
-                                        <button class="btn-flat waves-effect waves-red remove-btn" 
-                                                data-record-id="<%= record._id %>">
-                                            <i class="fas fa-trash red-text"></i>
-                                        </button>
+                                    <div class="card-action">
+                                        <div class="order-controls">
+                                            <div class="input-field">
+                                                <select class="order-select" 
+                                                        data-record-id="<%= record._id %>">
+                                                    <% for(let i = 1; i <= 5; i++) { %>
+                                                        <option value="<%= i %>" 
+                                                                <%= record.order === i ? 'selected' : '' %>>
+                                                            Position <%= i %>
+                                                        </option>
+                                                    <% } %>
+                                                </select>
+                                                <label>Display Order</label>
+                                            </div>
+                                        </div>
+                                        <div class="action-buttons">
+                                            <button class="btn-flat waves-effect waves-blue edit-btn" 
+                                                    data-record-id="<%= record._id %>"
+                                                    data-title="<%= record.title %>"
+                                                    data-artist="<%= record.artist %>"
+                                                    data-description="<%= record.description || '' %>"
+                                                    data-link="<%= record.link || '' %>"
+                                                    data-order="<%= record.order %>">
+                                                <i class="fas fa-edit blue-text"></i>
+                                            </button>
+                                            <button class="btn-flat waves-effect waves-red remove-btn" 
+                                                    data-record-id="<%= record._id %>">
+                                                <i class="fas fa-trash red-text"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    <% }); %>
-                </div>
-            <% } else { %>
-                <div class="card-panel">
-                    <p>No featured records yet. Add up to 5 records to display in the Heavy Rotation section.</p>
-                </div>
-            <% } %>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <div class="card-panel">
+                        <p>No featured records yet. Add up to 5 records to display in the Heavy Rotation section.</p>
+                    </div>
+                <% } %>
+            </div>
         </div>
     </div>
 </div>
@@ -83,7 +88,6 @@
 <!-- Add/Edit Record Modal -->
 <div id="addRecordModal" class="modal">
     <form action="/blog/admin/featured" method="POST" enctype="multipart/form-data" id="featuredForm">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <input type="hidden" name="_method" id="formMethod" value="POST">
         <input type="hidden" name="recordId" id="recordId" value="">
         <div class="modal-content">
@@ -122,7 +126,7 @@
                 </div>
 
                 <div class="input-field col s12">
-                    <select name="order" required>
+                    <select name="order" id="orderSelect">
                         <% for(let i = 1; i <= 5; i++) { %>
                             <option value="<%= i %>">Position <%= i %></option>
                         <% } %>
@@ -135,9 +139,7 @@
             <button type="submit" class="btn waves-effect waves-light blue">
                 <i class="fas fa-save left"></i> <span id="submitText">Add Record</span>
             </button>
-            <button type="button" class="btn-flat waves-effect modal-close">
-                Cancel
-            </button>
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
         </div>
     </form>
 </div>
@@ -164,7 +166,7 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button class="btn-flat waves-effect modal-close">Close</button>
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
     </div>
 </div>
 
@@ -209,10 +211,6 @@
 .order-controls {
     flex: 1;
     margin-right: 1rem;
-}
-
-.order-select {
-    width: 200px;
 }
 
 .description {
@@ -309,10 +307,6 @@
         margin-right: 0;
     }
     
-    .order-select {
-        width: 100%;
-    }
-    
     .search-result-card {
         flex-direction: column;
     }
@@ -328,6 +322,16 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Materialize components
+    const modals = document.querySelectorAll('.modal');
+    M.Modal.init(modals);
+    
+    const selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects);
+    
+    const textareas = document.querySelectorAll('.materialize-textarea');
+    textareas.forEach(textarea => M.textareaAutoResize(textarea));
+
     const form = document.getElementById('featuredForm');
     const modalTitle = document.getElementById('modalTitle');
     const submitText = document.getElementById('submitText');
@@ -336,18 +340,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const albumArtInput = document.getElementById('albumArt');
     const discogsSearchForm = document.getElementById('discogsSearchForm');
     const searchResults = document.getElementById('searchResults');
-
-    // Initialize Materialize components
-    const modals = document.querySelectorAll('.modal');
-    M.Modal.init(modals, {
-        dismissible: true,
-        opacity: 0.5,
-        inDuration: 300,
-        outDuration: 200
-    });
-    
-    M.FormSelect.init(document.querySelectorAll('select'));
-    M.textareaAutoResize(document.querySelector('#description'));
 
     // Handle order changes
     document.querySelectorAll('.order-select').forEach(select => {
@@ -398,7 +390,11 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('artist').value = data.artist;
             document.getElementById('description').value = data.description;
             document.getElementById('link').value = data.link;
-            document.querySelector('select[name="order"]').value = data.order;
+            
+            // Update select
+            const orderSelect = document.getElementById('orderSelect');
+            orderSelect.value = data.order;
+            M.FormSelect.init(orderSelect);
             
             // Make album art optional for editing
             albumArtInput.removeAttribute('required');
@@ -412,13 +408,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Reset form when adding new record
-    document.querySelector('[data-target="addRecordModal"]').addEventListener('click', function() {
+    document.querySelector('[href="#addRecordModal"]').addEventListener('click', function() {
         modalTitle.textContent = 'Add Featured Record';
         submitText.textContent = 'Add Record';
         formMethod.value = 'POST';
         recordIdInput.value = '';
         form.reset();
         albumArtInput.setAttribute('required', '');
+        
+        // Reinitialize select
+        setTimeout(() => {
+            M.FormSelect.init(document.getElementById('orderSelect'));
+        }, 100);
     });
 
     // Handle record removal
@@ -478,12 +479,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 data.results.forEach(result => {
                     resultsHTML += `
                         <div class="col s12 m6 l4">
-                            <div class="search-result-card">
-                                <img src="${result.thumb}" alt="${result.title}" class="search-result-image">
-                                <div class="search-result-info">
-                                    <div class="search-result-title truncate" title="${result.title}">${result.title}</div>
-                                    <div class="search-result-artist truncate" title="${result.artist}">${result.artist}</div>
-                                    <div class="search-result-year">${result.year || 'Unknown year'}</div>
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="${result.thumb || '/images/default-album.png'}" alt="${result.title}">
+                                </div>
+                                <div class="card-content">
+                                    <span class="card-title truncate" title="${result.title}">${result.title}</span>
+                                    <p class="truncate" title="${result.artist}">${result.artist}</p>
+                                    <p class="grey-text">${result.year || 'Unknown year'}</p>
+                                </div>
+                                <div class="card-action">
                                     <button class="btn waves-effect waves-light blue add-from-discogs" 
                                             data-release-id="${result.id}">
                                         Add
@@ -515,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             const data = await response.json();
                             
                             if (data.success) {
-                                M.toast({html: 'Record added to heavy rotation'});
+                                M.toast({html: data.message || 'Record added to heavy rotation'});
                                 setTimeout(() => window.location.reload(), 1000);
                             } else {
                                 throw new Error(data.error || 'Error adding record');
