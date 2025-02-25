@@ -63,9 +63,8 @@ app.use(methodOverride("_method"));                 // Support PUT/DELETE method
 SESSION_CONFIG.store = MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
     ttl: 24 * 60 * 60, // Session TTL in seconds (24 hours)
-    crypto: {
-        secret: process.env.SESSION_SECRET
-    }
+    autoRemove: 'native',
+    touchAfter: 24 * 3600 // time period in seconds
 });
 
 // Ensure session store is connected before starting server
