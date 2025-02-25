@@ -97,7 +97,9 @@ app.use((req, res, next) => {
     if (req.path.startsWith('/auth/') || 
         req.path.startsWith('/admin/heavy-rotation/add-from-discogs') ||
         req.path.startsWith('/blog/admin/featured/add-from-discogs') ||
-        req.path.startsWith('/blog/admin/featured/search-discogs')) {
+        req.path.startsWith('/blog/admin/featured/search-discogs') ||
+        req.path.includes('/blog/admin/featured/') ||
+        req.path.includes('/order')) {
         res.locals.csrfToken = '';
         return next();
     }

@@ -20,60 +20,62 @@
 
                 <% if (featured && featured.length > 0) { %>
                     <div class="featured-records">
-                        <% featured.forEach(record => { %>
-                            <div class="card horizontal" data-record-id="<%= record._id %>">
-                                <div class="card-image">
-                                    <img src="<%= record.albumArt %>" alt="<%= record.title %>">
-                                </div>
-                                <div class="card-stacked">
-                                    <div class="card-content">
-                                        <span class="card-title"><%= record.title %></span>
-                                        <p class="artist grey-text"><%= record.artist %></p>
+                        <div class="records-grid">
+                            <% featured.forEach(record => { %>
+                                <div class="record-card" data-record-id="<%= record._id %>">
+                                    <div class="record-image">
+                                        <img src="<%= record.albumArt %>" alt="<%= record.title %>">
+                                    </div>
+                                    <div class="record-content">
+                                        <div class="record-header">
+                                            <span class="record-title truncate"><%= record.title %></span>
+                                            <p class="record-artist truncate"><%= record.artist %></p>
+                                        </div>
                                         <% if (record.description) { %>
-                                            <p class="description"><%= record.description %></p>
+                                            <p class="record-description"><%= record.description %></p>
                                         <% } %>
                                         <% if (record.link) { %>
-                                            <p class="link">
+                                            <p class="record-link">
                                                 <a href="<%= record.link %>" target="_blank" class="blue-text">
                                                     <i class="fas fa-external-link-alt"></i> View Record
                                                 </a>
                                             </p>
                                         <% } %>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="order-controls">
-                                            <div class="input-field">
-                                                <select class="order-select" 
-                                                        data-record-id="<%= record._id %>">
-                                                    <% for(let i = 1; i <= 5; i++) { %>
-                                                        <option value="<%= i %>" 
-                                                                <%= record.order === i ? 'selected' : '' %>>
-                                                            Position <%= i %>
-                                                        </option>
-                                                    <% } %>
-                                                </select>
-                                                <label>Display Order</label>
+                                        <div class="record-actions">
+                                            <div class="order-controls">
+                                                <div class="input-field">
+                                                    <select class="order-select" 
+                                                            data-record-id="<%= record._id %>">
+                                                        <% for(let i = 1; i <= 5; i++) { %>
+                                                            <option value="<%= i %>" 
+                                                                    <%= record.order === i ? 'selected' : '' %>>
+                                                                Position <%= i %>
+                                                            </option>
+                                                        <% } %>
+                                                    </select>
+                                                    <label>Display Order</label>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="action-buttons">
-                                            <button class="btn-flat waves-effect waves-blue edit-btn" 
-                                                    data-record-id="<%= record._id %>"
-                                                    data-title="<%= record.title %>"
-                                                    data-artist="<%= record.artist %>"
-                                                    data-description="<%= record.description || '' %>"
-                                                    data-link="<%= record.link || '' %>"
-                                                    data-order="<%= record.order %>">
-                                                <i class="fas fa-edit blue-text"></i>
-                                            </button>
-                                            <button class="btn-flat waves-effect waves-red remove-btn" 
-                                                    data-record-id="<%= record._id %>">
-                                                <i class="fas fa-trash red-text"></i>
-                                            </button>
+                                            <div class="action-buttons">
+                                                <button class="btn-flat waves-effect waves-blue edit-btn" 
+                                                        data-record-id="<%= record._id %>"
+                                                        data-title="<%= record.title %>"
+                                                        data-artist="<%= record.artist %>"
+                                                        data-description="<%= record.description || '' %>"
+                                                        data-link="<%= record.link || '' %>"
+                                                        data-order="<%= record.order %>">
+                                                    <i class="fas fa-edit blue-text"></i>
+                                                </button>
+                                                <button class="btn-flat waves-effect waves-red remove-btn" 
+                                                        data-record-id="<%= record._id %>">
+                                                    <i class="fas fa-trash red-text"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        <% }); %>
+                            <% }); %>
+                        </div>
                     </div>
                 <% } else { %>
                     <div class="card-panel">
@@ -187,35 +189,90 @@
     margin-top: 2rem;
 }
 
-.featured-records .card.horizontal {
-    margin: 1rem 0;
+.records-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
 }
 
-.featured-records .card-image {
-    max-width: 150px;
-    min-width: 150px;
-    height: 150px;
+.record-card {
+    background: var(--bg-surface);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
 }
 
-.featured-records .card-image img {
+.record-card:hover {
+    transform: translateY(-4px);
+}
+
+.record-image {
+    position: relative;
+    padding-top: 100%;
+    overflow: hidden;
+}
+
+.record-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.card-action {
+.record-content {
+    padding: 1rem;
+    flex-grow: 1;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+}
+
+.record-header {
+    margin-bottom: 1rem;
+}
+
+.record-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+
+.record-artist {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.record-description {
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+    color: var(--text-secondary);
+}
+
+.record-link {
+    margin: 0.5rem 0;
+}
+
+.record-actions {
+    margin-top: auto;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
 }
 
 .order-controls {
-    flex: 1;
-    margin-right: 1rem;
+    margin-bottom: 1rem;
 }
 
-.description {
-    margin: 1rem 0;
-    color: #666;
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
 }
 
 /* Discogs search results styling */
@@ -282,29 +339,44 @@
     align-self: flex-start;
 }
 
+@media (max-width: 992px) {
+    .records-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 600px) {
     .header-section {
         flex-direction: column;
         gap: 1rem;
+        align-items: flex-start;
     }
     
-    .featured-records .card.horizontal {
-        display: block;
+    .header-section .action-buttons {
+        width: 100%;
+        justify-content: space-between;
     }
     
-    .featured-records .card-image {
-        max-width: none;
-        height: 200px;
+    .records-grid {
+        grid-template-columns: 1fr;
     }
     
-    .card-action {
+    .record-actions {
         flex-direction: column;
-        gap: 1rem;
     }
     
     .order-controls {
         width: 100%;
-        margin-right: 0;
+    }
+    
+    .action-buttons {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+    }
+    
+    .modal {
+        width: 95%;
     }
     
     .search-result-card {
@@ -432,7 +504,10 @@ document.addEventListener('DOMContentLoaded', function() {
             
             try {
                 const response = await fetch(`/blog/admin/featured/${recordId}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 });
                 
                 const data = await response.json();
@@ -442,7 +517,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     card.style.opacity = '0';
                     setTimeout(() => {
                         card.remove();
-                        if (document.querySelectorAll('.featured-records .card').length === 0) {
+                        if (document.querySelectorAll('.featured-records .record-card').length === 0) {
                             window.location.reload();
                         }
                     }, 300);
