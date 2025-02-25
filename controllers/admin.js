@@ -102,16 +102,26 @@ router.post('/heavy-rotation/add-from-discogs', asyncHandler(async (req, res) =>
         }
         
         // Sync with FeaturedRecord
-        const count = await FeaturedRecord.countDocuments();
-        if (count < 5) {
-            // Create new featured record
-            const featured = new FeaturedRecord({
-                title: record.title,
-                artist: record.artist,
-                albumArt: record.imageUrl,
-                order: count + 1
-            });
-            await featured.save();
+        // Check if record already exists in FeaturedRecord
+        let featured = await FeaturedRecord.findOne({
+            title: record.title,
+            artist: record.artist
+        });
+        
+        // If not, create it
+        if (!featured) {
+            const count = await FeaturedRecord.countDocuments();
+            if (count < 5) {
+                // Create new featured record
+                featured = new FeaturedRecord({
+                    title: record.title,
+                    artist: record.artist,
+                    albumArt: record.imageUrl,
+                    order: count + 1,
+                    link: `/records/${record._id}`
+                });
+                await featured.save();
+            }
         }
         
         req.flash('success', `${record.title} added to heavy rotation`);
@@ -134,17 +144,27 @@ router.post('/heavy-rotation/:id', asyncHandler(async (req, res) => {
 
     // Sync with FeaturedRecord
     if (record.inHeavyRotation) {
-        // Get current count of featured records
-        const count = await FeaturedRecord.countDocuments();
-        if (count < 5) {
-            // Create new featured record
-            const featured = new FeaturedRecord({
-                title: record.title,
-                artist: record.artist,
-                albumArt: record.imageUrl,
-                order: count + 1
-            });
-            await featured.save();
+        // Check if record already exists in FeaturedRecord
+        let featured = await FeaturedRecord.findOne({
+            title: record.title,
+            artist: record.artist
+        });
+        
+        // If not, create it
+        if (!featured) {
+            // Get current count of featured records
+            const count = await FeaturedRecord.countDocuments();
+            if (count < 5) {
+                // Create new featured record
+                featured = new FeaturedRecord({
+                    title: record.title,
+                    artist: record.artist,
+                    albumArt: record.imageUrl,
+                    order: count + 1,
+                    link: `/records/${record._id}`
+                });
+                await featured.save();
+            }
         }
     } else {
         // Remove from featured records
