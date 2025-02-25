@@ -5,10 +5,16 @@
         <div class="col s12">
             <div class="header-section">
                 <h4>Heavy Rotation</h4>
-                <button class="btn waves-effect waves-light blue modal-trigger" 
-                        data-target="addRecordModal">
-                    <i class="fas fa-plus left"></i> Add Record
-                </button>
+                <div class="action-buttons">
+                    <button class="btn waves-effect waves-light blue modal-trigger" 
+                            data-target="addRecordModal">
+                        <i class="fas fa-plus left"></i> Add Record
+                    </button>
+                    <button class="btn waves-effect waves-light green modal-trigger" 
+                            data-target="searchDiscogsModal">
+                        <i class="fas fa-search left"></i> Search Discogs
+                    </button>
+                </div>
             </div>
 
             <% if (featured && featured.length > 0) { %>
@@ -135,12 +141,43 @@
     </form>
 </div>
 
+<!-- Search Discogs Modal -->
+<div id="searchDiscogsModal" class="modal modal-fixed-footer">
+    <div class="modal-content">
+        <h4>Search Discogs</h4>
+        
+        <div class="row">
+            <form id="discogsSearchForm" class="col s12">
+                <div class="input-field">
+                    <input type="text" id="discogsQuery" required>
+                    <label for="discogsQuery">Search for albums</label>
+                </div>
+                <button type="submit" class="btn waves-effect waves-light blue">
+                    <i class="fas fa-search left"></i> Search
+                </button>
+            </form>
+        </div>
+        
+        <div id="searchResults" class="row">
+            <!-- Search results will be displayed here -->
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-flat waves-effect modal-close">Close</button>
+    </div>
+</div>
+
 <style>
 .header-section {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+}
+
+.header-section .action-buttons {
+    display: flex;
+    gap: 0.5rem;
 }
 
 .featured-records {
@@ -180,6 +217,42 @@
 .description {
     margin: 1rem 0;
     color: #666;
+}
+
+.search-result-card {
+    display: flex;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.search-result-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    margin-right: 1rem;
+}
+
+.search-result-info {
+    flex: 1;
+}
+
+.search-result-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0 0 0.5rem 0;
+}
+
+.search-result-artist {
+    color: #666;
+    margin: 0 0 0.5rem 0;
+}
+
+.search-result-year {
+    color: #999;
+    font-size: 0.9rem;
+    margin: 0 0 0.5rem 0;
 }
 
 @media (max-width: 600px) {
@@ -228,6 +301,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const formMethod = document.getElementById('formMethod');
     const recordIdInput = document.getElementById('recordId');
     const albumArtInput = document.getElementById('albumArt');
+    const discogsSearchForm = document.getElementById('discogsSearchForm');
+    const searchResults = document.getElementById('searchResults');
 
     // Initialize Materialize components
     M.Modal.init(document.querySelectorAll('.modal'));
@@ -338,6 +413,78 @@ document.addEventListener('DOMContentLoaded', function() {
                 M.toast({html: error.message || 'Error removing record'});
             }
         });
+    });
+
+    // Handle Discogs search
+    discogsSearchForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const query = document.getElementById('discogsQuery').value.trim();
+        
+        if (!query) return;
+        
+        searchResults.innerHTML = '<div class="progress"><div class="indeterminate"></div></div>';
+        
+        try {
+            const response = await fetch(`/blog/admin/featured/search-discogs?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            if (data.results && data.results.length > 0) {
+                searchResults.innerHTML = data.results.map(result => `
+                    <div class="col s12 m6">
+                        <div class="search-result-card">
+                            <img src="${result.thumb}" alt="${result.title}" class="search-result-image">
+                            <div class="search-result-info">
+                                <h5 class="search-result-title">${result.title}</h5>
+                                <p class="search-result-artist">${result.artist}</p>
+                                <p class="search-result-year">${result.year || 'Unknown year'}</p>
+                                <button class="btn waves-effect waves-light blue add-from-discogs" 
+                                        data-release-id="${result.id}">
+                                    Add to Heavy Rotation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Add event listeners to the "Add to Heavy Rotation" buttons
+                document.querySelectorAll('.add-from-discogs').forEach(btn => {
+                    btn.addEventListener('click', async function() {
+                        const releaseId = this.dataset.releaseId;
+                        
+                        try {
+                            const response = await fetch('/blog/admin/featured/add-from-discogs', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ releaseId })
+                            });
+                            
+                            const data = await response.json();
+                            
+                            if (data.success) {
+                                M.toast({html: 'Record added to heavy rotation'});
+                                setTimeout(() => window.location.reload(), 1000);
+                            } else {
+                                throw new Error(data.error || 'Error adding record');
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            M.toast({html: error.message || 'Error adding record'});
+                        }
+                    });
+                });
+            } else {
+                searchResults.innerHTML = '<p>No results found</p>';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            searchResults.innerHTML = `<p class="red-text">Error: ${error.message || 'Failed to search Discogs'}</p>`;
+        }
     });
 });
 </script>

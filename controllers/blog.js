@@ -3,12 +3,14 @@ const router = express.Router();
 const fs = require('fs/promises');
 const Post = require('../models/post');
 const FeaturedRecord = require('../models/featured');
+const Record = require('../models/record');
 const ensureSignedIn = require('../middleware/ensure-signed-in');
 const ensureAdmin = require('../middleware/ensure-admin');
 const asyncHandler = require('../middleware/async-handler');
 const multer = require('multer');
 const path = require('path');
 const { marked } = require('marked');
+const discogsService = require('../services/discogs');
 
 // Configure multer for image uploads
 const storage = multer.diskStorage({
@@ -264,6 +266,89 @@ router.get('/admin/featured', ensureAdmin, asyncHandler(async (req, res) => {
     });
 }));
 
+// Search Discogs for featured records
+router.get('/admin/featured/search-discogs', ensureAdmin, asyncHandler(async (req, res) => {
+    const query = req.query.q;
+    
+    if (!query || query.trim().length === 0) {
+        return res.json({ results: [] });
+    }
+    
+    try {
+        const results = await discogsService.searchRecords(query);
+        res.json({ results });
+    } catch (error) {
+        console.error('Discogs search error:', error);
+        res.status(500).json({ error: error.message });
+    }
+}));
+
+// Add record from Discogs to featured records
+router.post('/admin/featured/add-from-discogs', ensureAdmin, asyncHandler(async (req, res) => {
+    const { releaseId } = req.body;
+    
+    try {
+        // Get record details from Discogs
+        const recordDetails = await discogsService.getRecordDetails(releaseId);
+        
+        // Check if record already exists in the database
+        let record = await Record.findOne({
+            title: recordDetails.title,
+            artist: recordDetails.artist
+        });
+        
+        // If record doesn't exist, create it and assign to admin
+        if (!record) {
+            record = new Record({
+                title: recordDetails.title,
+                artist: recordDetails.artist,
+                year: recordDetails.year,
+                format: recordDetails.format,
+                imageUrl: recordDetails.imageUrl,
+                tags: recordDetails.tags,
+                owner: req.user._id,
+                plays: 0,
+                inHeavyRotation: true
+            });
+            
+            await record.save();
+        } else {
+            // If record exists, update heavy rotation status
+            record.inHeavyRotation = true;
+            await record.save();
+        }
+        
+        // Check if featured record already exists
+        let featured = await FeaturedRecord.findOne({
+            title: recordDetails.title,
+            artist: recordDetails.artist
+        });
+        
+        // If not, create it
+        if (!featured) {
+            const count = await FeaturedRecord.countDocuments();
+            if (count >= 5) {
+                return res.status(400).json({ error: 'Maximum of 5 featured records allowed' });
+            }
+            
+            featured = new FeaturedRecord({
+                title: recordDetails.title,
+                artist: recordDetails.artist,
+                albumArt: recordDetails.imageUrl,
+                order: count + 1,
+                link: record ? `/records/${record._id}` : undefined
+            });
+            
+            await featured.save();
+        }
+        
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error adding record from Discogs:', error);
+        res.status(500).json({ error: error.message });
+    }
+}));
+
 router.post('/admin/featured', ensureAdmin, upload.single('albumArt'), asyncHandler(async (req, res) => {
     const { title, artist, description, link, order, _method, recordId } = req.body;
     
@@ -293,6 +378,18 @@ router.post('/admin/featured', ensureAdmin, upload.single('albumArt'), asyncHand
         }
 
         await featured.save();
+        
+        // Update corresponding record if it exists
+        const record = await Record.findOne({
+            title: featured.title,
+            artist: featured.artist
+        });
+        
+        if (record) {
+            record.inHeavyRotation = true;
+            await record.save();
+        }
+        
         req.flash('success', 'Record updated successfully');
         return res.redirect('/blog/admin/featured');
     }
@@ -312,12 +409,40 @@ router.post('/admin/featured', ensureAdmin, upload.single('albumArt'), asyncHand
     });
 
     await featured.save();
+    
+    // Update corresponding record if it exists
+    const record = await Record.findOne({
+        title: featured.title,
+        artist: featured.artist
+    });
+    
+    if (record) {
+        record.inHeavyRotation = true;
+        await record.save();
+    }
+    
     req.flash('success', 'Record added successfully');
     res.redirect('/blog/admin/featured');
 }));
 
 router.delete('/admin/featured/:id', ensureAdmin, asyncHandler(async (req, res) => {
-    await FeaturedRecord.findByIdAndDelete(req.params.id);
+    const featured = await FeaturedRecord.findById(req.params.id);
+    
+    if (featured) {
+        // Update corresponding record if it exists
+        const record = await Record.findOne({
+            title: featured.title,
+            artist: featured.artist
+        });
+        
+        if (record) {
+            record.inHeavyRotation = false;
+            await record.save();
+        }
+        
+        await FeaturedRecord.findByIdAndDelete(req.params.id);
+    }
+    
     res.json({ success: true });
 }));
 
